@@ -1,6 +1,17 @@
-# Lokale Arbeitsanweisungen für Claude Code — bewusst nicht im Repo.
-# Enthält Klarwerte (Mailadressen, Aliase) und bleibt lokal.
-/CLAUDE.md
+# pixelyard — .gitignore
+# Angelegt 25.08.2026 · überarbeitet 26.08.2026 nach der Aufteilung der CLAUDE.md
+#
+# Die frühere Zeile /CLAUDE.md ist ENTFALLEN, und das ist der Punkt der Änderung:
+# Seit dem 26.08. enthält CLAUDE.md nur noch strukturelle Muster (IP, MAC, Hostname,
+# VLAN, Beleg-/Seriennummern) und keine Klarwerte mehr. Sie soll mitreisen.
+
+# Notbremse, nicht Mechanismus.
+# Die Klarwerte liegen als ~/Projekte/pixelyard-klarwerte.md eine Ebene UEBER
+# dem Repo und koennen dort gar nicht committet werden.
+/pixelyard-klarwerte.md
 
 # macOS-Ordnermetadaten — Ansichtseinstellungen, kann Dateinamen mitführen.
 .DS_Store
+
+# node_modules/, dist/, .astro/ kommen beim Aufsetzen aus der von
+# `npm create astro` generierten Datei — uebernehmen, nicht vorweg raten.
