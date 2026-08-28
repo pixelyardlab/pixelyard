@@ -13,5 +13,24 @@
 # macOS-Ordnermetadaten — Ansichtseinstellungen, kann Dateinamen mitführen.
 .DS_Store
 
-# node_modules/, dist/, .astro/ kommen beim Aufsetzen aus der von
-# `npm create astro` generierten Datei — uebernehmen, nicht vorweg raten.
+# Ab hier uebernommen aus der Astro-Vorlage (examples/minimal, 28.08.2026).
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.production
+
+# jetbrains setting folder
+.idea/

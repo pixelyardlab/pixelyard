@@ -107,14 +107,25 @@ Eine Anonymisierungsregel gilt **nicht** erst ab ihrer Einführung. **Beim Aufst
 
 ## Build & Dev
 
-**Noch kein `package.json`.** Sobald das Astro-Gerüst steht, kommen die Befehle hierher.
+**Astro-Gerüst steht seit 28.08.2026.** Vorlage `examples/minimal`, Astro `^7.2.9`, Node `>=22.12.0`.
 
-⚠️ **Beim Aufsetzen, gemessen an `create-astro@5.2.4`:**
+| Befehl | Wirkung |
+|---|---|
+| `npm install` | Abhängigkeiten. **Auf dem Mac ausführen** — `node_modules` enthält plattformabhängige Binärteile, eine Linux-Installation ist dort unbrauchbar |
+| `npm run dev` | Entwicklungsserver |
+| `npm run build` | statische Ausgabe nach `dist/` |
+| `npm run preview` | `dist/` lokal ausliefern |
 
-1. `CLAUDE.md` vorübergehend aus dem Ordner heraus verschieben — **nicht löschen**
-2. `npm create astro` **ohne** `--yes` laufen lassen. Mit `--yes` weicht der Assistent bei einem nicht-leeren Ordner **still in einen Zufallsordner** aus, statt zu fragen
-3. `CLAUDE.md` zurücklegen
-4. `git check-ignore -v CLAUDE.md` — muss **nichts** ausgeben (seit der Aufteilung vom 26.08. reist `CLAUDE.md` mit). Dazu `cat .gitignore`: `/pixelyard-klarwerte.md` und `.DS_Store` müssen noch drinstehen — der Assistent kann die Datei überschrieben haben. Fehlt etwas, wieder eintragen, **bevor** irgendetwas committet wird
-5. `node_modules/`, `dist/`, `.astro/` aus der **generierten** `.gitignore` übernehmen, nicht vorweg raten
+🔑 **`astro.config.mjs` trägt `site: 'https://www.pixelyard.ch'`** — Entscheid vom 26.08.2026. Sitemap, `hreflang`, Canonical und OG-Meta hängen daran. **Nicht anfassen, ohne den Entscheid selbst zu ändern.**
 
-> **Die Bedingung, die die Version überlebt:** Zum Zeitpunkt des Aufsetzens dürfen im Projektordner nur `.git` und `.gitignore` liegen. Alles andere lässt den Assistenten den Ordner als „nicht leer" behandeln.
+### Die Prüfungen aus dem Aufsetzen — gelaufen am 28.08.2026, alle sauber
+
+1. `git check-ignore -v CLAUDE.md` → keine Ausgabe. `CLAUDE.md` reist mit.
+2. `/pixelyard-klarwerte.md` und `.DS_Store` stehen weiterhin in der `.gitignore` — die Astro-Einträge wurden **angehängt**, die Datei nicht ersetzt.
+3. `dist/`, `.astro/`, `node_modules/` aus der Vorlage übernommen, nicht geraten.
+4. Anonymisierungs-`grep` über die vorgemerkten Änderungen → kein Treffer.
+
+⚠️ **Wiederholen, sobald der Assistent noch einmal über den Ordner läuft** — etwa bei `astro add`. Er kann die `.gitignore` ersetzen.
+
+⚠️ **`README.md` ist noch die Astro-Vorlage.** Sie wird beim ersten Push öffentlich sichtbar und gehört vorher ersetzt.
+
