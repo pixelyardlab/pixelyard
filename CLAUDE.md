@@ -107,11 +107,25 @@ Eine Anonymisierungsregel gilt **nicht** erst ab ihrer Einführung. **Beim Aufst
 
 ## Build & Dev
 
-**Astro-Gerüst steht seit 28.08.2026.** Vorlage `examples/minimal`, Astro `^7.2.9`, Node `>=22.12.0`.
+**Astro-Gerüst steht seit 28.08.2026.** Vorlage `examples/minimal`, Astro `7.2.9`.
+
+### Was auf dem Mac vorausgesetzt wird — und am 28.08.2026 dort eingerichtet wurde
+
+Der Mac hatte **kein Node**. Das stand in keinem Dokument und ist der Grund, warum es jetzt hier steht.
+
+| Werkzeug | Stand, gemessen |
+|---|---|
+| Homebrew | 6.0.20, in `/opt/homebrew`. `PATH` über `~/.zprofile`, Zeile aus der Installationsausgabe |
+| Node | `brew install node@24` → **v24.20.0** (LTS), keg-only. `PATH` über `~/.zshrc`: `/opt/homebrew/opt/node@24/bin` |
+| npm | 11.19.0, mit Node mitgeliefert |
+
+🔑 **Bewusst LTS und nicht die aktuelle Hauptversion.** `brew install node` hätte 26.x gebracht. Zwei Gründe: `sharp` — Astros Bildoptimierung, im Baum vorhanden — hinkt mit fertigen Binärpaketen bei neuen Node-Hauptversionen hinterher, und **lokal soll dieselbe Hauptversion laufen wie später im Cloudflare-Bau.** Ein Unterschied dort fällt erst im Deploy auf.
+
+⚠️ **npm meldet beim Installieren, dass 12.0.2 verfügbar sei. Nicht global aktualisieren.** Das npm gehört zur keg-only Node-Installation; ein globales Update daneben erzeugt zwei npm im Zugriff und eine Fehlersuche, die niemand braucht.
 
 | Befehl | Wirkung |
 |---|---|
-| `npm install` | Abhängigkeiten. **Auf dem Mac ausführen** — `node_modules` enthält plattformabhängige Binärteile, eine Linux-Installation ist dort unbrauchbar |
+| `npm install` | Abhängigkeiten. **Nur auf dem Mac** — der Baum enthält plattformabhängige Binärteile (`@rollup/rollup-darwin-arm64`, `sharp`). Eine Linux-Installation ist hier unbrauchbar und umgekehrt |
 | `npm run dev` | Entwicklungsserver |
 | `npm run build` | statische Ausgabe nach `dist/` |
 | `npm run preview` | `dist/` lokal ausliefern |
@@ -126,6 +140,12 @@ Eine Anonymisierungsregel gilt **nicht** erst ab ihrer Einführung. **Beim Aufst
 4. Anonymisierungs-`grep` über die vorgemerkten Änderungen → kein Treffer.
 
 ⚠️ **Wiederholen, sobald der Assistent noch einmal über den Ordner läuft** — etwa bei `astro add`. Er kann die `.gitignore` ersetzen.
+
+### 🔑 `package-lock.json` gehört ins Repo
+
+Sie ist der einzige Beleg dafür, **welche Versionen tatsächlich installiert wurden** — `^7.2.9` in der `package.json` ist ein Bereich, die Lockfile ist die Zahl. Cloudflare Pages baut daraus; fehlt sie, löst der Bau die Bereiche neu auf und kann andere Versionen erwischen als der Mac. **Der Fehler zeigt sich dann im Deploy und nicht lokal.**
+
+`node_modules/` dagegen **nie** — 141 MB, plattformgebunden, und aus der Lockfile jederzeit reproduzierbar.
 
 ⚠️ **`README.md` ist noch die Astro-Vorlage.** Sie wird beim ersten Push öffentlich sichtbar und gehört vorher ersetzt.
 
