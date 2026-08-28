@@ -1,0 +1,10 @@
+# _redirects — von Cloudflare Pages gelesen.
+#
+# Die Wurzel leitet auf die Standardsprache. Bisher tat das eine Seite mit
+# <meta refresh> (src/pages/index.astro); hier steht der echte 301, den
+# projektstart.md §6 Schritt 8 vorsieht.
+#
+# Beide bleiben vorerst nebeneinander: Diese Zeile greift nur bei Cloudflare,
+# die Astro-Seite überall sonst — auch im lokalen `npm run preview`.
+
+/    /de/    301
