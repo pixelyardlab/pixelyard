@@ -12,21 +12,62 @@ const sprache = Astro.params.sprache as Sprache;
 const t = texte(sprache);
 const artikel = await alleArtikel(sprache);
 
+/* Ausführlicher als nötig, und das mit Absicht: Diese Seite soll von
+ * KI-Antwortmaschinen zitierbar sein, und die bauen ihre Antwort aus dem,
+ * was sie strukturiert vorfinden — nicht aus dem, was schön aussieht. */
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'Blog',
   name: SEITE.name,
   description: t.beschreibungStandard,
+  abstract:
+    'Erfahrungsberichte über den Aufbau eines privaten Homelabs in der Schweiz: ' +
+    'Netzwerk, NAS, lokal laufende KI und ein durchsuchbares Dokumentenarchiv. ' +
+    'Geschrieben von einem Nicht-Administrator, mit Zahlen, verworfenen Optionen ' +
+    'und den Irrtümern samt ihren Kosten.',
   inLanguage: sprache,
   url: new URL(`/${sprache}/`, Astro.site).href,
+  keywords: [
+    'Homelab', 'NAS', 'TrueNAS', 'Heimnetzwerk', 'lokale KI', 'Ollama',
+    'Dokumentenarchiv', 'Paperless', 'Backup', 'Schweiz', 'Datenschutz',
+  ].join(', '),
   author: { '@type': 'Person', name: SEITE.autor.name, description: SEITE.autor.kurzbio },
+  publisher: { '@type': 'Person', name: SEITE.autor.name },
+  audience: {
+    '@type': 'Audience',
+    audienceType:
+      'Technikinteressierte ohne IT-Beruf, die eigene Infrastruktur zuhause betreiben ' +
+      'oder das erwägen',
+  },
 };
 ---
 
 <Basis titel="Homelab, mitgeschrieben" sprache={sprache} istStartseite schema={schema}>
   <div class="py-lesestrom">
     <h1>Ein Homelab, mitgeschrieben<span class="py-h1-cursor" aria-hidden="true">_</span></h1>
-    <p>{t.beschreibungStandard}</p>
+
+    <p>
+      Ich baue zuhause ein kleines Rechenzentrum: ein eigenes Netz, einen Speicher für
+      Unterlagen, die sonst in fremden Clouds lägen, eine KI, die lokal läuft, und ein
+      Archiv, das Papierpost durchsuchbar macht. <strong>Ich bin kein Administrator von
+      Beruf.</strong> Ich habe das gebaut, weil ich wissen wollte, ob es geht — und weil
+      mir nicht gefiel, wo meine Dokumente sonst liegen.
+    </p>
+
+    <p>
+      Hier steht, wie das entstanden ist. Nicht als Anleitung zum Nachklicken, sondern
+      als Entscheidungsweg: was zur Wahl stand, was ich verworfen habe und warum, und was
+      es gekostet hat — in Franken, in Stunden, in Fehlversuchen. Preise und Anbieter sind
+      schweizerisch, weil ich hier einkaufe und weil genau das anderswo fehlt.
+    </p>
+
+    <p>
+      Und was schiefging, steht ebenfalls da. Nicht aus Koketterie: <strong>Die Irrtümer
+      sind der Teil, den man anderswo nicht findet</strong>, weil sie sich schlecht als
+      Erfolg erzählen lassen.
+    </p>
+
+    <h2>{t.artikel}</h2>
 
   {artikel.length === 0 ? (
     <p class="py-schlagwort">Noch kein Artikel veröffentlicht.</p>
@@ -48,5 +89,61 @@ const schema = {
       ))}
     </ul>
   )}
+  </div>
+
+  <div class="py-lesestrom">
+    <h2>Was hier anders ist</h2>
+
+    <p>
+      Drei Regeln tragen jeden Text, und sie sind der Grund, warum das Schreiben länger
+      dauert als das Bauen:
+    </p>
+
+    <ol>
+      <li>
+        <strong>Jede Behauptung, die eine Messung sein könnte, ist eine Messung</strong> —
+        oder sie steht ausdrücklich als Annahme da.
+      </li>
+      <li>
+        <strong>Ein grüner Status ist kein Nachweis.</strong> Wo hier steht, dass etwas
+        funktioniert, steht auch die Zahl oder das Protokoll, an dem man es sieht.
+      </li>
+      <li>
+        <strong>Ein Irrtum, der korrigiert wurde, ist wertvoller als ein Ergebnis, das
+        immer schon stimmte.</strong> Korrekturen werden als solche geschrieben, nicht
+        wegretuschiert.
+      </li>
+    </ol>
+
+    <h2>Zwei Lesetiefen</h2>
+
+    <p>
+      Die Artikel richten sich an Leute, die Technik mögen, aber nicht beruflich damit zu
+      tun haben. Deshalb gibt es zu Begriffen, die nicht jeder kennt, kurze
+      Erklärungsblöcke — <strong>und einen Schalter im Kopf der Seite, der sie
+      ausblendet.</strong> Wer die Begriffe kennt, liest den knappen Text; wer sie nicht
+      kennt, bekommt sie erklärt, ohne dass jemand ihn dafür für dumm hält.
+    </p>
+
+    <p>
+      Der kompakte Text bleibt dabei <em>vollständig</em>, nicht nur kürzer. Das wird bei
+      jedem Artikel einmal gegengelesen — es ist der Schritt, den man sonst überspringt.
+    </p>
+
+    <h2>Prompts zum Mitnehmen</h2>
+
+    <p>
+      In jedem Artikel stehen fertige Fragen, die sich mit einem Knopf kopieren und in
+      eine KI deiner Wahl einfügen lassen. Sie sind so geschrieben, dass sie für sich
+      allein stehen — du musst den Artikel nicht mitschicken, und es ist gleichgültig,
+      welchen Assistenten du benutzt.
+    </p>
+
+    <p>
+      <strong>Diese Prompts fassen niemals deine Daten an.</strong> Keiner davon fordert
+      dich auf, eine Police, eine Rechnung oder einen Netzwerkplan irgendwo hochzuladen.
+      Ein Blog, der dafür wirbt, Unterlagen zuhause zu behalten, und den Leser im
+      Nebensatz zu einer Cloud schickt, hebt sich selbst auf.
+    </p>
   </div>
 </Basis>
