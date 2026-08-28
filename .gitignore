@@ -34,3 +34,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Wegwerfdatei des Anonymisierungs-Selbsttests. Sie enthält absichtlich ein
+# Muster, das anschlagen soll, und existiert nur für Sekunden — aber eine
+# Notbremse kostet nichts.
+.anon-selbsttest.tmp

@@ -1,0 +1,251 @@
+---
+titel: "Drei stille Fehler an einem Tag"
+beschreibung: "An einem Tag Blogbau meldete dreimal etwas Erfolg, und dreimal war der Erfolg echt — für die falsche Frage. Ein grüner Bau, acht identische Screenshots und eine Suche, die nichts finden konnte."
+datum: 2026-08-28
+schlagworte: ["messung", "werkzeuge", "css"]
+sprache: de
+paar: drei-stille-fehler-an-einem-tag
+entwurf: true
+faq:
+  - frage: "Was ist ein stiller Fehlermodus?"
+    antwort: "Ein Fehler, der keine Fehlermeldung erzeugt. Das Werkzeug meldet Erfolg, weil die Frage, die es geprüft hat, tatsächlich mit Ja zu beantworten war — nur war es die falsche Frage."
+  - frage: "Wie erkenne ich, ob ein Test wirklich etwas prüft?"
+    antwort: "Indem man ihn einmal absichtlich scheitern lässt. Ein Test, der nie rot war, hat seine Nützlichkeit nie belegt — er hat sie nur behauptet."
+---
+
+<TLDR>
+An einem Tag Arbeit an dieser Seite haben mir drei Werkzeuge Erfolg gemeldet: ein
+Bauvorgang, ein Bildschirmfoto und eine Suche. Alle drei hatten recht. Und alle drei
+haben eine andere Frage beantwortet als die, die ich gestellt hatte — was ich jedes Mal
+erst zwei Schritte später gemerkt habe.
+</TLDR>
+
+Ich baue diesen Blog nicht allein. Ein grosser Teil der Arbeit entsteht im Gespräch mit
+einem KI-Assistenten: Ich sage, was ich will, er schreibt den Code, ich sehe mir das
+Ergebnis an. Das funktioniert erstaunlich gut, und es erzeugt eine Fehlerklasse, die ich
+vorher so nicht kannte.
+
+Denn die Rückmeldungen kommen jetzt schneller und sehen ordentlicher aus. Ein Bauvorgang
+läuft durch und meldet acht erzeugte Seiten. Eine Suche gibt nichts zurück. Ein Bild wird
+erzeugt. Jedes dieser Ergebnisse ist eine Aussage — und an einem einzigen Tag habe ich
+dreimal die falsche Aussage für die richtige gehalten.
+
+<Erklaerung>
+Ein **Bauvorgang** — auf Englisch *build* — verwandelt die Quelldateien einer Website in
+das, was ein Browser später wirklich lädt. Aus Vorlagen, Texten und Stilangaben entstehen
+fertige HTML-Dateien. Läuft er ohne Fehlermeldung durch, heisst das: Alles Nötige war
+vorhanden und liess sich verarbeiten.
+</Erklaerung>
+
+## Der erste: acht grüne Seiten und ein schiefes Layout
+
+Am Vormittag stand das Design-System: Farben, Schriften, die Bausteine für Artikel. 42
+Dateien, 4'648 Zeilen. Der Bau lief durch:
+
+```
+generating static routes
+  ├─ /llms.txt
+  ├─ /rss.xml
+  ├─ /de/artikel/mustertext/index.html
+  ├─ /de/index.html
+✓ Completed in 32ms.
+```
+
+Acht Routen, keine Fehlermeldung. Ich habe trotzdem ein Bildschirmfoto gemacht — und da
+stand die Startseite schief. Der Fliesstext war mittig in einer Spalte von 544 Pixeln.
+Die Artikelliste darunter begann 121 Pixel weiter links, über die volle Breite. Zwei
+Elemente, die untereinander stehen und bündig sein sollten, waren es nicht.
+
+Die Ursache war eine einzige Zeile. In der Datei mit den Bausteinen stand:
+
+```css
+.py-liste { list-style: none; padding: 0; margin: 0; }
+```
+
+Das `margin: 0` ist eine Kurzschreibweise: Sie setzt den Abstand auf **allen vier Seiten**
+auf null — auch links und rechts. Eine andere Datei hatte kurz vorher gesagt, der
+Leseblock solle sich mittig ausrichten (`margin-inline: auto`). Beide Regeln waren gleich
+stark, und bei Gleichstand gewinnt die, die später geladen wird. Das war die mit der Null.
+
+<Erklaerung>
+CSS ist die Sprache, die einer Webseite ihr Aussehen gibt. Widersprechen sich zwei
+Anweisungen für dasselbe Element, entscheidet zuerst die **Spezifität** — grob: wie genau
+eine Regel das Element benennt. Sind zwei Regeln gleich genau, gewinnt schlicht die, die
+weiter unten steht. Genau dieser Gleichstand lag hier vor.
+</Erklaerung>
+
+**Was der Bau geprüft hat:** ob alle Dateien vorhanden und verarbeitbar waren. Das waren
+sie. **Was ich wissen wollte:** ob die Seite richtig aussieht. Diese Frage hat er nie
+gestellt und konnte sie auch nicht stellen.
+
+> Ein Bauvorgang ist eine Messung über den Vorgang. Ein Bildschirmfoto ist eine Messung
+> über das Ergebnis. Sie ersetzen einander nicht.
+
+<Prompt>
+Ich lese einen Artikel über Webentwicklung. Dort steht, zwei CSS-Regeln könnten sich
+widersprechen, und wenn sie gleich stark sind, gewinne die zuletzt geladene. Erklär mir
+in einfachen Worten, was in CSS über die Stärke einer Regel entscheidet, warum
+Kurzschreibweisen wie "margin" mehr überschreiben als man denkt, und woran ich erkenne,
+dass ein Anzeigefehler von so einem Konflikt kommt und nicht von einem Tippfehler.
+</Prompt>
+
+## Der zweite: acht Bildschirmfotos, die dasselbe zeigten
+
+Nach der Korrektur wollte ich es genauer wissen und liess vier Seiten je zweimal
+fotografieren, einmal im hellen und einmal im dunklen Modus. Acht Bilder.
+
+Beim Durchsehen fiel auf, dass die Paare gleich aussahen. Der naheliegende Schluss: Der
+Dunkelmodus greift nicht. Ich hätte an dieser Stelle angefangen, in den Farbdefinitionen
+zu suchen — dort, wo alles in Ordnung war.
+
+Stattdessen habe ich die Bilder zuerst verglichen, nicht angeschaut. Sie waren nicht
+ähnlich, sie waren **byteweise identisch**: vier Paare, vier gleiche Prüfsummen. Das ist
+etwas anderes. Der Dunkelmodus hätte wenigstens ein paar Pixel verändert.
+
+Also die einfachste Frage: Welche Farbe hat die Seite überhaupt?
+
+```
+light {"bg":"rgba(0,0,0,0)","fg":"rgb(0,0,0)","schrift":"Times New Roman"}
+dark  {"bg":"rgba(0,0,0,0)","fg":"rgb(0,0,0)","schrift":"Times New Roman"}
+```
+
+Kein Hintergrund, schwarze Schrift, Times New Roman. **Es war überhaupt kein Stil
+geladen.** Die Seiten waren direkt von der Festplatte geöffnet worden, und die Verweise
+auf die Stildateien beginnen mit einem Schrägstrich — sie zeigen auf die Wurzel eines
+Servers, den es beim direkten Öffnen nicht gibt. Ein kleiner lokaler Webserver, zwei
+Sekunden Aufwand, und die Bilder waren verschieden.
+
+<Erklaerung>
+Öffnet man eine HTML-Datei direkt aus dem Dateimanager, benutzt der Browser das Protokoll
+`file://`. Es kennt keinen Server und damit keine Wurzeladresse. Ein Verweis wie
+`/stile.css` bedeutet dort „ganz oben auf der Festplatte" statt „im Hauptverzeichnis der
+Website" — und läuft ins Leere. Über einen Webserver aufgerufen, stimmt derselbe Verweis.
+</Erklaerung>
+
+Der Fehler wäre folgenlos geblieben. Das Ärgerliche ist, wohin er mich geschickt hätte:
+in die Farbdatei, wo nichts kaputt war. Ich hätte dort gesucht, nichts gefunden, und wäre
+zu dem Schluss gekommen, das Problem liege tiefer.
+
+> Der eigene Eingriff ist der erste Verdächtige, nicht der letzte. Die Bilder waren nicht
+> das Messgerät, sie waren Teil meines Aufbaus — und der Aufbau war kaputt, nicht die
+> Sache.
+
+<Prompt>
+Ich lese einen Artikel über Fehlersuche. Dort steht, zwei Bildschirmfotos seien
+"byteweise identisch" gewesen, und daraus habe der Autor etwas anderes geschlossen, als
+wenn sie nur ähnlich ausgesehen hätten. Erklär mir in einfachen Worten, was eine
+Prüfsumme ist, warum "exakt gleich" bei Messergebnissen ein stärkeres Signal ist als
+"sieht gleich aus", und was so ein Ergebnis meistens bedeutet.
+</Prompt>
+
+## Der dritte: eine Suche, die nichts finden konnte
+
+Am Abend kam die Stelle, an der es unangenehm geworden wäre. Für das Impressum muss meine
+Adresse auf der Website stehen — das ist die einzige Ausnahme von der Regel, dass private
+Angaben nirgends im Projekt auftauchen. Also die Kontrolle: Steht sie wirklich nur an
+dieser einen Stelle?
+
+Der Befehl dafür kam aus einer Anleitung und enthielt ein Beispiel:
+
+```
+grep -rn "Musterstrasse 12" .
+```
+
+Ich habe ihn ausgeführt. Nichts kam zurück. Sah gut aus.
+
+Nur habe ich vergessen, `Musterstrasse 12` durch meine eigene Strasse zu ersetzen. Der
+Befehl hat nach einer Strasse gesucht, die es nirgends gibt, und nichts gefunden — völlig
+korrekt. **Er hätte auch dann geschwiegen, wenn meine Adresse in jeder zweiten Datei
+gestanden hätte.**
+
+Der Nachlauf mit den richtigen Werten brachte zehn Fundstellen — und zwar nicht nur im
+heutigen Stand, sondern über jeden Zwischenstand hinweg, den das Projekt seit dem ersten
+Tag festgehalten hat. Aufgeschlüsselt:
+
+<div class="py-tabelle">
+
+| Wo | Anzahl | Was es bedeutet |
+|---|---|---|
+| Absenderzeilen der Speicherpunkte | 7 | die Projekt-Mailadresse, die in jedem Eintrag steht |
+| Änderungszeilen in der Konfigurationsdatei | 3 | die drei Werte, die dort hingehören |
+| Dateien mit einem der Werte | **1** | genau die vorgesehene |
+
+</div>
+
+Also sauber — aber das weiss ich erst seit dem zweiten Lauf. Der erste hat nichts belegt.
+
+<Erklaerung>
+Ein **Speicherpunkt** (englisch *commit*) hält den Stand aller Projektdateien zu einem
+Zeitpunkt fest, zusammen mit einer Notiz, was geändert wurde. Zu jedem Punkt lässt sich
+zurückkehren. Weil an jedem auch der Absender vermerkt ist, taucht eine Mailadresse dort
+sieben Mal auf, ohne je im eigentlichen Inhalt zu stehen.
+</Erklaerung>
+
+Bei den ersten beiden Fehlern war der Schaden Zeit. Bei diesem wäre er anderer Art
+gewesen: Ein leeres Suchergebnis, das wie eine Freigabe aussieht, hätte eine Adresse in
+ein Verzeichnis wandern lassen, das später öffentlich wird. Und Verzeichnisse dieser Art
+vergessen nichts.
+
+## Was die drei gemeinsam haben
+
+Keiner der drei Fälle war ein Programmfehler. Alle drei Werkzeuge haben genau das getan,
+was sie sollten:
+
+<div class="py-tabelle">
+
+| Fall | Die Frage, die beantwortet wurde | Die Frage, die ich meinte |
+|---|---|---|
+| Bauvorgang | Lassen sich alle Dateien verarbeiten? | Sieht die Seite richtig aus? |
+| Bildschirmfotos | Wurden Bilder erzeugt? | Zeigen sie die fertige Seite? |
+| Suche | Kommt diese Zeichenkette vor? | Kommt **meine Adresse** vor? |
+
+</div>
+
+In allen drei Fällen war die gegebene Antwort korrekt. Und in allen drei Fällen habe ich
+sie als Antwort auf eine Frage genommen, die nie gestellt wurde.
+
+Was auffällt: **Zwei der drei Fehler stammen aus meinem eigenen Aufbau**, nicht aus der
+Sache. Die Bilder waren falsch aufgenommen. Der Suchbefehl war falsch ausgefüllt. Und der
+Grund, warum sie durchgingen, ist derselbe: Ein leeres Ergebnis und ein grüner Haken sehen
+gleich aus, egal ob nichts da war oder ob nichts gesucht wurde.
+
+<Erklaerung>
+Der Unterschied hat einen Namen: **falsch negativ**. Ein Test meldet „nichts gefunden",
+obwohl etwas da ist. In der Medizin ist das der Befund, der Entwarnung gibt, wo keine
+angebracht ist. Er ist gefährlicher als ein falscher Alarm, weil ein Alarm überprüft wird
+und Entwarnung nicht.
+</Erklaerung>
+
+Die Gegenmassnahme ist unbequem und kostet jedes Mal ein paar Minuten: **einen Test einmal
+absichtlich scheitern lassen.** Wir haben das für zwei Sperren gemacht, die jetzt im Bau
+stecken — eine bricht ab, solange im Impressum ein Platzhalter steht, die andere, wenn ein
+Werbelink gesetzt wird, ohne dass die Rechtstexte davon wissen. Beide wurden zweimal
+ausgeführt: einmal mit Auslöser, einmal ohne. Erst der Lauf, der rot wird, belegt, dass
+der Lauf, der grün ist, etwas bedeutet.
+
+> Ein Test, der nie rot war, hat seine Nützlichkeit nie belegt. Er hat sie behauptet.
+
+<Prompt>
+Ich lese einen Artikel über Softwaretests. Dort steht, ein Test, der nie fehlgeschlagen
+ist, habe seine Nützlichkeit nie belegt — man solle ihn einmal absichtlich scheitern
+lassen. Erklär mir in einfachen Worten, warum ein Test, der immer bestanden wird,
+verdächtig ist, was ein "falsch negatives" Ergebnis bedeutet, und wie ich bei einer
+Prüfung, die ich selbst eingerichtet habe, feststelle, ob sie überhaupt etwas prüft.
+</Prompt>
+
+## Und die Sache mit dem Assistenten
+
+Bleibt die Frage, ob das mit KI-Unterstützung häufiger passiert. Ich habe dazu keine
+Messung, nur eine Beobachtung von einem einzigen Tag — also eine Vermutung, und sie steht
+hier als solche.
+
+Die Vermutung: **Nicht die Fehler sind neu, sondern die Geschwindigkeit, mit der sie
+plausibel aussehen.** Ein Assistent liefert in Sekunden ein Ergebnis mit ordentlichem
+Protokoll. Acht Routen erzeugt, keine Fehlermeldung — das liest sich wie eine Abnahme.
+Hätte ich dieselben Dateien von Hand geschrieben, hätte ich beim Schreiben schon gesehen,
+dass zwei Regeln aufeinandertreffen.
+
+Der Preis für das Tempo ist also nicht schlechterer Code. Er ist, dass zwischen „gemacht"
+und „geprüft" ein Schritt verschwindet, den man früher unterwegs miterledigt hat. Wer ihn
+nicht bewusst wieder einbaut, hat am Ende sehr schnell etwas gebaut, von dem niemand
+weiss, ob es stimmt.
