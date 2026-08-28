@@ -3,6 +3,8 @@
 # anonymisierung-pruefen.sh — der Check aus CLAUDE.md als ein Befehl.
 #
 #   ./werkzeuge/anonymisierung-pruefen.sh              prüft den Arbeitsbaum
+#   ./werkzeuge/anonymisierung-pruefen.sh --historie    prüft ALLE Commits, nicht
+#                                                       nur den Arbeitsbaum
 #   ./werkzeuge/anonymisierung-pruefen.sh --selbsttest  prüft, ob dieses Skript
 #                                                       überhaupt anschlägt
 #
@@ -18,6 +20,10 @@ set -u
 
 cd "$(dirname "$0")/.." || exit 1
 
+KLARWERTE="../pixelyard-klarwerte.md"
+AUSNAHME="src/lib/seite.ts"   # die eine erlaubte Fundstelle, s. CLAUDE.md
+BEFUNDE=0
+
 # --- Selbsttest -----------------------------------------------------------
 # „Ein Test, der nie rot war, hat seine Nützlichkeit nie belegt."
 # Legt kurz eine Datei mit einem Muster an, das anschlagen MUSS, ruft das
@@ -26,6 +32,71 @@ cd "$(dirname "$0")/.." || exit 1
 # Der verwendete Wert stammt aus 203.0.113.0/24 — ein Bereich, den RFC 5737
 # ausdrücklich für Dokumentation reserviert. Kein Heimnetzwert, nirgends
 # geroutet. Die Datei steht zusätzlich in der .gitignore.
+# --- Historie ---------------------------------------------------------------
+# Der normale Lauf prüft den ARBEITSBAUM. Beim Öffentlichschalten des Repos
+# wird aber die HISTORIE öffentlich — jeder je committete Stand, auch der
+# gelöschte. Am 25.08.2026 lag genau so eine Heimnetz-IP im Repo: aus dem
+# Arbeitsbaum entfernt, in der Geschichte noch da.
+#
+# Dieser Lauf geht über jeden Blob in jedem Commit — jeden genau einmal.
+if [ "${1:-}" = "--historie" ]; then
+  echo "=== Anonymisierung über die GESAMTE Git-Historie ==="
+  echo "    (jeder je committete Stand, nicht nur der aktuelle)"
+  echo
+
+  MUSTER='([0-9]{1,3}\.){3}[0-9]{1,3}|([0-9a-f]{2}:){5}[0-9a-f]{2}|[a-z0-9-]+\.(local|arpa)\b|VLAN ?[0-9]+|(Beleg|Bestell|Kunden|Serien)\w*nummer'
+  WERTE=$(mktemp)
+  if [ -f "$KLARWERTE" ]; then
+    sed -n "/pixelyard:werte:anfang/,/pixelyard:werte:ende/p" "$KLARWERTE" 2>/dev/null \
+      | grep -v "pixelyard:werte:" | sed "s/^[[:space:]]*//;s/[[:space:]]*$//" \
+      | grep -v "^$" | grep -v "^#" | sort -u > "$WERTE"
+  fi
+
+  TREFFER=0
+  GEPRUEFT=0
+  git rev-list --objects --all | while read -r sha pfad; do
+    [ -n "$pfad" ] || continue
+    case "$pfad" in
+      *.woff2|*.woff|*.ico|*.png|*.jpg|*.webp|*.pdf) continue ;;
+      CLAUDE.md|.gitignore|werkzeuge/*) continue ;;   # Regeltexte, s. oben
+      # README.md ist bewusst NICHT ausgenommen: Sie wird gelesen, sie wächst,
+      # und jede Ausnahme ist ein blinder Fleck. Wo ihr Text ein Muster treffen
+      # würde, wird der Text umformuliert — nicht die Prüfung abgeschaltet.
+    esac
+    inhalt=$(git cat-file blob "$sha" 2>/dev/null) || continue
+    GEPRUEFT=$((GEPRUEFT + 1))
+    if printf '%s' "$inhalt" | grep -qEi "$MUSTER"; then
+      echo "  🔴 strukturelles Muster: $pfad  (Objekt ${sha:0:8})"
+      TREFFER=$((TREFFER + 1))
+    fi
+    if [ -s "$WERTE" ] && [ "$pfad" != "$AUSNAHME" ]; then
+      if printf '%s' "$inhalt" | grep -qwF -f "$WERTE"; then
+        echo "  🔴 benannter Wert:      $pfad  (Objekt ${sha:0:8})"
+        TREFFER=$((TREFFER + 1))
+      fi
+    fi
+  done > "$WERTE.aus"
+
+  cat "$WERTE.aus"
+  # grep -c liefert bei null Treffern Status 1; ein "|| echo 0" hängt dann eine
+  # ZWEITE Null an und macht aus der Zahl den String "0\n0". Deshalb getrennt.
+  ANZAHL=$(grep -c '🔴' "$WERTE.aus" 2>/dev/null) || ANZAHL=0
+  echo "  Objekte geprüft: $(git rev-list --objects --all | grep -c . )"
+  [ -s "$WERTE" ] || echo "  ⚠️  Kein Werteblock gefunden — nur die strukturellen Muster geprüft."
+  echo
+  if [ "$ANZAHL" -eq 0 ]; then
+    echo "✅ Kein Befund in der Historie."
+    echo "   ⚠️  Commit-NACHRICHTEN sind hiervon nicht erfasst — sie liegen nicht in Blobs."
+    echo "      Dafür: git log --all --format='%s%n%b' | grep -Ei '<muster>'"
+    rm -f "$WERTE" "$WERTE.aus"; exit 0
+  else
+    echo "🔴 $ANZAHL Fundstelle(n) in der Historie."
+    echo "   ⚠️  Aus der Historie entfernt man Werte NICHT durch einen weiteren Commit."
+    echo "      Vor jedem Umschreiben: git remote -v prüfen, Sicherungs-Ref anlegen."
+    rm -f "$WERTE" "$WERTE.aus"; exit 1
+  fi
+fi
+
 if [ "${1:-}" = "--selbsttest" ]; then
   PROBE=".anon-selbsttest.tmp"
   trap 'rm -f "$PROBE"' EXIT INT TERM
@@ -39,17 +110,14 @@ if [ "${1:-}" = "--selbsttest" ]; then
     echo "✅ Bestanden: Das Skript hat die eingebaute Testadresse gefunden."
     echo "   Damit bedeutet ein sauberer Lauf in Abschnitt 1 etwas."
     echo
-    echo "⚠️  Was dieser Selbsttest NICHT prüft: Abschnitt 2 und 3. Er schiebt ein"
-    echo "   strukturelles Muster unter, keinen benannten Wert — dafür müsste er die"
+    echo "⚠️  Was dieser Selbsttest NICHT prüft: Abschnitt 2, 3 und --historie. Er schiebt"
+    echo "   ein strukturelles Muster unter, keinen benannten Wert — dafür müsste er die"
     echo "   Klarwerte-Datei anfassen. Ein Test, der mehr zu belegen scheint als er"
     echo "   belegt, ist genau die Sorte Befund, um die es hier geht."
     exit 0
   fi
 fi
 
-KLARWERTE="../pixelyard-klarwerte.md"
-AUSNAHME="src/lib/seite.ts"   # die eine erlaubte Fundstelle, s. CLAUDE.md
-BEFUNDE=0
 
 sucheliste() {   # $1 = Datei mit Suchbegriffen, $2 = Beschriftung
   local liste="$1" was="$2" treffer hinweise kurz
