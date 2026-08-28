@@ -54,8 +54,11 @@ export const SEITE = {
  * Wer eines davon einschaltet, schaltet damit im selben Zug den zugehoerigen
  * Abschnitt in beiden Rechtstexten ein. Das ist der ganze Zweck. */
 export const MERKMALE = {
-  /** Cloudflare Web Analytics. Erst ab Schritt 8 moeglich — braucht die Pages-Site. */
-  analytics: false,
+  /** Cloudflare Web Analytics, eingeschaltet am 28.08.2026.
+   *  Das Skript fuegt CLOUDFLARE beim Ausliefern ein (Pages → Metrics → Enable),
+   *  es steht nicht in unserem Quelltext. Dieser Schalter steuert nur, ob die
+   *  Datenschutzerklaerung den Dienst beschreibt — und das muss zusammenpassen. */
+  analytics: true,
   /** Provisions- und Preisvergleichslinks im Bestand. */
   affiliate: false,
   /** Spendenmoeglichkeit („Kaffeekasse"). */
