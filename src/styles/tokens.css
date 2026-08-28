@@ -1,0 +1,97 @@
+/* tokens.css — die Farb- und Massvariablen des Design-Systems.
+ *
+ * Grundlage: designbrief.md §2 und §3. Wo ein Wert vom Brief abweicht, steht
+ * die MESSUNG daneben, nicht die Begruendung. Kontrastwerte sind gerechnet
+ * (WCAG 2.1, relative Luminanz), nicht geschaetzt.
+ *
+ * Regel fuer diese Datei: Diagramme, Komponenten und Seiten holen ihre Farben
+ * hier ab. Kein Hex-Wert ausserhalb dieser Datei — sonst nimmt der Dark Mode
+ * die Haelfte der Seite nicht mit.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Farbe, Light Mode (designbrief §2, unveraendert) ---- */
+  --py-bg:            #F4F0E6;   /* Creme/Papier */
+  --py-surface:       #EAE4D6;   /* Flaeche/Karten */
+  --py-text:          #1C1B18;   /* 15.13:1 auf bg — AAA */
+  --py-text-leise:    #5A564C;   /*  6.43:1 auf bg — AA, Meta-Zeilen */
+  --py-primary:       #004225;   /* 10.22:1 auf bg — British Racing Green */
+  --py-accent:        #C19A6B;   /* Camel — NUR Flaeche und Rahmen, s. unten */
+  --py-line:          #CFC8B8;
+
+  /* 🔴 Gemessene Korrektur, designbrief §2 hat sie als Frage offengelassen:
+   * Camel #C19A6B auf Creme #F4F0E6 ergibt 2.28:1. Das reicht weder fuer Text
+   * (4.5:1) noch fuer Bedienelemente (3:1). Camel bleibt Rahmen und Flaeche;
+   * fuer Camel-farbigen TEXT im Light Mode gilt der dunklere Wert. */
+  --py-accent-text:   #6E5230;   /*  6.34:1 auf bg — AA */
+
+  --py-link:          var(--py-primary);
+
+  /* ---- Terminal: in BEIDEN Modi dunkel (designbrief §4) ---- */
+  --py-term-bg:       #0D1F16;
+  --py-term-line:     #1E4433;
+  --py-term-text:     #EDE7D8;   /* 13.90:1 auf term-bg */
+  --py-term-green:    #7FC79B;   /*  8.61:1 auf term-bg */
+  --py-term-camel:    #D2AC7C;   /*  8.11:1 auf term-bg */
+
+  /* ---- Schrift (designbrief §3, Paarung A) ---- */
+  --py-schrift-text:  'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --py-schrift-mono:  'IBM Plex Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  --py-grad-text:     1.0625rem;  /* 17px — Fliesstext */
+  --py-hoehe-text:    1.65;       /* Brief: 1.6–1.7 */
+  --py-hoehe-eng:     1.25;
+  --py-mass:          34rem;      /* ~68 Zeichen, Brief: max ~70 */
+  --py-mass-breit:    52rem;      /* Tabellen, Terminal, Diagramme */
+
+  /* ---- Mass und Rhythmus ---- */
+  --py-r1: 0.25rem; --py-r2: 0.5rem;  --py-r3: 0.75rem; --py-r4: 1rem;
+  --py-r5: 1.5rem;  --py-r6: 2rem;    --py-r7: 3rem;    --py-r8: 4.5rem;
+  --py-radius: 2px;               /* fast nichts — britische Zurueckhaltung */
+  --py-rand: 1px;
+}
+
+/* Dark Mode. Beide Wege sind noetig:
+ * - ohne data-theme entscheidet die Systemeinstellung
+ * - mit data-theme gewinnt die Wahl des Lesers, in beide Richtungen */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --py-bg:          #0D1F16;
+    --py-surface:     #123527;
+    --py-text:        #EDE7D8;   /* 13.90:1 auf bg */
+    --py-text-leise:  #B3AC9C;   /*  7.59:1 auf bg */
+    --py-primary:     #4E9B6F;   /*  5.10:1 auf bg — Flaeche, Rahmen, Marke */
+    --py-accent:      #D2AC7C;   /*  8.11:1 auf bg */
+    --py-accent-text: #D2AC7C;
+    --py-line:        #24503C;
+    /* 🔴 Dritte gemessene Korrektur: Im Dunkelmodus ist die Seitenflaeche
+     * selbst #0D1F16 — ein Terminal-Block in derselben Farbe verschwindet und
+     * haengt nur noch am Rahmen. Der Block wird deshalb HELLER als die Seite
+     * (1.41:1 Abhebung), und die Schriftfarben halten weiter ueber AA:
+     * gruen 6.12, Text 9.88, Camel 5.76. */
+    --py-term-bg:     #183C2D;
+    --py-term-line:   #2A5C45;
+    /* 🔴 Zweite gemessene Korrektur: --py-primary #4E9B6F auf der Kartenflaeche
+     * #123527 ergibt 3.99:1 — unter AA. Links tragen deshalb einen helleren
+     * Gruenton, der auf beiden Flaechen haelt (8.61 / 6.74). */
+    --py-link:        #7FC79B;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --py-bg:          #0D1F16;
+  --py-surface:     #123527;
+  --py-text:        #EDE7D8;
+  --py-text-leise:  #B3AC9C;
+  --py-primary:     #4E9B6F;
+  --py-accent:      #D2AC7C;
+  --py-accent-text: #D2AC7C;
+  --py-line:        #24503C;
+  --py-link:        #7FC79B;
+  --py-term-bg:     #183C2D;
+  --py-term-line:   #2A5C45;
+}

@@ -1,17 +1,29 @@
 ---
+/* Die Wurzel leitet auf die Standardsprache um (designbrief.md §6a:
+ * Sprachpraefix im Routing ab Tag 1).
+ *
+ * Bewusst als eigene Seite und nicht ueber Astros i18n-Automatik: So ist
+ * sichtbar, was ausgeliefert wird, und es laesst sich lokal pruefen.
+ *
+ * ⚠️ Das ist eine Weiterleitung per <meta refresh>, kein 301. Bei Schritt 8
+ * (Cloudflare Pages) gehoert daraus ein echter 301 in `public/_redirects` —
+ * dann kann diese Datei weg. Steht als offener Punkt in der Sitzungsnotiz. */
+import { SPRACHE_STANDARD } from '../lib/seite';
 
+const ziel = `/${SPRACHE_STANDARD}/`;
+const kanonisch = new URL(ziel, Astro.site).href;
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content={`0; url=${ziel}`} />
+    <link rel="canonical" href={kanonisch} />
+    <meta name="robots" content="noindex, follow" />
+    <title>pixelyard</title>
+  </head>
+  <body>
+    <p><a href={ziel}>Weiter zu pixelyard</a></p>
+  </body>
 </html>

@@ -1,0 +1,140 @@
+---
+/* /de/design — das Design-System, an sich selbst vorgeführt.
+ *
+ * Zweck: Wer eine Komponente aendert, sieht hier sofort, was er sonst noch
+ * getroffen hat. Und die Kontrastwerte stehen als ZAHL da, nicht als Zusicherung.
+ *
+ * noindex — eine Werkzeugseite gehoert nicht in die Suche. */
+import Basis from '../../layouts/Basis.astro';
+import Erklaerung from '../../components/Erklaerung.astro';
+import Prompt from '../../components/Prompt.astro';
+import TLDR from '../../components/TLDR.astro';
+import { SPRACHEN } from '../../lib/seite';
+import type { Sprache } from '../../lib/seite';
+
+export function getStaticPaths() {
+  return SPRACHEN.map((sprache) => ({ params: { sprache } }));
+}
+const sprache = Astro.params.sprache as Sprache;
+
+/* Gerechnet, nicht geschaetzt: relative Luminanz nach WCAG 2.1.
+ * Die Werte stammen aus derselben Rechnung, die auch in tokens.css
+ * kommentiert ist — hier stehen sie sichtbar, damit sie nachgeprueft werden. */
+const farben = [
+  { rolle: 'Text auf Papier',        hell: '#1C1B18 / #F4F0E6', hellW: 15.13, dunkel: '#EDE7D8 / #0D1F16', dunkelW: 13.90 },
+  { rolle: 'Text leise auf Papier',  hell: '#5A564C / #F4F0E6', hellW: 6.43,  dunkel: '#B3AC9C / #0D1F16', dunkelW: 7.59 },
+  { rolle: 'Racing Green auf Papier',hell: '#004225 / #F4F0E6', hellW: 10.22, dunkel: '#4E9B6F / #0D1F16', dunkelW: 5.10 },
+  { rolle: 'Link auf Karte',         hell: '#004225 / #EAE4D6', hellW: 9.17,  dunkel: '#7FC79B / #123527', dunkelW: 6.74 },
+  { rolle: 'Camel als Text',         hell: '#6E5230 / #F4F0E6', hellW: 6.34,  dunkel: '#D2AC7C / #0D1F16', dunkelW: 8.11 },
+  { rolle: 'Camel als Rahmen',       hell: '#C19A6B / #F4F0E6', hellW: 2.28,  dunkel: '#D2AC7C / #0D1F16', dunkelW: 8.11 },
+  { rolle: 'Terminal-Grün auf Block',hell: '#7FC79B / #0D1F16', hellW: 8.61,  dunkel: '#7FC79B / #183C2D', dunkelW: 6.12 },
+];
+
+function urteil(wert: number, nurRahmen = false): string {
+  if (wert >= 7) return 'AAA';
+  if (wert >= 4.5) return 'AA';
+  if (wert >= 3) return nurRahmen ? 'AA (nur Rahmen)' : '🔴 unter AA';
+  return nurRahmen ? '⚠️ nur dekorativ' : '🔴 unter AA';
+}
+---
+
+<Basis titel="Design-System" sprache={sprache} nichtIndexieren
+  beschreibung="Die Bauteile des Blogs an sich selbst vorgeführt, mit gerechneten Kontrastwerten.">
+  <div class="py-lesestrom">
+    <h1>Design-System<span class="py-h1-cursor" aria-hidden="true">_</span></h1>
+    <p class="py-meta">
+      <span class="py-meta__eingabe" aria-hidden="true">$</span>
+      <span>Werkzeugseite · nicht indexiert · gehört nicht zum veröffentlichten Blog</span>
+    </p>
+
+    <h2>Farben und Kontrast</h2>
+    <p>
+      Die Werte sind gerechnet, nicht geschätzt. Die Richtlinie verlangt 4.5:1 für
+      normalen Text und 3:1 für Bedienelemente.
+    </p>
+  </div>
+
+  <div class="py-tabelle">
+    <table>
+      <thead>
+        <tr><th>Rolle</th><th>hell</th><th class="zahl">Wert</th><th>Urteil</th><th>dunkel</th><th class="zahl">Wert</th><th>Urteil</th></tr>
+      </thead>
+      <tbody>
+        {farben.map((f) => {
+          const nurRahmen = f.rolle.includes('Rahmen');
+          return (
+            <tr>
+              <td>{f.rolle}</td>
+              <td><code>{f.hell}</code></td>
+              <td class="zahl">{f.hellW.toFixed(2)}</td>
+              <td>{urteil(f.hellW, nurRahmen)}</td>
+              <td><code>{f.dunkel}</code></td>
+              <td class="zahl">{f.dunkelW.toFixed(2)}</td>
+              <td>{urteil(f.dunkelW, nurRahmen)}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="py-lesestrom">
+    <Erklaerung marke="Warum die letzte Zeile so wichtig ist">
+      Camel auf Creme ergibt 2.28:1 und fällt damit durch — für Text und für
+      Bedienelemente. Deshalb hat Camel im Light Mode zwei Rollen mit zwei Werten:
+      hell als Rahmen und Fläche, dunkel als Text. Der Design-Brief hatte diese Prüfung
+      als offenen Punkt vermerkt; sie ist gelaufen.
+    </Erklaerung>
+
+    <h2>Überschriften</h2>
+    <h3>Eine Überschrift dritter Ordnung</h3>
+    <p>
+      Fliesstext in der Grundschrift, mit einem <code>inline-code</code> und einem{' '}
+      <a href="#">Link</a>. Die Zeilenlänge ist auf rund 68 Zeichen begrenzt, weil
+      längere Zeilen beim Zurückspringen Fehler produzieren.
+    </p>
+
+    <h2>Die Bauteile</h2>
+
+    <TLDR>
+      Die Kurzfassung steht am Artikelanfang und ist der Block, den KI-Antwortmaschinen
+      als Erstes herausziehen. Zwei bis drei Sätze, keine Überschrift in Prosa.
+    </TLDR>
+
+    <Erklaerung>
+      Eine Erklärung ist eine Randbemerkung, kein Warnkasten. Deshalb nur ein Strich in
+      Camel und kein Rahmen — und deshalb steht sie im Text und nicht daneben.
+    </Erklaerung>
+
+    <Prompt>
+      Erklär mir in einfachen Worten, warum ein Design-System die Farben in Variablen
+      hält, statt sie an jeder Stelle einzeln hinzuschreiben — und was genau schiefgeht,
+      wenn eine einzelne Stelle die Variable nicht benutzt.
+    </Prompt>
+
+    <Prompt titel="$ mit dem Hinweis, der bei Finanzthemen Pflicht ist" keinUpload>
+      Erklär mir, welche Fristen im Schweizer Krankenversicherungssystem an ein
+      Kalenderjahr gebunden sind und worauf man dabei achtet.
+    </Prompt>
+
+    <h2>Terminal und Tabellen</h2>
+    <pre><code>{`$ npm run build
+ building client (vite)
+ ✓ built in 1.2s`}</code></pre>
+
+    <blockquote>
+      Ein grüner Status ist kein Nachweis. Was behauptet wird, wird gezählt oder
+      gemessen — sonst wird es als ungeprüft benannt.
+    </blockquote>
+
+    <h2>Die drei Schalter</h2>
+    <p>
+      Sie stehen oben rechts im Kopf — eine Monospace-Zeile, kein Steuerpult. Zum
+      Prüfen: Erklärungen ausschalten und beobachten, ob die Prompt-Boxen stehen
+      bleiben. Sie müssen es, das ist ihr einziger Zweck.
+    </p>
+    <p class="py-schlagwort">
+      Voreinstellungen: Farbschema folgt dem System · Erklärungen ein · Sprache de
+    </p>
+  </div>
+</Basis>

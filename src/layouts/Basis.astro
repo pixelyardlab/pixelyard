@@ -1,0 +1,129 @@
+---
+/* Basis.astro — Huelle jeder Seite.
+ *
+ * Traegt: Sprache, Canonical, hreflang, OG-Meta, das Inline-Skript gegen das
+ * Aufblitzen im falschen Modus, Kopf, Fuss.
+ *
+ * `Astro.site` kommt aus astro.config.mjs und lautet https://www.pixelyard.ch
+ * (Entscheid 26.08.2026). Canonical, Sitemap und OG haengen daran — deshalb
+ * wird die Domain hier NICHT noch einmal hingeschrieben. */
+import { SEITE, SPRACHEN, SPRACHEN_BEKANNT, texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+import Kopf from '../components/Kopf.astro';
+import Fuss from '../components/Fuss.astro';
+
+import '../styles/tokens.css';
+import '../styles/schriften.css';
+import '../styles/basis.css';
+import '../styles/bausteine.css';
+
+interface Props {
+  titel: string;
+  beschreibung?: string;
+  sprache?: Sprache;
+  istStartseite?: boolean;
+  /** OG-Typ: 'website' fuer Uebersichten, 'article' fuer Artikel. */
+  ogTyp?: 'website' | 'article';
+  /** Fertiges JSON-LD. Wird als einziges <script type="application/ld+json"> ausgegeben. */
+  schema?: unknown;
+  /** Pfade der Uebersetzungen, je Sprache. Erzeugt die hreflang-Angaben. */
+  uebersetzungen?: Partial<Record<Sprache, string>>;
+  /** Setzt <meta name="robots" content="noindex">, z. B. fuer Werkzeugseiten. */
+  nichtIndexieren?: boolean;
+}
+
+const {
+  titel,
+  beschreibung,
+  sprache = 'de',
+  istStartseite = false,
+  ogTyp = 'website',
+  schema,
+  uebersetzungen,
+  nichtIndexieren = false,
+} = Astro.props;
+
+const t = texte(sprache);
+const meta = SPRACHEN_BEKANNT[sprache];
+const kanonisch = new URL(Astro.url.pathname, Astro.site).href;
+const beschreibungText = beschreibung ?? t.beschreibungStandard;
+const seitentitel = istStartseite ? `${SEITE.name} — ${titel}` : `${titel} · ${t.titelSuffix}`;
+
+/* hreflang: eigene Seite immer mit, plus jede vorhandene Uebersetzung, plus
+ * x-default auf die Standardsprache. Solange es nur Deutsch gibt, ist das
+ * eine einzige Zeile — und genau das ist der Punkt aus designbrief §6a:
+ * die Struktur steht, bevor sie gebraucht wird. */
+const alternativen = [
+  { sprache, pfad: Astro.url.pathname },
+  ...Object.entries(uebersetzungen ?? {})
+    .filter(([s]) => s !== sprache && (SPRACHEN as readonly string[]).includes(s))
+    .map(([s, pfad]) => ({ sprache: s as Sprache, pfad: pfad as string })),
+];
+---
+
+<!doctype html>
+<html lang={meta.htmlLang} data-erklaerungen={undefined}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{seitentitel}</title>
+    <meta name="description" content={beschreibungText} />
+    <link rel="canonical" href={kanonisch} />
+    {nichtIndexieren && <meta name="robots" content="noindex, follow" />}
+
+    {alternativen.map((a) => (
+      <link rel="alternate" hreflang={SPRACHEN_BEKANNT[a.sprache].htmlLang} href={new URL(a.pfad, Astro.site).href} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={new URL(`/de/`, Astro.site).href} />
+
+    <meta property="og:type" content={ogTyp} />
+    <meta property="og:title" content={seitentitel} />
+    <meta property="og:description" content={beschreibungText} />
+    <meta property="og:url" content={kanonisch} />
+    <meta property="og:site_name" content={SEITE.name} />
+    <meta property="og:locale" content={meta.ogLocale} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="alternate" type="application/rss+xml" title={SEITE.name} href="/rss.xml" />
+
+    {/* Die zwei Schriftschnitte, die auf jeder Seite sofort sichtbar sind.
+        Mehr vorzuladen bringt nichts — es verdraengt nur die wichtigen. */}
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="/fonts/ibm-plex-sans/ibm-plex-sans-latin-400-normal.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="/fonts/ibm-plex-mono/ibm-plex-mono-latin-600-normal.woff2" />
+
+    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />}
+
+    {/* Muss INLINE und VOR dem ersten Bild laufen. Ein nachgeladenes Modul
+        kaeme zu spaet — die Seite blitzte im falschen Modus auf.
+        Deshalb steht hier dieselbe Logik ein zweites Mal und nicht im Modul. */}
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('py-js');
+        try {
+          var thema = localStorage.getItem('py-thema');
+          if (thema === 'light' || thema === 'dark') d.dataset.theme = thema;
+          if (localStorage.getItem('py-erklaerungen') === 'aus') d.dataset.erklaerungen = 'aus';
+        } catch (e) { /* privates Fenster, gesperrte Website-Daten */ }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="py-sprung" href="#inhalt">{t.zumInhalt}</a>
+    <Kopf sprache={sprache} istStartseite={istStartseite} />
+    <main id="inhalt" class="py-huelle">
+      <slot />
+    </main>
+    <Fuss sprache={sprache} />
+    <script>
+      import '../scripts/oberflaeche';
+    </script>
+  </body>
+</html>

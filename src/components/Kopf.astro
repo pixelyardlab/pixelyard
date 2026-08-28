@@ -1,0 +1,21 @@
+---
+import Wortmarke from './Wortmarke.astro';
+import Schalter from './Schalter.astro';
+import { texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+
+interface Props { sprache: Sprache; istStartseite?: boolean }
+const { sprache, istStartseite = false } = Astro.props;
+const t = texte(sprache);
+const pfad = Astro.url.pathname;
+---
+
+<header class="py-kopf">
+  <div class="py-huelle py-kopf__zeile">
+    <Wortmarke href={istStartseite ? null : `/${sprache}/`} />
+    <nav class="py-kopf__nav" aria-label="Hauptnavigation">
+      <a href={`/${sprache}/`} aria-current={pfad === `/${sprache}/` ? 'page' : undefined}>{t.artikel}</a>
+    </nav>
+    <Schalter sprache={sprache} />
+  </div>
+</header>

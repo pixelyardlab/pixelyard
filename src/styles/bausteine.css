@@ -1,0 +1,321 @@
+/* bausteine.css — die Bauteile aus designbrief.md §4/§4a/§4b.
+ * Farben ausschliesslich aus tokens.css.
+ *
+ * 🔴 Regel, die diese Datei am 28.08.2026 einmal gekostet hat:
+ * KEIN `margin`-Kurzschreiben in Bauteilen, die im Lesestrom stehen — nur
+ * `margin-block`. Das Kurzschreiben setzt auch die seitlichen Abstaende auf 0
+ * und schlaegt damit das `margin-inline: auto` aus basis.css. Ergebnis war eine
+ * Seite, auf der Fliesstext zentriert stand und TL;DR, Erklaerung und
+ * Artikelliste links davon — sichtbar erst im Screenshot, nicht im Bau.
+ * Ein gruener Build ist kein Nachweis. */
+
+/* ====================================================================
+ * Wortmarke — pixelyard_ (Entscheid 28.08.2026)
+ * ==================================================================== */
+
+.py-marke {
+  font-family: var(--py-schrift-mono);
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -0.03em;
+  color: var(--py-text);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.05em;
+}
+.py-marke:hover { color: var(--py-primary); }
+
+.py-marke__cursor {
+  color: var(--py-primary);
+  animation: py-blinken 1.2s steps(1, end) infinite;
+}
+@keyframes py-blinken { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+
+/* designbrief §4, ausdrueckliche Pflicht: Der Cursor BLEIBT STEHEN,
+ * er verschwindet nicht. Eine Dauer-Animation ohne Abschaltung ist fuer
+ * manche Leser unangenehm. */
+@media (prefers-reduced-motion: reduce) {
+  .py-marke__cursor { animation: none; opacity: 1; }
+}
+
+/* Der Cursor nach der H1 auf der Startseite — dasselbe Bauteil, groesser */
+.py-h1-cursor {
+  color: var(--py-primary);
+  animation: py-blinken 1.2s steps(1, end) infinite;
+  font-weight: 400;
+}
+@media (prefers-reduced-motion: reduce) {
+  .py-h1-cursor { animation: none; opacity: 1; }
+}
+
+/* ====================================================================
+ * Kopf und Fuss
+ * ==================================================================== */
+
+.py-kopf {
+  border-bottom: var(--py-rand) solid var(--py-line);
+  padding-block: var(--py-r4);
+}
+.py-kopf__zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--py-r4);
+  justify-content: space-between;
+}
+.py-kopf__nav {
+  display: flex;
+  gap: var(--py-r4);
+  font-family: var(--py-schrift-mono);
+  font-size: 0.875rem;
+}
+.py-kopf__nav a { color: var(--py-text-leise); text-decoration: none; }
+.py-kopf__nav a:hover,
+.py-kopf__nav a[aria-current='page'] { color: var(--py-link); text-decoration: underline; }
+
+.py-fuss {
+  border-top: var(--py-rand) solid var(--py-line);
+  margin-top: var(--py-r8);
+  padding-block: var(--py-r5) var(--py-r7);
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+  color: var(--py-text-leise);
+}
+.py-fuss ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--py-r4); }
+.py-fuss li { margin: 0; }
+
+/* ====================================================================
+ * Die drei Schalter (designbrief §4b)
+ * Eine Monospace-Zeile, kein Steuerpult.
+ * ==================================================================== */
+
+.py-schalter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--py-r3);
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+  color: var(--py-text-leise);
+}
+
+.py-schalter__knopf {
+  font: inherit;
+  color: var(--py-text-leise);
+  background: none;
+  border: 0;
+  padding: 0.15em 0.1em;
+  cursor: pointer;
+  border-radius: var(--py-radius);
+}
+.py-schalter__knopf:hover { color: var(--py-link); }
+
+/* Die eckigen Klammern sind das Terminal-Motiv und stehen im CSS,
+ * damit sie nicht im Vorlesetext des Screenreaders landen. */
+.py-schalter__gruppe {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  white-space: nowrap;
+}
+.py-schalter__gruppe::before { content: '['; color: var(--py-line); }
+.py-schalter__gruppe::after  { content: ']'; color: var(--py-line); }
+
+.py-schalter__aktiv {
+  color: var(--py-text);
+  font-weight: 600;
+}
+.py-schalter__trenner { color: var(--py-line); }
+
+/* Eine Sprache: keine Auswahl, nur eine Anzeige. Sobald en dazukommt,
+ * wird daraus dieselbe Gruppe wie oben — ohne CSS-Aenderung. */
+.py-schalter__marke { color: var(--py-text-leise); }
+
+/* Ohne JavaScript koennen die Schalter nichts schalten. Dann werden sie
+ * ausgeblendet statt tot dazustehen; die Erklaerungen bleiben sichtbar,
+ * weil das die Voreinstellung ist. */
+html:not(.py-js) .py-schalter__knopf { display: none; }
+
+/* ====================================================================
+ * <Erklaerung> (designbrief §4a, editorial.md §3)
+ * Immer im HTML, per Attribut am <html> ein- oder ausgeblendet.
+ * ==================================================================== */
+
+.py-erklaerung {
+  border-left: 3px solid var(--py-accent);
+  padding: 0 0 0 var(--py-r4);
+  margin-block: var(--py-r5);
+  color: var(--py-text-leise);
+}
+.py-erklaerung > :last-child { margin-bottom: 0; }
+
+.py-erklaerung__marke {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--py-accent-text);
+  margin: 0 0 var(--py-r2);
+}
+
+html[data-erklaerungen='aus'] .py-erklaerung { display: none; }
+
+/* editorial.md §3: Suchmaschinen UND Druckansicht sehen den vollstaendigen
+ * Text. Der Ausschalter ist eine Leseeinstellung, keine Zensur. */
+@media print {
+  html[data-erklaerungen='aus'] .py-erklaerung { display: block; }
+}
+
+/* ====================================================================
+ * <Prompt> (designbrief §4a/§7b, editorial.md §4)
+ * IMMER sichtbar. Terminal-Block mit Kopieren-Knopf.
+ * ==================================================================== */
+
+.py-prompt {
+  background: var(--py-term-bg);
+  border: var(--py-rand) solid var(--py-term-line);
+  border-radius: var(--py-radius);
+  margin-block: var(--py-r5);
+  overflow: hidden;
+}
+
+.py-prompt__kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--py-r3);
+  padding: var(--py-r2) var(--py-r3);
+  border-bottom: var(--py-rand) solid var(--py-term-line);
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  color: var(--py-term-green);
+}
+.py-prompt__marke { letter-spacing: 0.03em; }
+
+.py-prompt__knopf {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  color: var(--py-term-text);
+  background: none;
+  border: var(--py-rand) solid var(--py-term-line);
+  border-radius: var(--py-radius);
+  padding: 0.25em 0.7em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.py-prompt__knopf:hover { border-color: var(--py-term-green); color: var(--py-term-green); }
+.py-prompt__knopf:focus-visible { outline: 2px solid var(--py-term-green); outline-offset: 2px; }
+.py-prompt__knopf[data-zustand='fertig'] { color: var(--py-term-green); border-color: var(--py-term-green); }
+.py-prompt__knopf[data-zustand='fehler'] { color: var(--py-term-camel); border-color: var(--py-term-camel); }
+
+/* Ohne JavaScript kann nichts kopiert werden. Der Text bleibt lesbar und
+ * markierbar; nur der Knopf verschwindet, statt folgenlos zu klicken. */
+html:not(.py-js) .py-prompt__knopf { display: none; }
+
+.py-prompt__text {
+  margin: 0;
+  padding: var(--py-r4);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: var(--py-term-text);
+  font-family: var(--py-schrift-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+}
+/* Der Prompt-Text FLIESST, er wird nicht als Quelltext gesetzt.
+ * Beim Kopieren steht dann genau ein Absatz je Absatz in der Zwischenablage,
+ * statt der Zeilenumbrueche, die zufaellig in der MDX-Datei standen. */
+.py-prompt__text > p { margin: 0 0 var(--py-r3); }
+.py-prompt__text > :last-child { margin-bottom: 0; }
+
+/* editorial.md §4 Regel 2 / designbrief §7d-1 Punkt 3.
+ * Der Satz macht die Regel fuer den Leser SICHTBAR, statt sie nur einzuhalten. */
+.py-prompt__hinweis {
+  margin: 0;
+  padding: var(--py-r2) var(--py-r3) var(--py-r3);
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--py-term-camel);
+}
+
+/* ====================================================================
+ * <TLDR> (designbrief §6) — was KI-Antwortmaschinen extrahieren
+ * ==================================================================== */
+
+.py-tldr {
+  border: var(--py-rand) solid var(--py-accent);
+  border-left-width: 3px;
+  border-radius: var(--py-radius);
+  background: var(--py-surface);
+  padding: var(--py-r4);
+  margin-block: 0 var(--py-r6);
+}
+.py-tldr__marke {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--py-accent-text);
+  margin: 0 0 var(--py-r2);
+}
+.py-tldr > :last-child { margin-bottom: 0; }
+
+/* ====================================================================
+ * Artikelkopf und Meta-Zeile (designbrief §4)
+ * ==================================================================== */
+
+.py-meta {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+  color: var(--py-text-leise);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  align-items: baseline;
+  margin-block: 0 var(--py-r6);
+}
+.py-meta__eingabe { color: var(--py-primary); }
+.py-meta__punkt { color: var(--py-line); }
+.py-meta a { color: inherit; }
+
+.py-artikelkopf { margin-bottom: var(--py-r6); }
+
+/* ====================================================================
+ * Artikelliste
+ * ==================================================================== */
+
+.py-liste { list-style: none; padding: 0; margin-block: 0; }
+.py-liste > li {
+  margin-block: 0;
+  padding: var(--py-r5) 0;
+  border-bottom: var(--py-rand) solid var(--py-line);
+}
+.py-liste h2 { margin-block: 0 var(--py-r2); font-size: 1.35rem; }
+.py-liste h2 a { color: var(--py-text); text-decoration: none; }
+.py-liste h2 a:hover { color: var(--py-link); text-decoration: underline; }
+.py-liste p { margin-block: var(--py-r2) 0; color: var(--py-text-leise); }
+
+.py-schlagwort {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+  color: var(--py-text-leise);
+}
+
+/* ====================================================================
+ * Entwurfs-Fahne — nur im Dev-Server sichtbar, weil Entwuerfe
+ * im Bau gar nicht erst erzeugt werden.
+ * ==================================================================== */
+.py-entwurf {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--py-term-bg);
+  background: var(--py-accent);
+  padding: 0.15em 0.5em;
+  border-radius: var(--py-radius);
+}

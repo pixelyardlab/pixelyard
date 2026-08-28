@@ -1,0 +1,44 @@
+---
+import { render } from 'astro:content';
+import Artikel from '../../../layouts/Artikel.astro';
+import Erklaerung from '../../../components/Erklaerung.astro';
+import Prompt from '../../../components/Prompt.astro';
+import TLDR from '../../../components/TLDR.astro';
+import type { Sprache } from '../../../lib/seite';
+import { alleArtikel, slugVon, uebersetzungenVon, type Artikel as Eintrag } from '../../../lib/artikel';
+
+export async function getStaticPaths() {
+  const artikel = await alleArtikel();
+  return artikel.map((eintrag: Eintrag) => ({
+    params: { sprache: eintrag.data.sprache, slug: slugVon(eintrag) },
+    props: { eintrag },
+  }));
+}
+
+const { eintrag } = Astro.props as { eintrag: Eintrag };
+const { Content } = await render(eintrag);
+const uebersetzungen = await uebersetzungenVon(eintrag);
+const markdownPfad = `/${eintrag.data.sprache}/artikel/${slugVon(eintrag)}.md`;
+
+/* Die Bausteine werden dem MDX hier uebergeben, damit ein Artikel sie NICHT
+ * einzeln importieren muss. Ein Import, den man vergessen kann, wird vergessen —
+ * und dann fehlt ausgerechnet die Prompt-Box, das einzige exklusive Element. */
+const bausteine = { Erklaerung, Prompt, TLDR };
+---
+
+<Artikel
+  titel={eintrag.data.titel}
+  beschreibung={eintrag.data.beschreibung}
+  datum={eintrag.data.datum}
+  aktualisiert={eintrag.data.aktualisiert}
+  schlagworte={eintrag.data.schlagworte}
+  sprache={eintrag.data.sprache as Sprache}
+  autor={eintrag.data.autor}
+  entwurf={eintrag.data.entwurf}
+  faq={eintrag.data.faq}
+  rohtext={eintrag.body}
+  markdownPfad={markdownPfad}
+  uebersetzungen={uebersetzungen}
+>
+  <Content components={bausteine} />
+</Artikel>

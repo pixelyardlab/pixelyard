@@ -1,0 +1,52 @@
+---
+import Basis from '../../layouts/Basis.astro';
+import { SPRACHEN, SEITE, texte } from '../../lib/seite';
+import type { Sprache } from '../../lib/seite';
+import { alleArtikel, pfadVon, isoTag } from '../../lib/artikel';
+
+export function getStaticPaths() {
+  return SPRACHEN.map((sprache) => ({ params: { sprache } }));
+}
+
+const sprache = Astro.params.sprache as Sprache;
+const t = texte(sprache);
+const artikel = await alleArtikel(sprache);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  name: SEITE.name,
+  description: t.beschreibungStandard,
+  inLanguage: sprache,
+  url: new URL(`/${sprache}/`, Astro.site).href,
+  author: { '@type': 'Person', name: SEITE.autor.name, description: SEITE.autor.kurzbio },
+};
+---
+
+<Basis titel="Homelab, mitgeschrieben" sprache={sprache} istStartseite schema={schema}>
+  <div class="py-lesestrom">
+    <h1>Ein Homelab, mitgeschrieben<span class="py-h1-cursor" aria-hidden="true">_</span></h1>
+    <p>{t.beschreibungStandard}</p>
+
+  {artikel.length === 0 ? (
+    <p class="py-schlagwort">Noch kein Artikel veröffentlicht.</p>
+  ) : (
+    <ul class="py-liste">
+      {artikel.map((a) => (
+        <li>
+          <p class="py-meta">
+            <span class="py-meta__eingabe" aria-hidden="true">$</span>
+            <time datetime={isoTag(a.data.datum)}>{isoTag(a.data.datum)}</time>
+            {a.data.entwurf && <span class="py-entwurf">{t.entwurf}</span>}
+          </p>
+          <h2><a href={pfadVon(a)}>{a.data.titel}</a></h2>
+          <p>{a.data.beschreibung}</p>
+          {a.data.schlagworte.length > 0 && (
+            <p class="py-schlagwort">{a.data.schlagworte.map((s) => `#${s}`).join(' ')}</p>
+          )}
+        </li>
+      ))}
+    </ul>
+  )}
+  </div>
+</Basis>

@@ -1,0 +1,26 @@
+---
+/* <Erklaerung> — die zweite Lesetiefe (editorial.md §3, designbrief §4a).
+ *
+ * Steht IMMER im HTML und wird per Attribut am <html> ein- oder ausgeblendet.
+ * Nicht nachgeladen, weil: Suchmaschinen und Druckansicht sehen den
+ * vollstaendigen Text, es flackert nichts beim Umschalten, und ein paar
+ * Saetze kosten nichts.
+ *
+ * ⚠️ Bekannter Nebeneffekt: Die Seitensuche des Browsers findet auch
+ * ausgeblendete Erklaerungen. Steht hier, damit es kein Bugreport wird. */
+import { texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+
+interface Props {
+  /** Ueberschreibt die Marke „Erklärung" — z. B. „Warum das zaehlt". */
+  marke?: string;
+  sprache?: Sprache;
+}
+const { marke, sprache = 'de' } = Astro.props;
+const t = texte(sprache);
+---
+
+<aside class="py-erklaerung">
+  <p class="py-erklaerung__marke">{marke ?? t.erklaerungMarke}</p>
+  <slot />
+</aside>

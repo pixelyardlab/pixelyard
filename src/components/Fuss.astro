@@ -1,0 +1,22 @@
+---
+import { SEITE } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+
+interface Props { sprache: Sprache }
+const { sprache } = Astro.props;
+const jahr = new Date().getFullYear();
+---
+
+<footer class="py-fuss">
+  <div class="py-huelle">
+    <ul>
+      {/* ⚠️ Impressum und Datenschutz sind Schritt 5 (projektstart.md §6) und
+          haengen am §8-Entscheid. Die Links stehen hier bewusst NICHT als
+          tote Platzhalter — was fehlt, soll fehlen und nicht erledigt aussehen. */}
+      <li><a href="/rss.xml">RSS</a></li>
+      <li><a href="/llms.txt">llms.txt</a></li>
+      <li><a href={`/${sprache}/design`}>Design-System</a></li>
+    </ul>
+    <p>© {jahr} {SEITE.autor.name}</p>
+  </div>
+</footer>

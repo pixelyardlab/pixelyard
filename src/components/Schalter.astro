@@ -1,0 +1,52 @@
+---
+/* Die drei Schalter (designbrief.md §4b).
+ *
+ * Eine Monospace-Zeile, kein Steuerpult — das war die ausdrueckliche
+ * Gestaltungsaufgabe, weil drei Schalter viel sind fuer eine Marke, deren
+ * Leitidee „britische Zurueckhaltung" heisst.
+ *
+ * Voreinstellungen: Farbschema folgt prefers-color-scheme, Erklaerungen EIN,
+ * Sprache de. Die Wahl merkt sich der Browser (localStorage), nicht der Server.
+ *
+ * Der Zustand steht am <html>, nicht am <body> — nur so laesst er sich vor
+ * dem ersten Bild setzen, ohne dass die Seite kurz falsch aufblitzt. */
+import { SPRACHEN, SPRACHEN_BEKANNT, texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+
+interface Props { sprache: Sprache }
+const { sprache } = Astro.props;
+const t = texte(sprache);
+const mehrereSprachen = SPRACHEN.length > 1;
+---
+
+<div class="py-schalter">
+  <span class="py-schalter__gruppe" role="group" aria-label={t.farbschemaLabel}>
+    <button type="button" class="py-schalter__knopf" data-py-thema="light">{t.hell}</button>
+    <span class="py-schalter__trenner" aria-hidden="true">|</span>
+    <button type="button" class="py-schalter__knopf" data-py-thema="dark">{t.dunkel}</button>
+  </span>
+
+  <span class="py-schalter__gruppe" role="group" aria-label={t.erklaerungenLabel}>
+    <span aria-hidden="true">{t.erklaerungen}:</span>
+    <button type="button" class="py-schalter__knopf" data-py-erklaerungen aria-pressed="true">
+      <span data-py-erklaerungen-text>{t.ein}</span>
+      <span class="py-nur-fuer-screenreader">{t.erklaerungenLabel}</span>
+    </button>
+  </span>
+
+  <span class="py-schalter__gruppe" role="group" aria-label={t.spracheLabel}>
+    {mehrereSprachen
+      ? SPRACHEN.map((s, i) => (
+          <>
+            {i > 0 && <span class="py-schalter__trenner" aria-hidden="true">|</span>}
+            <a
+              class:list={['py-schalter__knopf', s === sprache && 'py-schalter__aktiv']}
+              href={`/${s}/`}
+              hreflang={SPRACHEN_BEKANNT[s].htmlLang}
+              lang={SPRACHEN_BEKANNT[s].htmlLang}
+            >{SPRACHEN_BEKANNT[s].beschriftung}</a>
+          </>
+        ))
+      : <span class="py-schalter__marke">{SPRACHEN_BEKANNT[sprache].beschriftung}</span>}
+  </span>
+</div>

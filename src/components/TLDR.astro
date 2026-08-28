@@ -1,0 +1,19 @@
+---
+/* <TLDR> — 2–3 Saetze Kernaussage am Artikelanfang (designbrief §6).
+ * KI-Antwortmaschinen extrahieren genau diesen Block; deshalb steht er
+ * ganz oben im <article> und nicht in einer Seitenspalte. */
+import { texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+
+interface Props {
+  marke?: string;
+  sprache?: Sprache;
+}
+const { marke, sprache = 'de' } = Astro.props;
+const t = texte(sprache);
+---
+
+<section class="py-tldr" aria-label={marke ?? t.tldrMarke}>
+  <p class="py-tldr__marke">{marke ?? t.tldrMarke}</p>
+  <slot />
+</section>

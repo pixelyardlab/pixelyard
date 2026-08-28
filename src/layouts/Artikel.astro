@@ -1,0 +1,134 @@
+---
+/* Artikel.astro — die Artikelseite.
+ *
+ * Was hier drinsteckt und warum (designbrief.md §6):
+ * - semantisches HTML: <article>, <time>, saubere H-Hierarchie
+ * - Schema.org TechArticle + Person (+ FAQPage, wo eine FAQ existiert)
+ * - hreflang ueber das Feld `paar`
+ * - „Als Markdown ansehen" — Rohtext fuer KI-Agenten und Leser, die lieber
+ *   selbst weiterverarbeiten
+ *
+ * Die H1 steht hier und NICHT im MDX. Sonst haette jeder Artikel zwei
+ * Ueberschriften erster Ordnung, sobald jemand die Vorlage vergisst. */
+import Basis from './Basis.astro';
+import { SEITE, texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+import { isoTag, lesezeit } from '../lib/artikel';
+
+interface Props {
+  titel: string;
+  beschreibung: string;
+  datum: Date;
+  aktualisiert?: Date;
+  schlagworte?: string[];
+  sprache: Sprache;
+  autor: string;
+  entwurf?: boolean;
+  faq?: { frage: string; antwort: string }[];
+  rohtext?: string;
+  markdownPfad: string;
+  uebersetzungen?: Partial<Record<Sprache, string>>;
+}
+
+const {
+  titel, beschreibung, datum, aktualisiert, schlagworte = [],
+  sprache, autor, entwurf = false, faq, rohtext, markdownPfad, uebersetzungen,
+} = Astro.props;
+
+const t = texte(sprache);
+const minuten = lesezeit(rohtext);
+const kanonisch = new URL(Astro.url.pathname, Astro.site).href;
+
+const person = {
+  '@type': 'Person',
+  name: autor,
+  description: SEITE.autor.kurzbio,
+};
+
+const schema: Record<string, unknown>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: titel,
+    description: beschreibung,
+    datePublished: datum.toISOString(),
+    ...(aktualisiert ? { dateModified: aktualisiert.toISOString() } : {}),
+    inLanguage: sprache,
+    author: person,
+    publisher: { '@type': 'Organization', name: SEITE.name },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': kanonisch },
+    ...(schlagworte.length ? { keywords: schlagworte.join(', ') } : {}),
+  },
+];
+
+if (faq?.length) {
+  schema.push({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({
+      '@type': 'Question',
+      name: f.frage,
+      acceptedAnswer: { '@type': 'Answer', text: f.antwort },
+    })),
+  });
+}
+---
+
+<Basis
+  titel={titel}
+  beschreibung={beschreibung}
+  sprache={sprache}
+  ogTyp="article"
+  schema={schema.length === 1 ? schema[0] : schema}
+  uebersetzungen={uebersetzungen}
+>
+  <article class="py-lesestrom">
+    <header class="py-artikelkopf">
+      {entwurf && <p><span class="py-entwurf">{t.entwurf}</span></p>}
+      <h1>{titel}</h1>
+      <p class="py-meta">
+        <span class="py-meta__eingabe" aria-hidden="true">$</span>
+        <span>{t.veroeffentlicht}</span>
+        <time datetime={isoTag(datum)}>{isoTag(datum)}</time>
+        <span class="py-meta__punkt" aria-hidden="true">·</span>
+        <span>{minuten} {t.minuten}</span>
+        {aktualisiert && (
+          <>
+            <span class="py-meta__punkt" aria-hidden="true">·</span>
+            <span>{t.aktualisiert} <time datetime={isoTag(aktualisiert)}>{isoTag(aktualisiert)}</time></span>
+          </>
+        )}
+        {schlagworte.length > 0 && (
+          <>
+            <span class="py-meta__punkt" aria-hidden="true">·</span>
+            <span>{schlagworte.map((s) => `#${s}`).join(' ')}</span>
+          </>
+        )}
+        <span class="py-meta__punkt" aria-hidden="true">·</span>
+        <a href={markdownPfad}>{t.alsMarkdown}</a>
+      </p>
+    </header>
+
+    <slot />
+
+    {faq?.length ? (
+      <section aria-labelledby="faq">
+        <h2 id="faq">Fragen</h2>
+        {faq.map((f) => (
+          <>
+            <h3>{f.frage}</h3>
+            <p>{f.antwort}</p>
+          </>
+        ))}
+      </section>
+    ) : null}
+
+    <footer>
+      <hr />
+      <p class="py-meta">
+        <span>{t.autorVon} <strong>{autor}</strong></span>
+      </p>
+      <p class="py-schlagwort">{SEITE.autor.kurzbio}</p>
+    </footer>
+  </article>
+</Basis>

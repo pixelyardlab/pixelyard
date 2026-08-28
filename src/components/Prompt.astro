@@ -1,0 +1,42 @@
+---
+/* <Prompt> — das einzige exklusive Element des Blogs.
+ * editorial.md §4, designbrief.md §4a und §7b.
+ *
+ * EIN Bauteil, nicht zwei: Das frühere „KI-Handover-Snippet" ist dasselbe
+ * hier (designbrief §4a). Zwei Copy-Bloecke pro Artikel driften.
+ *
+ * Die vier Regeln aus editorial.md §4 sind Redaktionsregeln, keine
+ * Code-Regeln — dieses Bauteil kann sie nicht erzwingen. Was es kann:
+ * den Satz aus §7d-1 Punkt 3 sichtbar mitliefern, wenn er faellig ist.
+ *
+ * IMMER sichtbar, nie hinter dem Erklaerungs-Schalter. */
+import { texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+
+interface Props {
+  /** Ersetzt „$ für deine KI kopieren" — z. B. „$ frag deine KI nach dem Index". */
+  titel?: string;
+  /** Setzt „Lade keine Dokumente hoch" darunter. Pflicht bei jedem Prompt
+   *  zu Finanz-, Versicherungs- oder Rechtsthemen (designbrief §7d-1). */
+  keinUpload?: boolean;
+  sprache?: Sprache;
+}
+const { titel, keinUpload = false, sprache = 'de' } = Astro.props;
+const t = texte(sprache);
+---
+
+<div class="py-prompt">
+  <div class="py-prompt__kopf">
+    <span class="py-prompt__marke">{titel ?? t.fuerDeineKI}</span>
+    <button
+      type="button"
+      class="py-prompt__knopf"
+      data-py-kopieren
+      data-py-text={t.kopieren}
+      data-py-fertig={t.kopiert}
+      data-py-fehler={t.kopierenFehlgeschlagen}
+    >{t.kopieren}</button>
+  </div>
+  <div class="py-prompt__text" data-py-quelle><slot /></div>
+  {keinUpload && <p class="py-prompt__hinweis">{t.keinUpload}</p>}
+</div>

@@ -1,0 +1,20 @@
+---
+/* Wortmarke — reine Typo-Marke in Monospace, Unterstrich als Cursor.
+ * Entscheid 28.08.2026, designbrief.md §10 erster offener Punkt.
+ *
+ * Der Cursor ist derselbe Baustein wie der nach der H1 auf der Startseite,
+ * nur kleiner. Er steht in bausteine.css, damit es EINE Animation gibt und
+ * nicht zwei, die auseinanderlaufen. */
+import { SEITE } from '../lib/seite';
+
+interface Props {
+  /** Auf der Startseite selbst ist die Marke kein Link auf sich selbst. */
+  href?: string | null;
+}
+const { href = '/de/' } = Astro.props;
+const Tag = href ? 'a' : 'span';
+---
+
+<Tag class="py-marke" {...href ? { href } : {}}>
+  {SEITE.wortmarke}<span class="py-marke__cursor" aria-hidden="true">_</span>
+</Tag>

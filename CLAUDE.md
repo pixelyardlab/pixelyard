@@ -108,6 +108,8 @@ Eine Anonymisierungsregel gilt **nicht** erst ab ihrer Einführung. **Beim Aufst
 ## Build & Dev
 
 **Astro-Gerüst steht seit 28.08.2026.** Vorlage `examples/minimal`, Astro `7.2.9`.
+**Dazugekommen am 28.08.2026 mit dem Design-System:** `@astrojs/mdx` (die Bauteile stehen
+mitten im Fliesstext, das geht mit reinem Markdown nicht), `@astrojs/sitemap`, `@astrojs/rss`.
 
 ### Was auf dem Mac vorausgesetzt wird — und am 28.08.2026 dort eingerichtet wurde
 
@@ -140,6 +142,35 @@ Der Mac hatte **kein Node**. Das stand in keinem Dokument und ist der Grund, war
 4. Anonymisierungs-`grep` über die vorgemerkten Änderungen → kein Treffer.
 
 ⚠️ **Wiederholen, sobald der Assistent noch einmal über den Ordner läuft** — etwa bei `astro add`. Er kann die `.gitignore` ersetzen.
+
+### Design-System — steht seit 28.08.2026
+
+Aufbau, damit klar ist, wo etwas hingehört:
+
+| Ort | Rolle |
+|---|---|
+| `src/styles/tokens.css` | **Einzige Quelle für Farbwerte.** Ausserhalb dieser Datei steht kein Hex-Wert |
+| `src/styles/schriften.css` | `@font-face`, **erzeugt** — nicht von Hand ändern, s. `public/fonts/HERKUNFT.md` |
+| `src/styles/basis.css` | Grundelemente, Fliesstext, Tabellen, Seitenraster |
+| `src/styles/bausteine.css` | die Bauteile aus `designbrief.md` §4 |
+| `src/components/` | `Erklaerung`, `Prompt`, `TLDR`, `Schalter`, `Wortmarke`, `Kopf`, `Fuss` |
+| `src/lib/seite.ts` | Sprachen, Oberflächentexte, Autorangaben. **Wird beim Push öffentlich** |
+| `src/lib/artikel.ts` | Auswahl über der Sammlung — Liste, RSS, `llms.txt` benutzen dieselbe |
+| `src/scripts/oberflaeche.ts` | die drei Schalter und der Kopieren-Knopf |
+
+⚠️ **Kein `margin`-Kurzschreiben in Bauteilen, die im Lesestrom stehen — nur `margin-block`.**
+Das Kurzschreiben setzt auch die seitlichen Abstände auf `0` und schlägt damit das
+`margin-inline: auto` aus `basis.css`. Der Bau bleibt grün, die Seite steht schief.
+**Am 28.08.2026 genau so passiert** und erst im Screenshot aufgefallen.
+
+⚠️ **`<Erklaerung>`, `<Prompt>` und `<TLDR>` werden dem MDX von der Artikelseite
+übergeben** (`src/pages/[sprache]/artikel/[...slug].astro`), nicht im Artikel importiert.
+Ein Import, den man vergessen kann, wird vergessen.
+
+**Schriftpaarung entschieden am 28.08.2026: IBM Plex Mono + IBM Plex Sans**
+(`designbrief.md` §3, Paarung A) — am Vergleich mit echtem Artikeltext, nicht am Brief.
+Die Vergleichsseite und die drei anderen Familien sind im selben Zug entfernt worden.
+**Es liegen nur noch die Schriften im Repo, die auch ausgeliefert werden** — 212 KB, 12 Dateien.
 
 ### 🔑 `package-lock.json` gehört ins Repo
 
