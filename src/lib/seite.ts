@@ -21,10 +21,45 @@ export const SEITE = {
     kurzbio:
       'Baut ein privates Homelab auf — kein Administrator von Beruf, sondern jemand, ' +
       'der die Entscheidungswege mitschreibt: die Zahlen, die Irrtümer und das, was sie gekostet haben.',
-    /* ⚠️ Kontaktadresse: bewusst noch leer. Sie gehoert zum Entscheid aus
-     * projektstart.md §8 (Impressum, Adresse, Analytics), der aussteht. */
-    kontakt: '',
+    /* Kontaktadresse fuer Impressum und Datenschutzerklaerung. */
+    kontakt: 'cedric@pixelyard.ch',
   },
+
+  /* --- Impressum (Entscheid 28.08.2026) -----------------------------
+   * Die Wohnadresse wird im Impressum genannt — das ist die EINE benannte
+   * Ausnahme von der Anonymisierungsregel (CLAUDE.md). Sie gilt fuer genau
+   * diese Datei und die Impressumsseite, nirgends sonst.
+   *
+   * 🔴 Die Klarwerte stehen bewusst NICHT hier drin. Sie werden von Hand
+   * eingetragen; der Bau bricht ab, solange die Platzhalter stehen —
+   * s. src/pages/[sprache]/impressum.astro.
+   *
+   * Pflichtangaben nach UWG Art. 3 Abs. 1 lit. s: Vor- und Nachname,
+   * Postadresse mit Strasse/PLZ/Ort, E-Mail-Adresse. */
+  impressum: {
+    strasse: 'Wirbelwies 12',
+    ort: '8200 Schaffhausen',
+    land: 'Schweiz',
+  },
+} as const;
+
+/* --- Was die Seite tatsaechlich tut --------------------------------------
+ * Diese Schalter steuern, welche Abschnitte in Impressum und Datenschutz-
+ * erklaerung erscheinen.
+ *
+ * 🔑 Der Punkt: Eine Datenschutzerklaerung, die etwas beschreibt, was gar
+ * nicht passiert, ist genauso falsch wie eine, die etwas verschweigt. Sie
+ * soll den IST-Zustand beschreiben, nicht die Absicht.
+ *
+ * Wer eines davon einschaltet, schaltet damit im selben Zug den zugehoerigen
+ * Abschnitt in beiden Rechtstexten ein. Das ist der ganze Zweck. */
+export const MERKMALE = {
+  /** Cloudflare Web Analytics. Erst ab Schritt 8 moeglich — braucht die Pages-Site. */
+  analytics: false,
+  /** Provisions- und Preisvergleichslinks im Bestand. */
+  affiliate: false,
+  /** Spendenmoeglichkeit („Kaffeekasse"). */
+  kaffeekasse: false,
 } as const;
 
 /* --- Sprachen (designbrief §6a, editorial.md §6) ---------------------
@@ -81,6 +116,9 @@ export const TEXTE = {
     artikel: 'Artikel',
     entwurf: 'Entwurf',
     autorVon: 'Geschrieben von',
+    impressum: 'Impressum',
+    datenschutz: 'Datenschutz',
+    werbung: 'Werbung',
   },
 } as const;
 

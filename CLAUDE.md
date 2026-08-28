@@ -58,7 +58,41 @@ Nie in Artikeln, Code, Commit-Nachrichten, Dateinamen oder Bildern:
 - **Hostnamen**, insbesondere `.local`- und `.arpa`-Namen
 - **VLAN-IDs und Netz-Topologie** — welches Segment was enthält
 - **Serien-, Beleg-, Bestell- und Kundennummern**
-- **Wohnadresse** — auch auf Fotos und Screenshots
+- **Wohnadresse** — auch auf Fotos und Screenshots. ⚠️ **Eine benannte Ausnahme, s. unten**
+
+### ⚠️ Die eine benannte Ausnahme: die Adresse im Impressum
+
+**Entscheid vom 28.08.2026** (`claude/entscheid_impressum_datenschutz.md`): Die Wohnadresse
+wird im **Impressum** genannt, weil der Blog mit Preisvergleichs-Links unter die
+Impressumspflicht nach UWG Art. 3 Abs. 1 lit. s fällt.
+
+**Die Regel oben bleibt im Übrigen vollständig bestehen.** Ausgenommen ist **genau eine
+Datei**: `src/lib/seite.ts`. Überall sonst — Artikel, Code, Commit-Nachrichten,
+Dateinamen, Bilder, Screenshots — gilt die Regel unverändert.
+
+⚠️ **Nicht `src/pages/[sprache]/impressum.astro`.** Die Seite *zeigt* die Adresse, aber sie
+*enthält* sie nicht — sie liest die Werte aus `src/lib/seite.ts`. Wer die Ausnahme auf die
+Impressumsseite setzt, nimmt die falsche Datei aus: Der Abgleich schweigt dort, wo nichts
+steht, und schlägt weiter dort an, wo der Wert wirklich liegt.
+
+> **Warum die Ausnahme so eng gefasst ist:** Das Impressum ist **eine** Stelle,
+> kontrolliert und jederzeit änderbar. Eine Adresse, die in Bildern und Artikeltexten
+> verstreut auftaucht, ist nicht mehr einzusammeln. Der Unterschied ist nicht die
+> Öffentlichkeit des Werts, sondern **ob man ihn zurücknehmen kann**.
+
+### 🔴 Was die Ausnahme am Prüfwerkzeug ändert — der Punkt, der leicht untergeht
+
+Der Abgleich gegen `../pixelyard-klarwerte.md` wird ab jetzt **bei jedem Lauf** einen
+Treffer auf die Adresse melden — in der Impressumsdatei, wo sie hingehört.
+
+⚠️ **Ein Prüfwerkzeug, das bei sauberem Bestand Alarm schlägt, ist kein Test, sondern
+Rauschen** — und es versteckt den echten Treffer. Genau das ist am 28.08.2026 beim
+ersten Klarwerte-Extraktor schon einmal passiert (80 Treffer wie „sondern", „beide").
+
+**Der Abgleich muss die Ausnahme deshalb kennen**, nicht der Mensch, der ihn liest:
+Treffer auf die Adresse werden **nur in `src/lib/seite.ts`** unterdrückt, überall sonst
+bleiben sie Treffer. Ein Ausschluss, der pauschal für das ganze Repo gilt, wäre die
+Abschaffung der Regel und nicht ihre Ausnahme.
 
 **Prüfbar statt vereinbart.** Vor jedem Commit über die vorgemerkten Änderungen:
 
@@ -162,6 +196,18 @@ Aufbau, damit klar ist, wo etwas hingehört:
 Das Kurzschreiben setzt auch die seitlichen Abstände auf `0` und schlägt damit das
 `margin-inline: auto` aus `basis.css`. Der Bau bleibt grün, die Seite steht schief.
 **Am 28.08.2026 genau so passiert** und erst im Screenshot aufgefallen.
+
+⚠️ **Endet eine Zeile in einer `.astro`-Datei mit `</em>`, `</code>`, `</strong>` oder
+`</a>` und geht der Satz in der nächsten Zeile weiter, verschwindet das Leerzeichen.**
+Ergebnis: `Data Privacy Frameworkeinen angemessenen Schutz`. Der Bau bleibt grün.
+Abhilfe: `{' '}` ans Zeilenende. Prüfbar mit
+
+```
+grep -nE "</(em|strong|code|a)>$" src/pages/**/*.astro src/**/*.astro
+```
+
+und dann durchsehen, ob der Satz weitergeht. **Am 28.08.2026 zweimal passiert** — beide
+Male erst im gerenderten Bild aufgefallen, nie im Bau.
 
 ⚠️ **`<Erklaerung>`, `<Prompt>` und `<TLDR>` werden dem MDX von der Artikelseite
 übergeben** (`src/pages/[sprache]/artikel/[...slug].astro`), nicht im Artikel importiert.

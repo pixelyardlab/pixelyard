@@ -1,0 +1,148 @@
+---
+/* Impressum — Pflichtangaben nach UWG Art. 3 Abs. 1 lit. s.
+ *
+ * Warum es diese Seite gibt: Der Blog setzt Preisvergleichs- und
+ * Provisionslinks ein und ist damit ein Angebot im elektronischen
+ * Geschaeftsverkehr. Ein Blog ohne jede Monetarisierung braeuchte sie nicht.
+ * Entscheid und Belege: claude/entscheid_impressum_datenschutz.md.
+ *
+ * 🔴 Die Adresse ist die EINE benannte Ausnahme von der Anonymisierungsregel
+ * (CLAUDE.md). Sie steht hier — und nirgends sonst im Repo. */
+import Basis from '../../layouts/Basis.astro';
+import { SEITE, SPRACHEN, MERKMALE, texte } from '../../lib/seite';
+import type { Sprache } from '../../lib/seite';
+
+export function getStaticPaths() {
+  return SPRACHEN.map((sprache) => ({ params: { sprache } }));
+}
+const sprache = Astro.params.sprache as Sprache;
+const t = texte(sprache);
+
+/* 🔑 Der Bau bricht ab, solange ein Platzhalter steht.
+ *
+ * Eine Warnung im Protokoll haette gereicht, um sie zu uebersehen. Ein
+ * Impressum mit „BITTE EINTRAGEN" ist schlimmer als gar keines: Es sieht
+ * erledigt aus. Im Entwicklungsserver bleibt die Seite erreichbar — dort
+ * steht stattdessen ein Kasten, s. unten.
+ *
+ * Eine Regel, die durchgesetzt ist, schlaegt eine, die vereinbart ist. */
+const felder = {
+  'SEITE.autor.kontakt': SEITE.autor.kontakt,
+  'SEITE.impressum.strasse': SEITE.impressum.strasse,
+  'SEITE.impressum.ort': SEITE.impressum.ort,
+};
+const offen = Object.entries(felder)
+  .filter(([, wert]) => String(wert).startsWith('PLATZHALTER'))
+  .map(([name]) => name);
+
+if (import.meta.env.PROD && offen.length > 0) {
+  throw new Error(
+    `Impressum unvollständig — der Bau wird abgebrochen.\n` +
+      `Noch nicht eingetragen: ${offen.join(', ')}\n` +
+      `Die Werte gehören in src/lib/seite.ts. Sie stehen bewusst nicht im ` +
+      `Repo-Verlauf und wurden nie von Claude eingetragen ` +
+      `(CLAUDE.md, Abschnitt „Was Claude in diesem Repo nicht tut").`,
+  );
+}
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: t.impressum,
+  inLanguage: sprache,
+  url: new URL(Astro.url.pathname, Astro.site).href,
+};
+---
+
+<Basis
+  titel={t.impressum}
+  beschreibung="Verantwortlich für den Inhalt dieser Website."
+  sprache={sprache}
+  schema={schema}
+>
+  <div class="py-lesestrom py-rechtstext">
+    <h1>{t.impressum}</h1>
+
+    {offen.length > 0 && (
+      <div class="py-fehlt">
+        <p class="py-fehlt__marke">Noch nicht eingetragen</p>
+        <p>
+          Diese Seite ist unvollständig:{' '}
+          {offen.map((feld, i) => (
+            <>{i > 0 && ', '}<code>{feld}</code></>
+          ))}. Die Werte gehören in <code>src/lib/seite.ts</code>.
+        </p>
+        <p>
+          <strong>Der Bau bricht damit ab</strong> — <code>npm run build</code>{' '}
+          schlägt fehl, solange ein Platzhalter steht. Nur der Entwicklungsserver
+          zeigt die Seite trotzdem an.
+        </p>
+      </div>
+    )}
+
+    <h2>Verantwortlich für diese Website</h2>
+    <p>
+      {SEITE.autor.name}<br />
+      {SEITE.impressum.strasse}<br />
+      {SEITE.impressum.ort}<br />
+      {SEITE.impressum.land}
+    </p>
+    <p>
+      E-Mail: <a href={`mailto:${SEITE.autor.kontakt}`}>{SEITE.autor.kontakt}</a>
+    </p>
+
+    <h2>Was diese Website ist</h2>
+    <p>
+      Ein privat betriebener Blog über den Aufbau eines Homelabs. Kein Unternehmen,
+      keine Beratung, kein Verkauf. Was hier steht, ist beschrieben, wie es gemacht
+      wurde — nicht empfohlen, wie es zu machen wäre.
+    </p>
+
+    {MERKMALE.affiliate && (
+      <>
+        <h2>Provisionslinks</h2>
+        <p>
+          Einzelne Links auf dieser Website sind Provisionslinks: Wird darüber etwas
+          gekauft, erhalte ich eine Vergütung, ohne dass sich der Preis für dich ändert.
+          <strong> Jeder solche Link ist am Link selbst als Werbung gekennzeichnet</strong> —
+          nicht nur hier.
+        </p>
+        <p>
+          Ein Produkt steht nicht deshalb in einem Artikel, weil es einen Provisionslink
+          gibt. Wo etwas nicht taugte, steht das auch dann, wenn ein Link darauf zeigt.
+        </p>
+      </>
+    )}
+
+    {MERKMALE.kaffeekasse && (
+      <>
+        <h2>Kaffeekasse</h2>
+        <p>
+          Diese Website nimmt freiwillige Zuwendungen entgegen. Sie sind an keine
+          Gegenleistung geknüpft und beeinflussen keinen Inhalt.
+        </p>
+      </>
+    )}
+
+    <h2>Haftung</h2>
+    <p>
+      Die Inhalte werden mit Sorgfalt erstellt und beruhen auf eigenen Messungen. Für
+      Vollständigkeit und Aktualität wird keine Gewähr übernommen. Wer etwas davon
+      nachbaut, tut das auf eigenes Risiko — insbesondere alles, was Strom, Netzwerk
+      oder Daten betrifft.
+    </p>
+    <p>
+      Für Inhalte verlinkter Websites sind deren Betreiber verantwortlich.
+    </p>
+
+    <h2>Urheberrecht</h2>
+    <p>
+      Texte und Bilder auf dieser Website stehen unter meinem Urheberrecht. Zitate mit
+      Quellenangabe sind willkommen. Für die Weiterverwendung ganzer Artikel bitte
+      kurz fragen.
+    </p>
+    <p>
+      <a href={`/${sprache}/datenschutz`}>Zur Datenschutzerklärung</a>
+    </p>
+  </div>
+</Basis>

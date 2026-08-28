@@ -319,3 +319,61 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   padding: 0.15em 0.5em;
   border-radius: var(--py-radius);
 }
+
+/* ====================================================================
+ * Rechtstexte — Impressum und Datenschutzerklärung
+ * ==================================================================== */
+
+/* Sie werden nicht am Stück gelesen, sondern durchsucht: Jemand sucht EINEN
+ * Abschnitt. Deshalb engere Überschriftenabstände als im Artikel und keine
+ * Monospace-H2 in Artikelgrösse — die Seite soll überflogen werden können. */
+.py-rechtstext h2 {
+  font-size: 1.15rem;
+  margin-top: var(--py-r6);
+}
+.py-rechtstext h2 + p { margin-top: 0; }
+.py-rechtstext ul { padding-left: var(--py-r5); }
+
+/* Der Kasten für nicht eingetragene Pflichtangaben.
+ * Camel als Fläche, nicht als Text — 2.28:1 trägt keine Schrift (tokens.css). */
+.py-fehlt {
+  border: 2px solid var(--py-accent);
+  border-radius: var(--py-radius);
+  background: var(--py-surface);
+  padding: var(--py-r4);
+  margin-block: var(--py-r5);
+}
+.py-fehlt__marke {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--py-accent-text);
+  margin: 0 0 var(--py-r2);
+}
+.py-fehlt > :last-child { margin-bottom: 0; }
+
+/* ====================================================================
+ * Werbekennzeichnung am Provisionslink
+ * ==================================================================== */
+
+/* Sie steht DIREKT am Link und nicht in einer Fussnote — das ist die
+ * Empfehlung der Lauterkeitskommission und zugleich der einzige Ort, an dem
+ * sie jemand liest, bevor er klickt.
+ *
+ * Bewusst kein Grau in Grau: Eine Kennzeichnung, die man suchen muss, ist
+ * keine. Deshalb Camel als Rahmen und der dunklere Camel-Ton als Schrift. */
+.py-werbung {
+  display: inline-block;
+  margin-left: 0.35em;
+  padding: 0.05em 0.4em;
+  font-family: var(--py-schrift-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--py-accent-text);
+  border: var(--py-rand) solid var(--py-accent);
+  border-radius: var(--py-radius);
+  vertical-align: 0.1em;
+  white-space: nowrap;
+}

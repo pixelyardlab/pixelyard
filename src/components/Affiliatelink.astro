@@ -1,0 +1,50 @@
+---
+/* <Affiliatelink> — ein Provisionslink, der sich nicht unbemerkt setzen laesst.
+ *
+ * Drei Dinge auf einmal, damit keines davon vergessen werden kann:
+ * 1. sichtbare Kennzeichnung „Werbung" direkt am Link — nicht am Seitenende
+ *    und nicht in einer Fussnote (Empfehlung der Lauterkeitskommission)
+ * 2. rel="sponsored nofollow" — Googles Vorgabe fuer bezahlte Links. Fehlt sie,
+ *    ist es aus Suchmaschinensicht Linkkauf
+ * 3. 🔑 der Bau bricht ab, wenn MERKMALE.affiliate nicht eingeschaltet ist
+ *
+ * Zu Punkt 3, und das ist der eigentliche Zweck dieser Komponente:
+ * Ein Provisionslink im Artikel und der Abschnitt „Provisionslinks" in
+ * Impressum und Datenschutzerklaerung haengen an DERSELBEN Schaltung. Sie
+ * koennen nicht auseinanderlaufen. Der erste Provisionslink schaltet die
+ * Rechtstexte mit — oder er wird gar nicht erst gebaut.
+ *
+ * In der Schweiz ist die fehlende Kennzeichnung uebrigens NICHT sanktionierbar
+ * (UWG Art. 2, Lauterkeitskommission ohne Zwangsmittel). Sie steht hier
+ * trotzdem als Pflicht: Der Blog verkauft Glaubwuerdigkeit, und ein
+ * verschwiegener Provisionslink ist der billigste Weg, sie zu verbrennen.
+ * Die Marke ist hier strenger als das Gesetz. */
+import { MERKMALE, texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+
+interface Props {
+  href: string;
+  /** Haendler oder Plattform, z. B. „digitec". Erscheint im Titel des Links. */
+  anbieter?: string;
+  sprache?: Sprache;
+}
+const { href, anbieter, sprache = 'de' } = Astro.props;
+const t = texte(sprache);
+
+if (!MERKMALE.affiliate) {
+  throw new Error(
+    `<Affiliatelink> benutzt, aber MERKMALE.affiliate ist false (src/lib/seite.ts).\n` +
+      `Betroffener Link: ${href}\n\n` +
+      `Der Schalter steuert zugleich die Abschnitte „Provisionslinks" in Impressum ` +
+      `und Datenschutzerklärung. Bliebe er aus, stünde ein Provisionslink im Artikel, ` +
+      `während beide Rechtstexte das Gegenteil behaupten.`,
+  );
+}
+---
+
+<a
+  href={href}
+  rel="sponsored nofollow noopener"
+  target="_blank"
+  title={anbieter ? `Provisionslink zu ${anbieter}` : 'Provisionslink'}
+><slot /></a><span class="py-werbung">{t.werbung}</span>

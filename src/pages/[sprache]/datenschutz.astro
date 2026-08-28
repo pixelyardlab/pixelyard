@@ -1,0 +1,212 @@
+---
+/* Datenschutzerklaerung — Informationspflicht nach Art. 19 DSG.
+ *
+ * Sie ist auch ohne Analytics und ohne Cookies faellig: Die Serverlogs des
+ * Hosters enthalten IP-Adressen, und das ist Bearbeitung von Personendaten.
+ *
+ * 🔑 Die Abschnitte haengen an MERKMALE in src/lib/seite.ts. Was nicht
+ * eingeschaltet ist, wird auch nicht beschrieben. Eine Datenschutzerklaerung,
+ * die etwas behauptet, was gar nicht passiert, ist genauso falsch wie eine,
+ * die etwas verschweigt.
+ *
+ * Belege und Quellen: claude/entscheid_impressum_datenschutz.md */
+import Basis from '../../layouts/Basis.astro';
+import { SEITE, SPRACHEN, MERKMALE, texte } from '../../lib/seite';
+import type { Sprache } from '../../lib/seite';
+
+export function getStaticPaths() {
+  return SPRACHEN.map((sprache) => ({ params: { sprache } }));
+}
+const sprache = Astro.params.sprache as Sprache;
+const t = texte(sprache);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: t.datenschutz,
+  inLanguage: sprache,
+  url: new URL(Astro.url.pathname, Astro.site).href,
+};
+---
+
+<Basis
+  titel={t.datenschutz}
+  beschreibung="Welche Daten beim Besuch dieser Website anfallen, wer sie erhält und wie lange."
+  sprache={sprache}
+  schema={schema}
+>
+  <div class="py-lesestrom py-rechtstext">
+    <h1>{t.datenschutz}</h1>
+
+    <p class="py-meta">
+      <span class="py-meta__eingabe" aria-hidden="true">$</span>
+      <span>Stand: 28. August 2026</span>
+    </p>
+
+    <h2>Kurz gesagt</h2>
+    <p>
+      Diese Website ist statisch. Sie setzt <strong>keine Cookies</strong>, bindet
+      keine Schriften, Karten oder Videos von Dritten ein und hat
+      {MERKMALE.analytics ? ' eine cookielose Reichweitenmessung' : ' keine Reichweitenmessung'}.
+      Was trotzdem anfällt, sind die Zugriffsprotokolle des Hosters — und darum geht
+      es im Wesentlichen auf dieser Seite.
+    </p>
+
+    <h2>Verantwortlich</h2>
+    <p>
+      {SEITE.autor.name}<br />
+      E-Mail: <a href={`mailto:${SEITE.autor.kontakt}`}>{SEITE.autor.kontakt}</a>
+    </p>
+    <p>
+      Die vollständige Anschrift steht im <a href={`/${sprache}/impressum`}>Impressum</a>.
+    </p>
+
+    <h2>Was beim Aufruf der Website anfällt</h2>
+    <p>
+      Diese Website wird über <strong>Cloudflare Pages</strong> ausgeliefert, einen Dienst
+      der Cloudflare, Inc. mit Sitz in den USA. Beim Aufruf einer Seite fallen dort
+      technisch bedingt Zugriffsdaten an, insbesondere:
+    </p>
+    <ul>
+      <li>IP-Adresse des anfragenden Geräts</li>
+      <li>Datum und Uhrzeit des Zugriffs, abgerufene Adresse</li>
+      <li>technische Angaben zur Verbindung und zur Konfiguration des Systems</li>
+    </ul>
+    <p>
+      <strong>Zweck:</strong> die Auslieferung der Seite, die Abwehr von Angriffen und
+      Überlastung, sowie die Betriebssicherheit. Diese Daten werden nicht mit anderen
+      Quellen zusammengeführt und nicht ausgewertet, um einzelne Personen zu erkennen.
+    </p>
+    <p>
+      <strong>Aufbewahrungsdauer:</strong> Cloudflare nennt in seiner Datenschutzerklärung
+      <em> keine feste Frist</em>, sondern nur einen Zeitraum, der „mit den geschäftlichen
+      Zwecken vereinbar" sei. <strong>Eine genauere Angabe wäre an dieser Stelle erfunden,
+      und deshalb steht hier keine.</strong>
+    </p>
+
+    <h2>Bekanntgabe in die USA</h2>
+    <p>
+      Mit der Auslieferung über Cloudflare gelangen die oben genannten Daten in die
+      Vereinigten Staaten. Der Schweizer Bundesrat hat am 14. August 2024 entschieden,
+      dass zertifizierte US-Unternehmen unter dem <em>Swiss–U.S. Data Privacy Framework</em>{' '}
+      einen angemessenen Datenschutz bieten; die Regelung gilt seit dem 15. September 2024.
+    </p>
+    <p>
+      Cloudflare erklärt, gegenüber dem US-Handelsministerium sowohl die Grundsätze des
+      EU–U.S. als auch des Swiss–U.S. Data Privacy Framework anerkannt zu haben. Die
+      Übermittlung stützt sich damit auf diese Anerkennung und benötigt keine zusätzlichen
+      Garantien nach Art. 16 Abs. 2 DSG.
+    </p>
+
+    {MERKMALE.analytics ? (
+      <>
+        <h2>Reichweitenmessung</h2>
+        <p>
+          Diese Website verwendet <strong>Cloudflare Web Analytics</strong>. Der Dienst
+          arbeitet nach Angaben des Anbieters <strong>ohne Cookies und ohne
+          Fingerprinting</strong>; ein Besuch wird anhand der Herkunft der Anfrage gezählt,
+          nicht anhand eines wiedererkennbaren Merkmals. Es entstehen keine Profile, und
+          es wird nicht verfolgt, wohin jemand die Seite verlässt.
+        </p>
+        <p>
+          Cloudflare ist als Betreiber dieser Website ohnehin beteiligt — die Messung
+          bringt also <strong>keinen zusätzlichen Empfänger</strong> ins Spiel. Genau
+          deshalb ist sie gewählt worden.
+        </p>
+      </>
+    ) : (
+      <>
+        <h2>Keine Reichweitenmessung</h2>
+        <p>
+          Diese Website misst nicht, wer sie liest. Es sind keine Analysedienste
+          eingebunden, weder eigene noch fremde. <strong>Das ist ein Entscheid und kein
+          Versäumnis</strong> — er bedeutet, dass über die Zugriffsprotokolle des Hosters
+          hinaus keine Daten anfallen.
+        </p>
+      </>
+    )}
+
+    <h2>Keine Cookies, kein Banner</h2>
+    <p>
+      Es werden keine Cookies gesetzt. Die drei Einstellungen im Seitenkopf — Farbschema,
+      Erklärungen und Sprache — werden ausschliesslich <strong>im Speicher deines
+      Browsers</strong> abgelegt (<code>localStorage</code>). Diese Angaben verlassen dein
+      Gerät nicht, erreichen weder mich noch Cloudflare und lassen sich über die
+      Einstellungen des Browsers jederzeit löschen.
+    </p>
+
+    <h2>Keine eingebetteten Inhalte von Dritten</h2>
+    <p>
+      Schriften liegen auf dem eigenen Server, nicht bei einem Schriftdienst. Es sind
+      keine Karten, Videos, Kommentarsysteme, sozialen Schaltflächen oder Werbenetzwerke
+      eingebunden. Beim Lesen eines Artikels wird also keine Verbindung zu einem weiteren
+      Anbieter aufgebaut.
+    </p>
+
+    <h2>Der Kopieren-Knopf</h2>
+    <p>
+      Artikel enthalten Textbausteine, die sich mit einem Knopf in die Zwischenablage
+      kopieren lassen. Das geschieht vollständig im Browser. <strong>Es wird nicht
+      übermittelt, ob, wann oder was jemand kopiert.</strong> Was du anschliessend mit
+      dem Text tust — etwa ihn in einen KI-Assistenten einfügen — unterliegt der
+      Datenschutzerklärung des dortigen Anbieters, nicht dieser.
+    </p>
+
+    {MERKMALE.affiliate && (
+      <>
+        <h2>Provisionslinks</h2>
+        <p>
+          Einzelne Links führen zu Angeboten Dritter und sind mit einer Kennung versehen,
+          über die ein Kauf mir zugerechnet wird. <strong>Mit dem Klick verlässt du diese
+          Website</strong>; ab dann gilt die Datenschutzerklärung des Zielanbieters. Jeder
+          solche Link ist als Werbung gekennzeichnet.
+        </p>
+      </>
+    )}
+
+    {MERKMALE.kaffeekasse && (
+      <>
+        <h2>Kaffeekasse</h2>
+        <p>
+          Für freiwillige Zuwendungen ist ein Zahlungsdienst verlinkt. Die Zahlung wird
+          dort abgewickelt; ich erhalte von diesem Dienst die Angaben, die zur Zuordnung
+          der Zahlung nötig sind. Es besteht keine Verpflichtung, dieses Angebot zu nutzen.
+        </p>
+      </>
+    )}
+
+    <h2>Wenn du mir schreibst</h2>
+    <p>
+      Schreibst du mir eine E-Mail, verarbeite ich die Angaben, die in der Nachricht
+      stehen — Absenderadresse, Inhalt und was du sonst mitteilst — um sie zu beantworten.
+      Ich bewahre solche Nachrichten so lange auf, wie es der Zusammenhang erfordert.
+    </p>
+
+    <h2>Deine Rechte</h2>
+    <p>
+      Nach dem Schweizer Datenschutzgesetz kannst du Auskunft darüber verlangen, ob und
+      welche Personendaten über dich bearbeitet werden. Du kannst die Berichtigung
+      unrichtiger Daten und, unter den gesetzlichen Voraussetzungen, deren Löschung
+      verlangen sowie einer Bearbeitung widersprechen.
+    </p>
+    <p>
+      Für eine Anfrage genügt eine E-Mail an{' '}
+      <a href={`mailto:${SEITE.autor.kontakt}`}>{SEITE.autor.kontakt}</a>. Zu den
+      Zugriffsprotokollen ist eine Auskunft praktisch nur möglich, wenn du den Zeitpunkt
+      und die verwendete IP-Adresse nennst — sonst lässt sich der Eintrag nicht finden.
+    </p>
+    <p>
+      Zuständige Aufsichtsbehörde in der Schweiz ist der Eidgenössische Datenschutz- und
+      Öffentlichkeitsbeauftragte (EDÖB).
+    </p>
+
+    <h2>Änderungen</h2>
+    <p>
+      Ändert sich etwas an dieser Website, das hier beschrieben ist, wird diese Erklärung
+      angepasst. Das Datum oben nennt den Stand.
+    </p>
+    <p>
+      <a href={`/${sprache}/impressum`}>Zum Impressum</a>
+    </p>
+  </div>
+</Basis>

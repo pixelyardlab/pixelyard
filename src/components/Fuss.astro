@@ -1,18 +1,20 @@
 ---
-import { SEITE } from '../lib/seite';
+import { SEITE, texte } from '../lib/seite';
 import type { Sprache } from '../lib/seite';
 
 interface Props { sprache: Sprache }
 const { sprache } = Astro.props;
+const t = texte(sprache);
 const jahr = new Date().getFullYear();
 ---
 
 <footer class="py-fuss">
   <div class="py-huelle">
     <ul>
-      {/* ⚠️ Impressum und Datenschutz sind Schritt 5 (projektstart.md §6) und
-          haengen am §8-Entscheid. Die Links stehen hier bewusst NICHT als
-          tote Platzhalter — was fehlt, soll fehlen und nicht erledigt aussehen. */}
+      {/* Impressum und Datenschutz seit 28.08.2026 — Entscheid aus
+          claude/entscheid_impressum_datenschutz.md. */}
+      <li><a href={`/${sprache}/impressum`}>{t.impressum}</a></li>
+      <li><a href={`/${sprache}/datenschutz`}>{t.datenschutz}</a></li>
       <li><a href="/rss.xml">RSS</a></li>
       <li><a href="/llms.txt">llms.txt</a></li>
       <li><a href={`/${sprache}/design`}>Design-System</a></li>
