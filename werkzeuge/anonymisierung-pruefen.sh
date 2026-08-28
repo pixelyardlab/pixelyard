@@ -52,19 +52,48 @@ AUSNAHME="src/lib/seite.ts"   # die eine erlaubte Fundstelle, s. CLAUDE.md
 BEFUNDE=0
 
 sucheliste() {   # $1 = Datei mit Suchbegriffen, $2 = Beschriftung
-  local liste="$1" was="$2" treffer
+  local liste="$1" was="$2" treffer hinweise kurz
   [ -s "$liste" ] || { printf '  %-34s keine Suchbegriffe gefunden\n' "$was"; return; }
-  treffer=$(grep -rnF -f "$liste" . \
+
+  # 🔴 Gesucht wird an WORTGRENZEN (-w), nicht als Buchstabenfolge.
+  #
+  # Am 28.08.2026 stand ein kurzer Vorname in der Werteliste — und steckte in
+  # „Kanonische". Eine Teilstring-Suche meldet solche Zufälle als Fund. Ein
+  # Werkzeug, das viel Belangloses meldet, wird nicht schärfer, sondern
+  # ignoriert, und dann versteckt es den echten Treffer.
+  treffer=$(grep -rnwF -f "$liste" . \
       --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist \
       --exclude-dir=.astro --exclude-dir=werkzeuge 2>/dev/null \
-    | grep -v "^\./$AUSNAHME:" \
-    | cut -d: -f1,2)
+    | grep -v "^\./$AUSNAHME:" | cut -d: -f1,2)
+
+  # Teilwort-Vorkommen gehen NICHT verloren — sie erscheinen als Hinweis,
+  # nicht als Befund. Verschweigen wäre die andere Hälfte desselben Fehlers.
+  hinweise=$(grep -rnF -f "$liste" . \
+      --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist \
+      --exclude-dir=.astro --exclude-dir=werkzeuge 2>/dev/null \
+    | grep -v "^\./$AUSNAHME:" | cut -d: -f1,2 \
+    | grep -vxF "$treffer" 2>/dev/null)
+
   if [ -z "$treffer" ]; then
     printf '  %-34s sauber (%s Begriffe geprüft)\n' "$was" "$(wc -l < "$liste" | tr -d ' ')"
   else
     printf '  %-34s 🔴 FUNDSTELLEN:\n' "$was"
     printf '%s\n' "$treffer" | sed 's/^/      /'
     BEFUNDE=$((BEFUNDE + 1))
+  fi
+
+  if [ -n "$hinweise" ]; then
+    echo "     ℹ️  Zusätzlich als Teil längerer Wörter gefunden — meist Zufall,"
+    echo "        gilt nicht als Befund. Einmal ansehen, dann vergessen:"
+    printf '%s\n' "$hinweise" | sed 's/^/        /'
+  fi
+
+  # Sehr kurze Begriffe sind auch mit Wortgrenzen unzuverlässig.
+  kurz=$(awk 'length($0) < 4' "$liste")
+  if [ -n "$kurz" ]; then
+    echo "     ⚠️  $(printf '%s\n' "$kurz" | wc -l | tr -d ' ') Begriff(e) im Block sind kürzer als"
+    echo "        vier Zeichen. Solche Werte melden Zufälle statt Funde — besser in der"
+    echo "        Form eintragen, in der sie tatsächlich in einem Artikel stünden."
   fi
 }
 
