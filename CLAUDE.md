@@ -192,7 +192,7 @@ Aufbau, damit klar ist, wo etwas hingehört:
 | `src/styles/schriften.css` | `@font-face`, **erzeugt** — nicht von Hand ändern, s. `public/fonts/HERKUNFT.md` |
 | `src/styles/basis.css` | Grundelemente, Fliesstext, Tabellen, Seitenraster |
 | `src/styles/bausteine.css` | die Bauteile aus `designbrief.md` §4 |
-| `src/components/` | `Erklaerung`, `Prompt`, `TLDR`, `Schalter`, `Wortmarke`, `Kopf`, `Fuss` |
+| `src/components/` | `Erklaerung`, `Prompt`, `TLDR`, `Affiliatelink`, `Schalter`, `Wortmarke`, `Kopf`, `Fuss` |
 | `src/lib/seite.ts` | Sprachen, Oberflächentexte, Autorangaben. **Wird beim Push öffentlich** |
 | `src/lib/artikel.ts` | Auswahl über der Sammlung — Liste, RSS, `llms.txt` benutzen dieselbe |
 | `src/scripts/oberflaeche.ts` | die drei Schalter und der Kopieren-Knopf |
@@ -217,6 +217,13 @@ Male erst im gerenderten Bild aufgefallen, nie im Bau.
 ⚠️ **`<Erklaerung>`, `<Prompt>` und `<TLDR>` werden dem MDX von der Artikelseite
 übergeben** (`src/pages/[sprache]/artikel/[...slug].astro`), nicht im Artikel importiert.
 Ein Import, den man vergessen kann, wird vergessen.
+
+🔑 **`<Affiliatelink>` nur, wenn Geld fliesst.** Ein Produkt- oder Shop-Link wird genau
+dann als Bauteil gesetzt, wenn er eine Provisionskennung trägt und daraus eine Vergütung
+entsteht. Jeder andere externe Link — auch der auf einen Händlerblog oder eine
+Produktseite — bleibt gewöhnlicher Markdown-Link. Die Kennzeichnung „Werbung" ist sonst
+selbst eine Falschangabe, und `MERKMALE.affiliate` schaltet Abschnitte in Impressum und
+Datenschutzerklärung mit, die dann etwas behaupten, was nicht stattfindet.
 
 **Schriftpaarung entschieden am 28.08.2026: IBM Plex Mono + IBM Plex Sans**
 (`designbrief.md` §3, Paarung A) — am Vergleich mit echtem Artikeltext, nicht am Brief.

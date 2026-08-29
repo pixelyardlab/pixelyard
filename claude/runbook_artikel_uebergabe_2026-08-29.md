@@ -46,7 +46,7 @@ Nicht vorhanden: `title`, `description`, `pubDate`, `tags`, `draft`.
 
 `<TLDR>`, `<Erklaerung>`, `<Prompt>`, `<Affiliatelink>` — keine Import-Zeilen in der `.mdx`; `src/pages/[sprache]/artikel/[...slug].astro` reicht sie über `components={bausteine}` durch. Markdown im Inneren wird gerendert. `<TLDR>` als erstes Element.
 
-⚠️ Nebenbefund: `Affiliatelink` fehlt in der Bauteil-Tabelle der `CLAUDE.md`. Nachzutragen.
+🔑 `<Affiliatelink>` nur, wenn Geld fliesst: Der Link trägt eine Provisionskennung und bringt eine Vergütung. Jeder andere externe Link — Händlerblog, Produktseite, Beleg — bleibt gewöhnlicher Markdown-Link. Die Kennzeichnung „Werbung" wäre sonst selbst falsch.
 
 ---
 
