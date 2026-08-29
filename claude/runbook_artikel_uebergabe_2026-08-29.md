@@ -121,8 +121,8 @@ Die dritte Zeile gehört dazu: Seit `a2ee9a9` (Soft-404 behoben, `404.astro`) li
 |---|---|---|
 | `--py-line` gegen `--py-surface` 1.31 / 1.46, gegen `--py-bg` 1.46 / 1.87 | **`--py-line` nur auf `--py-bg`, nur als Zierlinie.** Vier Stellen auf `--py-surface` umgestellt auf `--py-text-leise`. Regel als vierte gemessene Korrektur in `tokens.css` | `70f115a` |
 | Camel-Rahmen `.py-tldr`, `.py-fehlt` auf `--py-surface`: hell 2.04 | `--py-accent-text` (5.69 / 6.35), bleibt Camel, dunkel identischer Wert | `929c8c3` |
-| `.py-werbung` Camel auf `--py-bg`: hell 2.28 | Beheben — Kennzeichnung muss lesbar sein | offen |
-| `.py-erklaerung` 3px-Balken Camel auf `--py-bg` | bleibt, reine Zier | — |
+| `.py-werbung` Rahmen Camel: hell 2.28 auf `--py-bg`, **2.04 auf `--py-surface`** — das Abzeichen hat keinen eigenen Hintergrund und kann auf beiden landen | `--py-accent-text` (6.34 / 5.69), dunkel unverändert. Die Schrift war schon lesbar, nur der Rahmen nicht. Wirkt erst beim ersten Provisionslink (`MERKMALE.affiliate` ist `false`) | `90c8750` |
+| `.py-erklaerung` 3px-Balken Camel auf `--py-bg` | bleibt, reine Zier — der einzige verbliebene `--py-accent`-Rahmen im Stylesheet | — |
 | Soft-404: jeder unbekannte Pfad lieferte 200 | `404.astro`, Pages antwortet 404 | `a2ee9a9` |
 | Prüfstück `mustertext-design-system.mdx` | entfernt, bleibt in der Historie, enthielt nie Klarwerte | `92b7688` |
 
@@ -130,7 +130,6 @@ Die dritte Zeile gehört dazu: Seit `a2ee9a9` (Soft-404 behoben, `404.astro`) li
 
 ## 9. Offen
 
-- `.py-werbung` Kontrast (§8)
 - Zeitmessung `editorial.md` §7 — der zweite Artikel war der erste Messpunkt, nicht gemessen
 - Keine Serien-Nummerierung auf der Seite; falls gewünscht, Schemafeld `serie`/`teil` als eigener Entscheid
 - Dieses Runbook liegt in v1 im Repo (`b8fb13f`); v2 nachziehen
