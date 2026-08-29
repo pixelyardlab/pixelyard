@@ -81,7 +81,7 @@ code, kbd, samp {
 /* Inline-Tags fuer Hardware und Befehle */
 :not(pre) > code {
   background: var(--py-surface);
-  border: var(--py-rand) solid var(--py-line);
+  border: var(--py-rand) solid var(--py-text-leise);
   border-radius: var(--py-radius);
   padding: 0.1em 0.35em;
   overflow-wrap: break-word;
@@ -146,7 +146,7 @@ img, svg, video { max-width: 100%; height: auto; }
 
 figure { margin-inline: 0; }
 figure img, figure svg {
-  border: var(--py-rand) solid var(--py-line);
+  border: var(--py-rand) solid var(--py-text-leise);
   border-radius: var(--py-radius);
   background: var(--py-surface);
   display: block;
@@ -192,7 +192,7 @@ figcaption {
   top: var(--py-r2);
   background: var(--py-surface);
   color: var(--py-text);
-  border: var(--py-rand) solid var(--py-line);
+  border: var(--py-rand) solid var(--py-text-leise);
   padding: var(--py-r2) var(--py-r3);
   font-family: var(--py-schrift-mono);
   font-size: 0.875rem;

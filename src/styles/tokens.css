@@ -21,6 +21,23 @@
   --py-accent:        #C19A6B;   /* Camel — NUR Flaeche und Rahmen, s. unten */
   --py-line:          #CFC8B8;
 
+  /* 🔴 Vierte gemessene Korrektur, 29.08.2026 — eine REGEL, kein neuer Wert:
+   * --py-line gehoert auf --py-bg und NUR dorthin. Gegen --py-surface misst es
+   * 1.31:1 im Hellmodus und 1.46:1 im Dunkelmodus; gegen --py-bg 1.46 und 1.87.
+   * Fuer ein grafisches Objekt verlangt WCAG 3:1 — auf der Flaeche verschwindet
+   * die Linie also, auf der Seite traegt sie knapp.
+   *
+   * Auf --py-surface wird deshalb --py-text-leise gerahmt (5.77 hell / 5.94
+   * dunkel). Betroffen waren vier Stellen: :not(pre) > code, figure img/svg,
+   * .py-sprung und eine Linie im Pruefstueck-SVG.
+   *
+   * Aufgefallen ist es an einem Diagramm, dessen Kaesten im Dunkelmodus blass
+   * wurden. Hell war es genauso falsch — nur sah man es dort nicht.
+   *
+   * ⚠️ Offen und bewusst nicht miterledigt: .py-tldr und .py-fehlt liegen
+   * ebenfalls auf --py-surface und rahmen mit --py-accent. Das misst 2.04:1 im
+   * Hellmodus, dieselbe Klasse Fehler mit anderer Farbe. Eigener Entscheid. */
+
   /* 🔴 Gemessene Korrektur, designbrief §2 hat sie als Frage offengelassen:
    * Camel #C19A6B auf Creme #F4F0E6 ergibt 2.28:1. Das reicht weder fuer Text
    * (4.5:1) noch fuer Bedienelemente (3:1). Camel bleibt Rahmen und Flaeche;
