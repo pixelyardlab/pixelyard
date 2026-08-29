@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import rehypeExternalLinks from 'rehype-external-links';
 
 /* Eigenes Farbschema fuer Code-Bloecke.
  *
@@ -79,5 +80,23 @@ export default defineConfig({
 	// Modus folgt; die Schriftfarben oben halten gegen beide Werte.
 	markdown: {
 		shikiConfig: { theme: terminalFarben },
+
+		// 🔑 Externe Links oeffnen in einem neuen Fenster — Entscheid vom
+		// 29.08.2026. `rel="noopener"` gehoert zwingend dazu: ohne es bekommt
+		// die Zielseite ueber `window.opener` Zugriff auf diese hier.
+		//
+		// Das Plugin unterscheidet nach PROTOKOLL, nicht gegen `site`: Es fasst
+		// Links mit absolutem http/https-Ziel an. Interne Links stehen im Blog
+		// als relative Pfade (/de/...) und bleiben deshalb unberuehrt —
+		// nachgeprueft im Bau, nicht angenommen.
+		//
+		// ⚠️ Folge davon: Wer einen INTERNEN Link ausnahmsweise absolut
+		// schreibt (https://www.pixelyard.ch/...), bekommt target="_blank"
+		// mit. Interne Ziele deshalb immer relativ schreiben.
+		//
+		// Wirkt nur auf Markdown und MDX. `<Affiliatelink>` bringt target und
+		// rel selbst mit (rel="sponsored nofollow noopener") und liegt als
+		// Komponente ausserhalb dieses Baums — das Plugin sieht ihn nicht.
+		rehypePlugins: [[rehypeExternalLinks, { target: '_blank', rel: ['noopener'] }]],
 	},
 });
