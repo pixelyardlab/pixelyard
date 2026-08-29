@@ -56,7 +56,12 @@ Nie in Artikeln, Code, Commit-Nachrichten, Dateinamen oder Bildern:
 - **IP-Adressen** jeder Art
 - **MAC-Adressen**
 - **Hostnamen**, insbesondere `.local`- und `.arpa`-Namen
-- **VLAN-IDs und Netz-Topologie** — welches Segment was enthält
+- **VLAN-IDs** jeder Art
+- **Netz-Topologie im Konkreten** — welche **Geräte, Namen oder Adressen** in welchem
+  Segment liegen. ⚠️ **Nicht** die Zonenstruktur als solche: Segmente und
+  Gerätegattungen ohne Werte („Familie", „Server", „Firmenlaptop") sind erlaubt und
+  ausdrücklich Inhalt des Blogs — `designbrief.md` §5a. Verboten ist die Verengung auf
+  das *Wo*, nicht die Struktur, die das *Was* erklärt.
 - **Serien-, Beleg-, Bestell- und Kundennummern**
 - **Wohnadresse** — auch auf Fotos und Screenshots. ⚠️ **Eine benannte Ausnahme, s. unten**
 
