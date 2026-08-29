@@ -1,6 +1,6 @@
 # Runbook: Artikel vom Homelab-Projekt ins Repo
 
-**29.08.2026, v2** · Gilt für jeden Beitrag. v1 entstand vor dem ersten Durchlauf; v2 trägt nach, was der Durchlauf mit „Mein Weg ins Homelab" gezeigt hat. Alle Werte in §2, §4, §5 und §8 sind **gelesen oder gemessen** (Claude Code, 29.08.), nicht aus dem Gedächtnis.
+**29.08.2026, v2.1** · Im Repo als `claude/runbook_artikel_uebergabe_2026-08-29.md` (`1b31388`, `96d9712`). Das Dokument gehört dem Pixelyard-Projekt; Claude Code meldet Abweichungen, ändert sie nicht. · Gilt für jeden Beitrag. v1 entstand vor dem ersten Durchlauf; v2 trägt nach, was der Durchlauf mit „Mein Weg ins Homelab" gezeigt hat. Alle Werte in §2, §4, §5 und §8 sind **gelesen oder gemessen** (Claude Code, 29.08.), nicht aus dem Gedächtnis.
 
 ---
 
@@ -130,6 +130,7 @@ Die dritte Zeile gehört dazu: Seit `a2ee9a9` (Soft-404 behoben, `404.astro`) li
 
 ## 9. Offen
 
+- **Kopfzeile fixieren** (Wunsch 29.08.): Die Schalterzeile soll beim Lesen stehen bleiben, damit „Erklärungen ein/aus" ohne Scrollen erreichbar ist. Zu entscheiden: nur die Schalterzeile oder der ganze Kopf; was sie auf einem Handy an Höhe kostet; Kontrast der fixierten Zeile über Fliesstext, Kasten und Terminal-Block (drei Hintergründe, gerechnet, nicht geschätzt). Adressat Claude Code, Vorschlag mit Screenshots hell/dunkel, Desktop und Handy, vor dem Commit.
+
 - Zeitmessung `editorial.md` §7 — der zweite Artikel war der erste Messpunkt, nicht gemessen
 - Keine Serien-Nummerierung auf der Seite; falls gewünscht, Schemafeld `serie`/`teil` als eigener Entscheid
-- Dieses Runbook liegt in v1 im Repo (`b8fb13f`); v2 nachziehen
