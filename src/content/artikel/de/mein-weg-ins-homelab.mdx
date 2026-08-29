@@ -1,0 +1,362 @@
+---
+titel: "Mein Weg ins Homelab – und warum daraus Pixelyard wurde"
+beschreibung: "Vier Dinge kamen in einem Sommer zusammen: veraltete Netzwerkhardware, Glasfaser vor der Tür, ein Händlerblog und ein KI-Assistent, der mitdenkt. Wie daraus ein Projekt wurde – und ein Blog."
+datum: 2026-08-29
+schlagworte: ["homelab", "start", "local-first", "schweiz"]
+sprache: de
+paar: mein-weg-ins-homelab
+entwurf: true
+faq:
+  - frage: "Braucht man Profi-Hardware, um zu Hause Netze zu trennen?"
+    antwort: "Man braucht Hardware, die VLANs und eine Zonen-Firewall beherrscht. Das ist nicht teuer, aber in typischen Heimroutern selten. Der Unterschied liegt weniger im Preis als in der Frage, ob das Gerät mehrere logische Netze überhaupt kennt."
+  - frage: "Warum das Netz vor dem Speicher aufbauen?"
+    antwort: "Weil jeder Dienst, der später auf der NAS läuft, eine Zone braucht, in die er gehört. Wer mit Fotos oder Dokumenten anfängt und die Zonen nachträglich einzieht, muss jedes Gerät ein zweites Mal anfassen."
+---
+
+<TLDR>
+Ein Jahrzehnt lang lief zu Hause ein Netz für alles – bis WLAN, Fotos und Firmenlaptop gleichzeitig an ihre Grenzen kamen. Glasfaser vor der Tür, ein Händlerblog und ein KI-Assistent, der Entscheidungen dokumentiert, öffneten ein Zeitfenster. Dieser Beitrag erzählt, wie daraus ein Homelab mit fünf getrennten Zonen wurde, und nach welchen drei Regeln dieser Blog darüber schreibt.
+</TLDR>
+
+## Ein Netz für alles, und alles war müde
+
+Im Untergeschoss stand seit über zehn Jahren dieselbe Kiste: eine Synology DS212j, zwei Festplatten, ein Netz. Daneben ein UniFi-Setup der ersten Generation – Cloud Key Gen 1, ein US-8-150W-Switch und drei Mesh-Access-Points, die sich das Haus über Funk teilten. Das lief. Es lief so zuverlässig, dass ich jahrelang keinen Grund hatte, etwas anzufassen.
+
+<Erklaerung>
+Eine NAS (Network Attached Storage) ist ein kleiner Server mit Festplatten, der im Heimnetz Dateien für alle Geräte bereitstellt. Die DS212j war 2012 ein Einsteigermodell mit zwei Schächten. Mesh-Access-Points verbinden sich untereinander über Funk statt Kabel – bequem zu installieren, aber jeder Funk-Sprung kostet Bandbreite.
+</Erklaerung>
+
+Genau das war das Problem. Das WLAN riss im Obergeschoss ab, sobald zwei Personen gleichzeitig ein Video schauten. Die Fotos meiner Partnerin lagen auf drei Laptop-Generationen, einer externen Festplatte und einem Handy – nirgends vollständig, nirgends gesichert. Die Kinder hatten Geräte, die ich nicht mehr auseinanderhalten konnte. Und alles hing an einem einzigen Netz: der Firmenlaptop neben der Steckdose, die per Cloud in China schaltet, neben der NAS, auf der die Steuerunterlagen liegen.
+
+Ich bin nicht der Erste, der so ein Setup hat. Ich bin nur einer der wenigen, die aufschreiben, was sie dann getan haben.
+
+## Vier Auslöser, ein Zeitfenster
+
+Kein einzelner Grund hätte gereicht. Zusammen ergaben sie ein Fenster, das sich für ein paar Wochen öffnete.
+
+**Die Hardware war am Ende.** Der Cloud Key der ersten Generation ist ein Gerät aus einer Zeit, in der „ein Netz für alles" die Norm war. VLANs, Zonen, eine Firewall, die zwischen Familie und Firmenlaptop unterscheidet – das ging theoretisch, praktisch war es Bastelei. Und die drei Mesh-Access-Points zeigten, was Mesh ohne Kabel bedeutet: Jeder Sprung über Funk kostet die Hälfte. Ein vierter hätte das Problem vergrössert, nicht gelöst. *Warum weniger Access Points am Kabel mehr bringen als mehr Access Points im Mesh, ist einen eigenen Beitrag wert.*
+
+<Erklaerung>
+Ein VLAN (Virtual LAN) teilt ein physisches Netz in mehrere logische Netze, die sich nicht sehen – als hätte man mehrere Router. Eine Zonen-Firewall legt fest, welche dieser Netze miteinander reden dürfen. Beides ist in Profi-Hardware seit Jahren Standard, in Heimroutern selten.
+</Erklaerung>
+
+**Glasfaser vor der Tür.** Als Glasfaser bei uns ankam, habe ich mich für Init7 entschieden, und damit für einen Anschluss, der 10 Gbit ins Haus bringt. Damit drängt sich ein neuer Router sowieso auf – die alte Kette hätte davon ein Zehntel weitergereicht. *Was 10 Gbit im Haus tatsächlich bringen, und was nicht: später, mit Messwerten.*
+
+**Ein Händlerblog war der Funke.** Ich gebe es zu: Der Auslöser für die NAS war [ein Beitrag im Digitec-Blog über die UGREEN DXP4800 Plus](https://www.digitec.ch/de/page/viel-nas-fuer-wenig-geld-ugreen-nasync-dxp4800-plus-im-langzeittest-38128). Vier Schächte, x86-Prozessor, und – das war der entscheidende Satz – man kann das Herstellersystem durch TrueNAS ersetzen. Für unter CHF 600. Die DS212j hatte mir ein Jahrzehnt lang beigebracht, was eine NAS können sollte. Der Digitec-Beitrag hat mir gezeigt, dass ich das jetzt bezahlen kann. *Die Entscheidung in Zahlen – Festplatten, RAM, und ein Fehler bei der Speicherbestückung, der mich CHF 181 gekostet hat – kommt als eigener Beitrag.*
+
+<Erklaerung>
+TrueNAS ist ein freies Betriebssystem für Speicherserver, das auf dem Dateisystem ZFS aufbaut. ZFS prüft jede gespeicherte Datei mit Prüfsummen und erkennt stille Datenfehler, die andere Systeme erst beim Öffnen der Datei bemerken. Das ist der Hauptgrund, ein Herstellersystem dagegen auszutauschen.
+</Erklaerung>
+
+**Ein Assistent, der mitdenkt.** Der vierte Auslöser ist der, über den ich am längsten nachgedacht habe, bevor ich ihn hierhin schreibe.
+
+## Was die Zusammenarbeit mit einer KI verändert hat – und was nicht
+
+Ich habe dieses Projekt mit Claude gebaut. Nicht „mit KI-Unterstützung" im Sinne einer besseren Suchmaschine, sondern als Gegenüber, mit dem ich jede Entscheidung durchgesprochen habe. Drei Dinge waren anders als bei jedem Projekt davor.
+
+**Optionen wurden abgewogen, nicht gegoogelt.** Die Frage „noch ein Access Point oder ein neues Netz?" habe ich früher in einem Forum gestellt und die erste Antwort mit vielen Upvotes genommen. Diesmal entstand die Antwort in einem Gespräch: Was will ich schützen, was will ich trennen, was kostet die Trennung an Bequemlichkeit? Am Ende stand eine Entscheidung mit Begründung, nicht eine Empfehlung von jemandem, der meinen Haushalt nicht kennt.
+
+**Entscheidungen wurden dokumentiert – auch die verworfenen.** Das ist der eigentliche Gewinn, und er hat mit Technik wenig zu tun. Das Projekt hat ein Übergabedokument, das inzwischen über ein Dutzend Versionen hinter sich hat. Jede Änderung hat ein Datum. Jede verworfene Idee steht in einem eigenen Abschnitt mit dem Grund, warum sie verworfen wurde. Ohne diese Disziplin wäre dieselbe Idee dreimal aufgetaucht, und ich hätte dreimal denselben Nachmittag verloren.
+
+**Es geht auch schief.** Mitte August habe ich einen halben Tag mit einer Fehlersuche verbracht, die ein einziger falscher Wert in meiner eigenen Dokumentation angeführt hatte. Der Wert stand da, er sah plausibel aus, und der Assistent hat ihn genauso selbstbewusst weitergetragen wie ich selbst. Niemand hatte ins Gerät geschaut. Der Merksatz, der daraus entstand, gilt seither für alles: **Die Einstellung steht nur im Gerät. Die Doku ist eine Behauptung.**
+
+Eine KI ersetzt nicht das Hinschauen. Sie sorgt dafür, dass man weiss, wo man hinschauen muss – und sie erinnert sich an das, was man beim letzten Mal gesehen hat.
+
+## Warum überhaupt?
+
+Drei Gründe tragen das Projekt, und sie tragen auch diesen Blog.
+
+**Datensouveränität.** Fotos, Dokumente, Backups liegen bei uns. Es gibt eine verschlüsselte Kopie in der Cloud – aber sie ist eine Kopie, und der Schlüssel liegt hier. Wenn der Anbieter morgen die Preise verdoppelt oder das Produkt einstellt, ist nichts verloren.
+
+**Familie als Nutzer.** Ich baue das nicht für mich. Wenn meine Partnerin die Fotosicherung nicht ohne Anleitung benutzen kann, ist sie nicht fertig. Wenn die Kinder das Gäste-WLAN erklären müssen, ist die Trennung falsch gebaut. Der Massstab ist nicht, ob es läuft, sondern ob es ohne mich läuft.
+
+**Schweizer Kontext.** Preise in Franken, Händler von hier, ein Datenschutzgesetz, das nicht die DSGVO ist, aber ihr ähnlich sieht. Die meisten Anleitungen, die ich gefunden habe, waren aus den USA übersetzt – mit 110 Volt, Amazon-Links und einem Verständnis von Privatsphäre, das nicht meines ist.
+
+## Drei Prinzipien, an denen man mich messen darf
+
+1. **Local first.** Alles, was lokal laufen kann, läuft lokal. Auch die KI – ein Sprachmodell auf einem Mac Mini im Büro, das so eingerichtet ist, dass es nichts nach draussen schickt – gemessen habe ich das noch nicht.
+2. **Saubere Trennung.** Familie, Arbeit, IoT, Server, Gäste. Fünf Zonen, die sich nicht sehen, mit genau definierten Ausnahmen.
+3. **Jede Behauptung, die eine Messung sein könnte, ist eine Messung.** Wenn hier „schneller" steht, steht daneben eine Zahl. Wenn hier „funktioniert" steht, steht daneben, wie ich es geprüft habe. Das ist die Regel für diesen Blog, und wer mich beim Verstoss erwischt, darf mir schreiben.
+
+<Erklaerung>
+Ein lokales Sprachmodell ist eine KI wie ChatGPT oder Claude, die aber komplett auf dem eigenen Rechner läuft. Die Antworten sind weniger gut als bei den grossen Cloud-Modellen, dafür verlässt keine Frage das Haus. Auf einem Mac mit 16 GB Speicher laufen Modelle mit rund 8 Milliarden Parametern brauchbar.
+</Erklaerung>
+
+## Wie das Netz heute aussieht
+
+Ohne Adressen, ohne Gerätenamen – nur die Struktur.
+
+{/* DIAGRAMM A — Zonenmodell. Zeigt fünf Zonen (Familie, Arbeit, IoT, Server, Gäste) an einem Gateway mit Zonen-Firewall; gestrichelte Kanten sind erlaubte Wege, durchgestrichene sind Sperren. Nur Struktur, keine Werte. SVG-Umsetzung im Repo.
+
+flowchart TB
+    INET(("Glasfaser"))
+    GW["Gateway + Zonen-Firewall"]
+    INET --- GW
+
+    subgraph FAM["Familie"]
+        F1["Handys · Laptops · TV"]
+    end
+    subgraph WORK["Arbeit"]
+        W1["Firmenlaptop"]
+    end
+    subgraph IOT["IoT"]
+        I1["Lautsprecher · Kameras · Steckdosen"]
+    end
+    subgraph SRV["Server"]
+        S1["NAS: Fotos · Dokumente · Backup"]
+        S2["Automation"]
+        S3["Lokale KI"]
+    end
+    subgraph GUEST["Gäste"]
+        G1["Besucher-Geräte"]
+    end
+
+    GW --- FAM
+    GW --- WORK
+    GW --- IOT
+    GW --- SRV
+    GW --- GUEST
+
+    FAM -. "darf" .-> SRV
+    FAM -. "darf steuern" .-> IOT
+    S2 -. "eine Ausnahme" .-> S3
+
+    WORK x--x SRV
+    IOT x--x SRV
+    GUEST x--x FAM
+*/}
+
+<figure>
+<svg viewBox="0 0 900 520" role="img" aria-label="Zonenmodell: Die Glasfaser fuehrt auf ein Gateway mit Zonen-Firewall, darunter liegen fuenf getrennte Zonen — Familie, Arbeit, IoT, Server und Gaeste. Gestrichelte Boegen zeigen erlaubte Wege, durchgestrichene Boegen zeigen Sperren.">
+  <g font-family="var(--py-schrift-mono)" text-anchor="middle">
+
+    <g font-size="10.5" fill="var(--py-text-leise)" text-anchor="start">
+      <line x1="646" y1="30" x2="686" y2="30" stroke="var(--py-primary)" stroke-width="1.5" stroke-dasharray="5 4" />
+      <text x="694" y="34">erlaubter Weg</text>
+      <line x1="646" y1="52" x2="686" y2="52" stroke="var(--py-accent-text)" stroke-width="1.5" />
+      <line x1="660" y1="46" x2="672" y2="58" stroke="var(--py-accent-text)" stroke-width="1.5" />
+      <line x1="672" y1="46" x2="660" y2="58" stroke="var(--py-accent-text)" stroke-width="1.5" />
+      <text x="694" y="56">gesperrt</text>
+    </g>
+
+    <rect x="390" y="18" width="120" height="32" rx="16" fill="var(--py-bg)" stroke="var(--py-text-leise)" stroke-width="1.5" />
+    <text x="450" y="39" font-size="12" fill="var(--py-text)">Glasfaser</text>
+    <line x1="450" y1="50" x2="450" y2="74" stroke="var(--py-text-leise)" stroke-width="1.5" />
+
+    <rect x="320" y="74" width="260" height="40" rx="2" fill="var(--py-surface)" stroke="var(--py-primary)" stroke-width="1.5" />
+    <text x="450" y="99" font-size="12" fill="var(--py-text)">Gateway + Zonen-Firewall</text>
+
+    <line x1="450" y1="114" x2="450" y2="146" stroke="var(--py-text-leise)" stroke-width="1.5" />
+    <line x1="100" y1="146" x2="800" y2="146" stroke="var(--py-text-leise)" stroke-width="1.5" />
+    <line x1="100" y1="146" x2="100" y2="180" stroke="var(--py-text-leise)" stroke-width="1.5" />
+    <line x1="275" y1="146" x2="275" y2="180" stroke="var(--py-text-leise)" stroke-width="1.5" />
+    <line x1="450" y1="146" x2="450" y2="180" stroke="var(--py-text-leise)" stroke-width="1.5" />
+    <line x1="625" y1="146" x2="625" y2="180" stroke="var(--py-text-leise)" stroke-width="1.5" />
+    <line x1="800" y1="146" x2="800" y2="180" stroke="var(--py-text-leise)" stroke-width="1.5" />
+
+    <g fill="var(--py-bg)" stroke="var(--py-text-leise)" stroke-width="1.5">
+      <rect x="25" y="180" width="150" height="150" rx="2" />
+      <rect x="200" y="180" width="150" height="150" rx="2" />
+      <rect x="375" y="180" width="150" height="150" rx="2" />
+      <rect x="550" y="180" width="150" height="150" rx="2" />
+      <rect x="725" y="180" width="150" height="150" rx="2" />
+    </g>
+    <g stroke="var(--py-text-leise)" stroke-width="1">
+      <line x1="42" y1="210" x2="158" y2="210" />
+      <line x1="217" y1="210" x2="333" y2="210" />
+      <line x1="392" y1="210" x2="508" y2="210" />
+      <line x1="567" y1="210" x2="683" y2="210" />
+      <line x1="742" y1="210" x2="858" y2="210" />
+    </g>
+    <g font-size="12.5" fill="var(--py-text)">
+      <text x="100" y="202">Familie</text>
+      <text x="275" y="202">Arbeit</text>
+      <text x="450" y="202">IoT</text>
+      <text x="625" y="202">Server</text>
+      <text x="800" y="202">Gäste</text>
+    </g>
+    <g font-size="11" fill="var(--py-text-leise)">
+      <text x="100" y="234">Handys</text>
+      <text x="100" y="254">Laptops</text>
+      <text x="100" y="274">TV</text>
+      <text x="275" y="254">Firmenlaptop</text>
+      <text x="450" y="234">Lautsprecher</text>
+      <text x="450" y="254">Kameras</text>
+      <text x="450" y="274">Steckdosen</text>
+      <text x="800" y="254">Besucher-Geräte</text>
+    </g>
+
+    <g fill="var(--py-surface)" stroke="var(--py-text-leise)" stroke-width="1">
+      <rect x="560" y="216" width="130" height="24" rx="2" />
+      <rect x="560" y="248" width="130" height="24" rx="2" />
+      <rect x="560" y="296" width="130" height="24" rx="2" />
+    </g>
+    <g font-size="10.5" fill="var(--py-text-leise)">
+      <text x="625" y="232">NAS</text>
+      <text x="625" y="264">Automation</text>
+      <text x="625" y="312">Lokale KI</text>
+    </g>
+    <line x1="585" y1="274" x2="585" y2="290" stroke="var(--py-accent-text)" stroke-width="1.5" stroke-dasharray="4 3" />
+    <polygon points="581,289 589,289 585,296" fill="var(--py-accent-text)" />
+    <text x="595" y="288" font-size="8.5" fill="var(--py-accent-text)" text-anchor="start">Ausnahme</text>
+
+    <g fill="none" stroke="var(--py-primary)" stroke-width="1.5" stroke-dasharray="5 4">
+      <path d="M80,330 Q255,458 430,330" />
+      <path d="M100,330 Q372.5,586 645,330" />
+    </g>
+    <g font-size="10" fill="var(--py-link)">
+      <text x="255" y="388">darf steuern</text>
+      <text x="372.5" y="452">darf</text>
+    </g>
+
+    <g fill="none" stroke="var(--py-accent-text)" stroke-width="1.5">
+      <path d="M470,330 Q537.5,394 605,330" />
+      <path d="M275,330 Q450,522 625,330" />
+      <path d="M800,330 Q460,654 120,330" />
+    </g>
+    <g fill="var(--py-surface)">
+      <circle cx="537.5" cy="362" r="9" />
+      <circle cx="450" cy="426" r="9" />
+      <circle cx="460" cy="492" r="9" />
+    </g>
+    <g stroke="var(--py-accent-text)" stroke-width="2">
+      <line x1="532" y1="357" x2="543" y2="367" />
+      <line x1="543" y1="357" x2="532" y2="367" />
+      <line x1="444.5" y1="421" x2="455.5" y2="431" />
+      <line x1="455.5" y1="421" x2="444.5" y2="431" />
+      <line x1="454.5" y1="487" x2="465.5" y2="497" />
+      <line x1="465.5" y1="487" x2="454.5" y2="497" />
+    </g>
+  </g>
+</svg>
+<figcaption>
+Struktur, ohne Adressen und ohne Gerätenamen. Gestrichelt: erlaubte Wege — die Familienzone
+darf auf die Server und darf IoT steuern. Durchgestrichen: was sich nicht sieht — Arbeit und
+IoT kommen nicht an die Server, Gäste nicht an die Familie. Auf der NAS liegen Fotos,
+Dokumente und Backup. Die eine Ausnahme innerhalb der Serverzone führt von der Automation
+zur lokalen KI. Fünf Zonen — dieselbe Zahl steht in der Tabelle weiter unten.
+</figcaption>
+</figure>
+
+
+*Gestrichelt: erlaubte Wege. Durchgestrichen: was sich nicht sieht. Die Arbeitszone hat keinen einzigen Weg nach innen – auch nicht zur NAS. Das war eine bewusste Entscheidung, und ich habe eine Ausnahme dafür entworfen, geprüft und wieder verworfen. Auch das kommt.*
+
+## Die grobe Planung
+
+Ich habe das Projekt in Meilensteine geteilt, und die Reihenfolge ist Teil der Lehre: Erst das Netz, dann der Speicher, dann erst die Dinge, die darauf laufen. Wer mit den Fotos anfängt, baut das Netz zweimal.
+
+| Meilenstein | Inhalt | Stand | Zahl |
+|---|---|---|---|
+| M1 · Netz | Zonen, Glasfaser, WLAN | steht | 5 Zonen |
+| M2 · Speicher & Backup | NAS, USV, Offsite-Kopie | steht | – |
+| M3 · Fotos | Fotoarchiv der Familie umgezogen | steht | ~80'000 Bilder |
+| M4 · Dokumente & Automation | Papierlos, Workflows | steht | – |
+| M5 · Lokale KI | Sprachmodell im Haus | läuft | – |
+| Später | Verkabelung, Agenten | geplant | – |
+
+{/* DIAGRAMM B — Roadmap. Zeigt sechs Meilensteine in Baureihenfolge (M1 Netz bis M5 Lokale KI, dazu Später) mit Stand: vier stehen, einer läuft, einer geplant. Einzige Zahl: 80'000 Bilder in M3, steht in der Tabelle darüber. SVG-Umsetzung im Repo.
+
+flowchart LR
+    M1["<b>M1 · Netz</b><br/>Zonen, Glasfaser, WLAN<br/>✅ steht"]
+    M2["<b>M2 · Speicher & Backup</b><br/>NAS, USV, Offsite<br/>✅ steht"]
+    M3["<b>M3 · Fotos</b><br/>80'000 Bilder umgezogen<br/>✅ steht"]
+    M4["<b>M4 · Dokumente & Automation</b><br/>Papierlos, Workflows<br/>✅ steht"]
+    M5["<b>M5 · Lokale KI</b><br/>Sprachmodell im Haus<br/>🔧 läuft"]
+    M6["<b>Später</b><br/>Verkabelung, Agenten<br/>📋 geplant"]
+
+    M1 --> M2 --> M3 --> M4 --> M5 --> M6
+*/}
+
+<figure>
+<svg viewBox="0 0 900 200" role="img" aria-label="Roadmap: sechs Meilensteine in Baureihenfolge — M1 Netz, M2 Speicher und Backup, M3 Fotos, M4 Dokumente und Automation, M5 Lokale KI, danach Spaeteres. Vier stehen, einer laeuft, einer ist geplant.">
+  <g font-family="var(--py-schrift-mono)" text-anchor="middle">
+
+    <g fill="var(--py-bg)" stroke="var(--py-text-leise)" stroke-width="1.5">
+      <rect x="11" y="30" width="128" height="120" rx="2" />
+      <rect x="161" y="30" width="128" height="120" rx="2" />
+      <rect x="311" y="30" width="128" height="120" rx="2" />
+      <rect x="461" y="30" width="128" height="120" rx="2" />
+      <rect x="611" y="30" width="128" height="120" rx="2" />
+      <rect x="761" y="30" width="128" height="120" rx="2" />
+    </g>
+
+    <g stroke="var(--py-text-leise)" stroke-width="1.5" fill="var(--py-text-leise)">
+      <line x1="143" y1="90" x2="152" y2="90" /><polygon points="152,86 158,90 152,94" stroke="none" />
+      <line x1="293" y1="90" x2="302" y2="90" /><polygon points="302,86 308,90 302,94" stroke="none" />
+      <line x1="443" y1="90" x2="452" y2="90" /><polygon points="452,86 458,90 452,94" stroke="none" />
+      <line x1="593" y1="90" x2="602" y2="90" /><polygon points="602,86 608,90 602,94" stroke="none" />
+      <line x1="743" y1="90" x2="752" y2="90" /><polygon points="752,86 758,90 752,94" stroke="none" />
+    </g>
+
+    <g font-size="11.5" fill="var(--py-text)">
+      <text x="75" y="58">M1 · Netz</text>
+      <text x="225" y="58">M2 · Speicher</text>
+      <text x="225" y="73">&amp; Backup</text>
+      <text x="375" y="58">M3 · Fotos</text>
+      <text x="525" y="58">M4 · Dokumente</text>
+      <text x="525" y="73">&amp; Automation</text>
+      <text x="675" y="58">M5 · Lokale KI</text>
+      <text x="825" y="58">Später</text>
+    </g>
+
+    <g font-size="9.5" fill="var(--py-text-leise)">
+      <text x="75" y="98">Zonen, Glasfaser,</text>
+      <text x="75" y="112">WLAN</text>
+      <text x="225" y="98">NAS, USV,</text>
+      <text x="225" y="112">Offsite-Kopie</text>
+      <text x="375" y="98">80'000 Bilder</text>
+      <text x="375" y="112">umgezogen</text>
+      <text x="525" y="98">Papierlos,</text>
+      <text x="525" y="112">Workflows</text>
+      <text x="675" y="98">Sprachmodell</text>
+      <text x="675" y="112">im Haus</text>
+      <text x="825" y="98">Verkabelung,</text>
+      <text x="825" y="112">Agenten</text>
+    </g>
+
+    <g fill="none" stroke-width="1">
+      <rect x="45" y="124" width="60" height="17" rx="2" stroke="var(--py-primary)" />
+      <rect x="195" y="124" width="60" height="17" rx="2" stroke="var(--py-primary)" />
+      <rect x="345" y="124" width="60" height="17" rx="2" stroke="var(--py-primary)" />
+      <rect x="495" y="124" width="60" height="17" rx="2" stroke="var(--py-primary)" />
+      <rect x="645" y="124" width="60" height="17" rx="2" stroke="var(--py-accent-text)" />
+      <rect x="795" y="124" width="60" height="17" rx="2" stroke="var(--py-text-leise)" />
+    </g>
+    <g font-size="9">
+      <text x="75" y="136" fill="var(--py-link)">steht</text>
+      <text x="225" y="136" fill="var(--py-link)">steht</text>
+      <text x="375" y="136" fill="var(--py-link)">steht</text>
+      <text x="525" y="136" fill="var(--py-link)">steht</text>
+      <text x="675" y="136" fill="var(--py-accent-text)">läuft</text>
+      <text x="825" y="136" fill="var(--py-text-leise)">geplant</text>
+    </g>
+  </g>
+</svg>
+<figcaption>
+Baureihenfolge, nicht Zeitachse: erst das Netz, dann der Speicher, dann was darauf läuft.
+Vier Meilensteine stehen, einer läuft, einer ist geplant. Die einzige Zahl im Bild —
+80'000 Bilder in M3 — steht auch in der Tabelle darüber, weil ein Bild allein keine Zahl ist.
+</figcaption>
+</figure>
+
+
+*Jedes Kästchen wird ein Beitrag. Die 80'000 sind gerundet – die genaue Zahl, und die 9'900 Bilder, die beim ersten Zählen gefehlt haben, gehören in den Fotos-Beitrag.*
+
+Vier von fünf Meilensteinen stehen. Der fünfte läuft. Das heisst nicht, dass das Projekt fertig ist – es heisst, dass ich jetzt genug gemessen habe, um darüber zu schreiben, ohne zu raten.
+
+<Prompt>
+Wer den eigenen Haushalt durchdenken will, bevor er etwas kauft, kann diesen Einstieg an einen KI-Assistenten geben. Lade keine Dokumente hoch – die Antwort wird nicht besser, und du gibst mehr preis als nötig.
+
+„Ich möchte mein Heimnetz und meine Datenhaltung neu ordnen. Stelle mir nacheinander Fragen zu: Welche Geräte gibt es im Haushalt und wem gehören sie? Welche Daten wären ein echter Verlust (Fotos, Dokumente, Steuerunterlagen)? Welche Geräte gehören nicht ins selbe Netz wie diese Daten (Firmenlaptop, smarte Steckdosen, Gäste)? Wo steht heute die einzige Kopie von etwas? Fasse am Ende zusammen, welche Trennungen sich aus meinen Antworten ergeben und welche Reihenfolge du für den Aufbau empfehlen würdest – und begründe, warum das Netz vor dem Speicher kommt."
+</Prompt>
+
+## Und warum Pixelyard?
+
+Weil das Aufschreiben ohnehin passiert. Die Dokumentation ist Teil der Arbeitsweise, nicht eine zusätzliche Baustelle. Ein Nachmittag Aufräumen im August hat sieben Beitragsideen produziert, ohne dass ich für den Blog gearbeitet hätte – jede mit einer Messung im Rücken.
+
+Pixelyard ist der Ort, an dem das landet. Auf Deutsch, mit Schweizer Bezug, statisch gehostet und bewusst nicht auf der eigenen NAS. Ohne Konten, ohne Tracking, ohne Kommentare – dafür mit Werkzeugen, die man mitnehmen kann: Checklisten, Prompt-Vorlagen für den eigenen Assistenten, und bald ein Simulator, der die Frage beantwortet, die jeder als Erstes stellt: *Lohnt sich das für uns?*
+
+Der nächste Beitrag erklärt, warum drei Mesh-Access-Points das WLAN nicht gerettet haben und zwei am Kabel es tun – mit dem gemessenen Durchsatz in jedem Stockwerk und der Zählung der Geräte pro Zone.
+
+Wer bis hierhin gelesen hat und ein ähnliches Setup im Keller stehen hat: Schreib mir, was dich abgehalten hat. Das ist wahrscheinlich ein Beitrag.
+
+— Cedric
