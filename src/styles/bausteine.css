@@ -372,7 +372,7 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--py-accent-text);
-  border: var(--py-rand) solid var(--py-accent);
+  border: var(--py-rand) solid var(--py-accent-text);
   border-radius: var(--py-radius);
   vertical-align: 0.1em;
   white-space: nowrap;
