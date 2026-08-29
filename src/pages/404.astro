@@ -1,0 +1,50 @@
+---
+/* 404.astro — die Seite fuer Pfade, die es nicht gibt.
+ *
+ * 🔑 Sie liegt bewusst in src/pages/ und NICHT unter [sprache]/. Astro baut
+ * daraus dist/404.html, und genau diesen Dateinamen im Wurzelverzeichnis sucht
+ * Cloudflare Pages: Ist er da, wird er mit Status 404 ausgeliefert. Fehlt er,
+ * faellt Pages auf dist/index.html zurueck — und antwortet mit 200.
+ *
+ * Genau das war bis zum 29.08.2026 der Fall. Gemessen an einem frei erfundenen
+ * Pfad: HTTP/2 200, und der Rumpf war byteweise dist/index.html, also der
+ * Weiterleitungsstumpf der Wurzel. Solche Soft-404s werden indexiert, und sie
+ * machen jede Pruefung wertlos, die eine URL ueber ihren Status beurteilt —
+ * auch die Freigabepruefung fuer Entwuerfe.
+ *
+ * Deshalb hat diese Seite keine Sprachvariante: Cloudflare liefert genau eine
+ * 404.html aus, unabhaengig vom angefragten Pfad. Kaeme Englisch dazu, waere
+ * das ein eigener Entscheid und keine Routing-Frage. */
+import Basis from '../layouts/Basis.astro';
+import { SPRACHE_STANDARD } from '../lib/seite';
+
+const start = `/${SPRACHE_STANDARD}/`;
+---
+
+<Basis
+  titel="Seite nicht gefunden"
+  sprache={SPRACHE_STANDARD}
+  nichtIndexieren
+  beschreibung="Diese Adresse gibt es auf pixelyard nicht."
+>
+  <div class="py-lesestrom">
+    <h1>404<span class="py-h1-cursor" aria-hidden="true">_</span></h1>
+    <p class="py-meta">
+      <span class="py-meta__eingabe" aria-hidden="true">$</span>
+      <span>Seite nicht gefunden · Status 404</span>
+    </p>
+
+    <p>
+      Diese Adresse gibt es nicht. Entweder war ein Tippfehler im Spiel, oder
+      der Beitrag, der hier lag, ist noch ein Entwurf und nicht veröffentlicht.
+    </p>
+
+    <p>
+      Entwürfe erscheinen bewusst nicht auf der Seite — sie stehen im Repo, bis
+      sie fertig sind. Wenn du von einem Link hierhergekommen bist, der einmal
+      funktioniert hat, schreib mir: dann ist es meine Baustelle und nicht deine.
+    </p>
+
+    <p><a href={start}>Zurück zur Startseite</a></p>
+  </div>
+</Basis>
