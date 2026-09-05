@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+# pre-commit — die Anonymisierungspruefung als Bedingung, nicht als Vorsatz.
+#
+# Git ruft diese Datei vor jedem Commit auf. Endet sie mit einem Fehler,
+# kommt der Commit nicht zustande.
+#
+# Warum es das gibt: werkzeuge/anonymisierung-pruefen.sh existiert seit dem
+# 28.08. und ist gut — aber es lief nur, wenn jemand daran dachte, es
+# aufzurufen. Der Weg ueber ./werkzeuge/artikel deckt den Livegang eines
+# Artikels ab; er deckt NICHT den schnellen Commit zwischendurch, und genau
+# der ist der wahrscheinlichste.
+#
+#   Eine Regel, die durchgesetzt ist, schlaegt eine, die vereinbart ist.
+#
+# Dieselbe Begruendung, aus der pixelyard-klarwerte.md ausserhalb des Repos
+# liegt statt gitignoriert darin: Der Schutz sitzt in der Mechanik, nicht in
+# der Absicht.
+#
+# EINGEBAUT WIRD ER UEBER hooksPath, NICHT ueber .git/hooks:
+#
+#   git config core.hooksPath werkzeuge/git-hooks
+#
+# Damit liegt der Hook im Repo, ist versioniert und wandert bei jedem Umzug
+# mit. ⚠️ Die Einstellung selbst ist Teil der lokalen Git-Konfiguration und
+# wandert NICHT mit — nach einem frischen Klon (oder auf einem neuen Mac)
+# muss die Zeile einmal neu gesetzt werden. Deshalb zeigt
+# ./werkzeuge/artikel unter „Lage" an, ob sie gesetzt ist.
+#
+# Absichtlich uebergehen laesst er sich mit `git commit --no-verify`. Das ist
+# keine Hintertuer, sondern Git. Wer ihn benutzt, hat den Commit gemacht und
+# die Pruefung nicht — und sollte sie danach von Hand nachholen.
+
+# Git ruft Hooks im Wurzelverzeichnis auf; sicherheitshalber trotzdem setzen.
+WURZEL=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+cd "$WURZEL" || exit 1
+
+SKRIPT="./werkzeuge/anonymisierung-pruefen.sh"
+
+# Fehlt das Pruefskript, wird NICHT durchgewunken.
+# Ein Waechter, der bei eigener Abwesenheit gruen meldet, ist schlimmer als
+# keiner: Er erzeugt die Gewissheit, die er nicht mehr deckt.
+if [ ! -x "$SKRIPT" ]; then
+  echo "🔴 pre-commit: $SKRIPT fehlt oder ist nicht ausfuehrbar."
+  echo "   Der Commit wird angehalten, weil die Pruefung nicht laufen konnte."
+  echo "   Beheben:  chmod +x $SKRIPT   — oder Datei wiederherstellen."
+  exit 1
+fi
+
+echo "── pre-commit: Anonymisierungspruefung ─────────────────────────"
+"$SKRIPT"
+ERGEBNIS=$?
+echo "────────────────────────────────────────────────────────────────"
+
+if [ "$ERGEBNIS" -ne 0 ]; then
+  echo
+  echo "🔴 Commit angehalten. Oben steht Datei und Zeile, nie der Wert selbst."
+  echo
+  echo "   Drei moegliche Lagen, und sie sind nicht dasselbe:"
+  echo "   1. Ein echter Fund  → Text aendern, dann erneut committen."
+  echo "   2. Ein Fund ausserhalb des Gestagten → das Skript prueft den"
+  echo "      ARBEITSBAUM, nicht nur was du gerade vormerkst. Strenger,"
+  echo "      nicht lockerer: hinsehen lohnt sich trotzdem."
+  echo "   3. 'Kein markierter Werteblock' → dann lief nur die halbe Pruefung."
+  echo "      Die Klarwerte-Datei eine Ebene ueber dem Repo pruefen."
+  echo
+  exit 1
+fi
+
+exit 0

@@ -8,6 +8,11 @@
 # einer Zahl. Jeder schreibende Schritt fragt vorher, und zeigt vorher, was er
 # tun wuerde.
 #
+# Die Anleitung steckt im Werkzeug: Menuepunkt "h" — der Weg, jeder Menuepunkt,
+# jede Pruefung mit ihrem Anlass, die Merksaetze, die Ablage, die Fehlerfaelle.
+# Grund: eine Anleitung in einem zweiten Dokument wird beim Arbeiten nicht
+# aufgeschlagen — und eine, die niemand aufschlaegt, altert still.
+#
 # Warum es das gibt: Der Weg aus `claude/runbook_artikel_uebergabe_2026-08-29.md`
 # hat neun Schritte, und drei davon sind still. Der stillste ist der
 # Entwurfsschalter: `entwurf: true` erzeugt einen gruenen Bau und eine fehlende
@@ -367,6 +372,22 @@ schritt_lage() {
     n=$(cd "$REPO" && git status --porcelain | wc -l | tr -d ' ')
     if [ "$n" = "0" ]; then echo "   Arbeitsbaum:  sauber"
     else echo "   Arbeitsbaum:  $n geaenderte Datei(en)"; (cd "$REPO" && git status --short | sed 's/^/                 /'); fi
+    # Der Pruef-Hook haengt an einer LOKALEN Einstellung. Sie wandert nicht mit
+    # dem Repo — nach einem frischen Klon fehlt sie, und nichts meldet das.
+    # Deshalb steht sie hier: ein Waechter, dessen Abwesenheit man nicht sieht,
+    # ist keiner.
+    hooks=$(cd "$REPO" && git config --get core.hooksPath 2>/dev/null) || hooks=""
+    if [ "$hooks" = "werkzeuge/git-hooks" ]; then
+      if [ -x "$REPO/werkzeuge/git-hooks/pre-commit" ]; then
+        echo "   Pruef-Hook:   aktiv — jeder Commit laeuft durch die Anonymisierung"
+      else
+        echo "   Pruef-Hook:   ⚠️  hooksPath gesetzt, aber pre-commit fehlt oder ist nicht ausfuehrbar"
+      fi
+    elif [ -n "$hooks" ]; then
+      echo "   Pruef-Hook:   ⚠️  hooksPath zeigt auf '$hooks' — erwartet: werkzeuge/git-hooks"
+    else
+      echo "   Pruef-Hook:   ⚠️  NICHT gesetzt.  git config core.hooksPath werkzeuge/git-hooks"
+    fi
   else
     echo "Git: nicht gefunden oder kein Repo an dieser Stelle."
   fi
