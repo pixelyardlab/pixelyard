@@ -1,0 +1,233 @@
+---
+titel: "WLAN pro Stockwerk: drei Messungen – und die Zahl, die zählt, ist nicht der Durchsatz"
+beschreibung: "Zwei Access Points am Kabel, drei Standorte, eine Speedtest-App: 1012, 900 und 330 Mbit/s. Die interessante Zahl ist eine andere – und eine der drei Messungen hat einen Fehler, den ich stehen lasse."
+datum: 2026-09-05
+schlagworte: ["wlan", "messung", "unifi", "homelab", "schweiz"]
+sprache: de
+paar: wlan-pro-stockwerk
+entwurf: false
+faq:
+  - frage: "Wie viele Access Points braucht ein Einfamilienhaus?"
+    antwort: "Eine allgemeine Zahl dazu habe ich nicht, und gemessen habe ich nur das eigene Haus: Hier decken zwei Access Points am Kabel die beiden Wohngeschosse ab, im Untergeschoss hängt weiterhin ein älteres Gerät. Woran man merkt, dass einer fehlt, ist nicht der Durchsatz, sondern die Antwortzeit unter Last am Rand der Abdeckung."
+  - frage: "Reichen 330 Mbit/s im WLAN?"
+    antwort: "Für Streaming, Videoanrufe und Dateiübertragungen im Haushalt reichen sie deutlich. Am gemessenen Randstandort war nicht der Durchsatz das Problem, sondern die Antwortzeit unter Last: 141 statt 11 Millisekunden. Eine Zahl, die man an der Bandbreite nicht ablesen kann."
+---
+
+<TLDR>
+Zwei Access Points am Kabel, ein Messgerät, drei Standorte, dieselbe App: 1012 Mbit/s nahe am Access Point, 900 Mbit/s ein Stockwerk höher, 330 Mbit/s am entferntesten Punkt. Die Zahl, die tatsächlich etwas über das Netz aussagt, ist keine davon – es ist die Antwortzeit unter Last, die am Rand von 11 auf 141 Millisekunden steigt. Dazu ein Fehler in meiner eigenen Messreihe, den ich nicht wegräume, und ein Widerspruch: 900 Mbit/s im Büro und trotzdem acht Stunden für eine Datenübertragung.
+</TLDR>
+
+## Was gemessen wurde, und womit
+
+Am Anschluss hängt Glasfaser mit 10 Gbit/s. Vom Gateway im Untergeschoss führt ein 20-Meter-Kabel ins Erdgeschoss auf einen Switch mit Stromversorgung über Netzwerkkabel; daran hängen zwei Access Points vom Typ UniFi U7 Pro XG – einer im Erdgeschoss, einer im Obergeschoss. Im Untergeschoss läuft weiterhin ein älterer U6 Lite. Der ist bewusst geblieben, dazu unten mehr.
+
+Gemessen habe ich am 29. August 2026 mit einem iPhone Air und derselben Speedtest-App, die ich seit Jahren benutze. Drei Standorte, pro Standort ein Durchlauf, notiert wurden Downstream, Upstream, Antwortzeit im Leerlauf, Antwortzeit unter Last und Jitter.
+
+<Erklaerung>
+Ein Speedtest misst den Weg vom Gerät zu einem Server im Internet und zurück. Er liefert drei Grössen: den Durchsatz in Megabit pro Sekunde in beide Richtungen, die Antwortzeit (den Ping) in Millisekunden, und den Jitter – die Schwankung dieser Antwortzeit. Neuere Versionen messen den Ping zweimal: einmal bei ruhender Leitung und einmal, während der Durchsatztest läuft. Der zweite Wert beschreibt das Verhalten unter Last; er sagt etwas anderes aus als der erste.
+</Erklaerung>
+
+## Die drei Standorte
+
+| Standort | Down | Up | Ping ruhend | Ping unter Last (down/up) | Jitter |
+|---|---|---|---|---|---|
+| Erdgeschoss, nahe am Access Point | 1012 Mbit/s | 1057 Mbit/s | 5 ms | 11 / 34 ms | 1 ms |
+| Obergeschoss, Büro | 900 Mbit/s | 868 Mbit/s | 5 ms | 14 / 42 ms | 1 ms |
+| Erdgeschoss, maximal weit weg | 330 Mbit/s | 319 Mbit/s | 4 ms | **141 / 130 ms** | 1 ms |
+
+{/* DIAGRAMM — Signalweg und Messpunkte. Zeigt den Weg von der Glasfaser über das Gateway im UG, ein 20-m-Kabel und den PoE-Switch im EG zu zwei Access Points (EG und OG), dazu die drei Messpunkte mit ihren Werten und den nicht gemessenen alten AP im UG. Keine Adressen, keine Netznamen, keine Zonen-Nummern. SVG-Umsetzung im Repo.
+
+flowchart TB
+    FIBER(("Glasfaser 10 Gbit/s"))
+    GW["Gateway · UG"]
+    APALT["AP Bestand · UG"]
+    SW["Switch mit PoE · EG"]
+    APEG["AP · EG"]
+    APOG["AP · OG"]
+    M1["EG nahe am AP<br/>1012 / 1057 Mbit/s<br/>Ping unter Last 11-34 ms"]
+    M2["OG Büro<br/>900 / 868 Mbit/s<br/>Ping unter Last 14-42 ms"]
+    M3["EG maximal weit weg<br/>330 / 319 Mbit/s<br/>Ping unter Last 141-130 ms"]
+    M4["UG · nicht gemessen"]
+
+    FIBER --- GW
+    GW --- APALT
+    GW -- "Kabel, 20 m" --- SW
+    SW --- APEG
+    SW --- APOG
+    APOG -. WLAN .-> M2
+    APEG -. WLAN .-> M1
+    APEG -. WLAN .-> M3
+    APALT -. WLAN .-> M4
+*/}
+
+<figure>
+<svg viewBox="0 0 900 420" role="img" aria-label="Signalweg und Messpunkte: Die Glasfaser fuehrt auf ein Gateway im Untergeschoss, von dort ein 20-Meter-Kabel auf einen Switch im Erdgeschoss, der zwei Access Points speist — einen im Erdgeschoss, einen im Obergeschoss. Rechts stehen die drei gemessenen Standorte mit Durchsatz und Antwortzeit unter Last, dazu der alte Access Point im Untergeschoss, der nicht gemessen wurde.">
+  <g font-family="var(--py-schrift-mono)" text-anchor="middle">
+
+    <rect x="40" y="20" width="430" height="380" rx="2" fill="var(--py-bg)" stroke="var(--py-text-leise)" stroke-width="1.5" />
+    <line x1="40" y1="146" x2="470" y2="146" stroke="var(--py-text-leise)" stroke-width="1" />
+    <line x1="40" y1="272" x2="470" y2="272" stroke="var(--py-text-leise)" stroke-width="1" />
+
+    <g font-size="12.5" fill="var(--py-text)" text-anchor="start">
+      <text x="56" y="44">OG</text>
+      <text x="56" y="170">EG</text>
+      <text x="56" y="296">UG</text>
+    </g>
+
+    <g stroke="var(--py-text-leise)" stroke-width="1.5">
+      <line x1="185" y1="324" x2="185" y2="348" />
+      <line x1="250" y1="362" x2="300" y2="362" />
+      <line x1="185" y1="348" x2="185" y2="224" />
+      <line x1="250" y1="210" x2="300" y2="210" />
+      <line x1="185" y1="196" x2="185" y2="84" />
+      <line x1="185" y1="84" x2="300" y2="84" />
+    </g>
+    <text x="196" y="290" font-size="9.5" fill="var(--py-text-leise)" text-anchor="start">Kabel, 20 m</text>
+
+    <g fill="var(--py-surface)" stroke="var(--py-text-leise)" stroke-width="1.5">
+      <rect x="120" y="296" width="130" height="28" rx="14" />
+      <rect x="120" y="348" width="130" height="28" rx="2" />
+      <rect x="300" y="348" width="130" height="28" rx="2" />
+      <rect x="120" y="196" width="130" height="28" rx="2" />
+      <rect x="300" y="196" width="130" height="28" rx="2" />
+      <rect x="300" y="70" width="130" height="28" rx="2" />
+    </g>
+    <g font-size="10.5" fill="var(--py-text)">
+      <text x="185" y="315">Glasfaser 10 Gbit/s</text>
+      <text x="185" y="367">Gateway</text>
+      <text x="365" y="367">AP · Bestand</text>
+      <text x="185" y="215">Switch mit PoE</text>
+      <text x="365" y="215">AP · EG</text>
+      <text x="365" y="89">AP · OG</text>
+    </g>
+
+    <g fill="none" stroke="var(--py-primary)" stroke-width="1.5" stroke-dasharray="5 4">
+      <line x1="430" y1="84" x2="540" y2="84" />
+      <line x1="430" y1="210" x2="540" y2="210" />
+      <path d="M430,224 Q490,270 540,300" />
+    </g>
+    <line x1="430" y1="362" x2="540" y2="362" stroke="var(--py-text-leise)" stroke-width="1.5" stroke-dasharray="4 4" />
+
+    <g fill="var(--py-bg)" stroke="var(--py-text-leise)" stroke-width="1.5">
+      <rect x="540" y="58" width="340" height="52" rx="2" />
+      <rect x="540" y="184" width="340" height="52" rx="2" />
+      <rect x="540" y="274" width="340" height="52" rx="2" />
+    </g>
+    <rect x="540" y="344" width="340" height="36" rx="2" fill="var(--py-bg)" stroke="var(--py-text-leise)" stroke-width="1.5" stroke-dasharray="4 4" />
+
+    <g text-anchor="start">
+      <g font-size="11.5" fill="var(--py-text)">
+        <text x="558" y="80">OG · Büro</text>
+        <text x="558" y="206">EG · nahe am Access Point</text>
+        <text x="558" y="296">EG · maximal weit weg</text>
+      </g>
+      <g font-size="10" fill="var(--py-text-leise)">
+        <text x="558" y="98">900 / 868 Mbit/s · Ping unter Last 14–42 ms</text>
+        <text x="558" y="224">1012 / 1057 Mbit/s · Ping unter Last 11–34 ms</text>
+        <text x="558" y="314">330 / 319 Mbit/s · Ping unter Last <tspan fill="var(--py-accent-text)">141–130 ms</tspan></text>
+        <text x="558" y="367">UG · alter Access Point, bewusst behalten – nicht gemessen</text>
+      </g>
+    </g>
+  </g>
+</svg>
+<figcaption>
+Der Weg des Signals und die drei Messpunkte. Durchgezogen: Kabel. Gestrichelt grün: Funk.
+Gestrichelt grau: der Teil des Hauses, der nicht gemessen wurde. Die Werte im Bild stehen
+auch in der Tabelle darüber – ein Bild allein ist keine Zahl.
+</figcaption>
+</figure>
+
+Es gibt noch einen vierten Wert, und er gehört nicht in die Reihe: 1418 Mbit/s im Downstream, gemessen am selben Abend vom Sofa aus, rund drei Meter vom Access Point entfernt. Er belegt, dass die Kombination aus diesem Access Point und einem aktuellen Gerät über ein Gigabit hinauskommt. Als Messpunkt taugt er trotzdem nicht: Ich habe Antwortzeit und Jitter nicht notiert. Ein Rekord ist keine Messreihe.
+
+## Die Zahl, die zählt, ist die Antwortzeit unter Last
+
+Im Leerlauf antwortet die Leitung überall gleich: 4 bis 5 Millisekunden, an allen drei Standorten, mit 1 Millisekunde Jitter. Das ist der Anschluss, und der ist in Ordnung.
+
+Interessant wird es, sobald Daten fliessen. Nahe am Access Point steigt die Antwortzeit auf 11 Millisekunden, ein Stockwerk höher auf 14. Am entferntesten Punkt steigt sie auf 141 – zehnmal so viel, bei einem Anschluss, der im Leerlauf einen Millisekundenwert besser ist als die anderen beiden Messungen.
+
+<Erklaerung>
+Antwortzeit unter Last beschreibt, wie lange eine kleine Anfrage braucht, während gleichzeitig grosse Datenmengen unterwegs sind. Sie steigt, wenn Pakete in Warteschlangen stehen – im Gerät, im Access Point oder im Router. Für Streaming ist das gleichgültig, weil ein Puffer voraus lädt. Für alles, was auf eine Antwort wartet, ist es der Unterschied zwischen flüssig und zäh: Videoanrufe, Fernzugriffe, Spiele, gemeinsam bearbeitete Dokumente.
+</Erklaerung>
+
+Damit dreht sich die Bewertung um. 330 Mbit/s am Randstandort sind kein Problem – drei gleichzeitige Videostreams belegen davon einen Bruchteil. Die 141 Millisekunden sind eines. Wer nur auf den Durchsatz schaut, sieht an dieser Stelle ein Netz, das reicht.
+
+**Die Zahl, die eine Abdeckungslücke sichtbar macht, ist nicht die Bandbreite, sondern die Antwortzeit unter Last.**
+
+## Ein Fehler in meiner eigenen Messreihe
+
+Die dritte Messung lief gegen einen anderen Testserver als die beiden ersten – die App hat für den entfernten Standort auf einen Server des Anschlussanbieters gewechselt, während die anderen beiden gegen den Server eines anderen Betreibers liefen. Das habe ich erst beim Notieren gesehen.
+
+Damit hat sich in einer dreiteiligen Messreihe ein Parameter geändert, den ich nicht kontrolliert habe. Ein Teil der 141 Millisekunden könnte am Weg zum anderen Server liegen statt am Funk. Dagegen spricht, dass die Antwortzeit im Leerlauf mit 4 Millisekunden die niedrigste der drei Messungen war – wäre der Weg das Problem, wäre schon dieser Wert höher. Bewiesen ist es damit nicht.
+
+Ich lasse den Wert stehen und schreibe dazu, was ihn schwächt. Das ist ehrlicher, als die Messung nachträglich zu wiederholen und nur das saubere Ergebnis zu zeigen.
+
+**Eine Messreihe, in der ein Parameter unbemerkt wechselt, ist eine Messung weniger, als man denkt.** Beim nächsten Durchgang wird der Server in der App fest eingestellt, bevor die erste Messung läuft.
+
+## Warum hier kein Vorher-Nachher steht
+
+Aus dem alten Setup gibt es Werte – dieselbe App, derselbe Haushalt, drei Jahre älter. Sie zeigen zwischen dem schlechtesten und dem besten Wert im selben Haus einen Faktor von rund 30, je nachdem, wo man gerade stand.
+
+Ein Vergleich wird daraus trotzdem nicht. Der Standort wurde damals nicht protokolliert, und das Messgerät ist ein anderes: ein aktuelles Handy mit einer neueren WLAN-Generation. Ein Vorher-Nachher würde drei Veränderungen auf einmal messen und dem Access Point zuschreiben. Was die alten Werte tragen, ist die Streuung innerhalb eines Hauses – nicht der Fortschritt.
+
+## 900 Mbit/s im Büro, und trotzdem acht Stunden
+
+Der Mac im Büro im Obergeschoss hängt am WLAN. Der Speedtest sagt dort 900 Mbit/s. Im August habe ich über genau diese Verbindung ein Fotoarchiv von 157 Gigabyte von einer externen Festplatte auf die NAS kopiert. Der Lauf dauerte rund acht Stunden – das sind etwa 5 Megabyte pro Sekunde, also rund 40 Mbit/s.
+
+Beide Zahlen sind gemessen, und sie unterscheiden sich um mehr als den Faktor 20.
+
+Der Grund ist nicht, dass eine der beiden falsch wäre, sondern dass sie verschiedene Dinge messen. Der Speedtest belegt kurze Spitzenlast gegen einen darauf optimierten Server im Internet. Der Kopierlauf misst eine ganze Kette: externe Festplatte, Dateiprotokoll, viele kleine Dateien, die Gegenstelle – und eine Funkstrecke, die diese Last über Stunden halten muss. Welches Glied der Kette hier das langsamste war, habe ich nicht einzeln nachgemessen; die 40 Mbit/s sind der Durchsatz des Ganzen.
+
+Was daraus folgt, ist trotzdem eindeutig: Über eine Kabelverbindung mit einem Gigabit hätte derselbe Lauf 25 bis 40 Minuten gebraucht statt acht Stunden. Die Verkabelung des Büros ist damit die Nachrüstung mit dem am klarsten belegten Nutzen im ganzen Projekt – und sie steht trotzdem hinten, weil sie noch niemanden gestört hat.
+
+**Ein Speedtest misst den Weg nach draussen. Was im Haus passiert, misst er nicht.**
+
+## Zwei Access Points am Kabel statt drei im Funk
+
+Vorher hingen hier drei Access Points, die sich das Haus über Funk teilten. Heute sind es zwei, jeder an einem Kabel vom Switch im Erdgeschoss. Der Grund ist keine Messung, sondern Bauart: Ein Access Point, der seine Daten selbst über Funk beziehen muss, teilt sich die Luft mit den Geräten, die er versorgt. Jeder Sprung kostet, und ein zusätzliches Gerät im Funknetz vergrössert das Problem eher, als es zu lösen.
+
+Ich habe die alte Aufstellung nicht gegen die neue gemessen – was ich gemessen habe, steht oben. Belegbar ist etwas anderes, und es ist die eigentliche Antwort auf die Frage nach der Anzahl: Am entferntesten Punkt bleiben 330 Mbit/s stehen, aber die Antwortzeit unter Last verzehnfacht sich. Genau dort gehört ein dritter Access Point hin – an ein Kabel, nicht ins Funknetz.
+
+Im Untergeschoss hängt weiterhin ein Access Point der vorherigen Generation. Er ist geblieben, weil er für seinen Zweck reicht. Gemessen habe ich ihn nicht, und deshalb steht hier auch keine Zahl über ihn. Nicht alles, was alt ist, muss ersetzt werden – aber wer es behält, sollte es nicht stillschweigend mitzählen.
+
+## Was tatsächlich im Netz hängt
+
+Zur Frage, wofür der ganze Aufwand: Am 26. August habe ich die Clientliste des Gateways durchgezählt, nach Zonen sortiert.
+
+| Zone | Geräte |
+|---|---|
+| IoT (Lautsprecher, Lampen, Fernseher, Steckdosen) | 27 |
+| Familie (Handys, Uhren, Rechner, Server) | 11 |
+| Management (Netzwerkgeräte, Kameras) | 6 |
+| Arbeit (Firmengeräte, vollständig isoliert) | 2 |
+| Gäste | 1 |
+| noch nicht zugeordnet | 2 |
+| **Total** | **49** |
+
+Drei Beobachtungen aus dieser Zählung, die mehr wert sind als die Summe.
+
+**Vier der sechs Geräte im Management-Netz sind ein einziges Gerät.** Eine Kamerabasis mit drei Funkkameras erscheint als vier Clients hinter einem Kabel. Wer Geräte zählt, zählt Netzwerkteilnehmer, nicht Gegenstände.
+
+**Drei Geräte stehen in der falschen Zone**, und zwar durch meine eigene Hand: zwei Handys und eine Uhr im IoT-Netz. Beim Einrichten einer smarten Steckdose gibt das Handy dem neuen Gerät das Netz weiter, in dem es selbst gerade steckt – man wechselt also vorher bewusst hinüber. Der zweite Teil der Regel lautet, das Netz danach am Handy wieder zu entfernen. Der fällt zuverlässig weg. **Eine Betriebsregel mit zwei Halbsätzen wird zur Regel mit einem** – wer so eine Regel aufstellt, plant den Aufräumschritt gleich mit ein.
+
+**Die Zahl 49 gilt für einen Nachmittag.** Eine Clientliste zählt keine Geräte, sondern eingeschaltete Geräte. Was im Keller ausgesteckt ist, fehlt darin – und taucht beim nächsten Zählen als Überraschung auf.
+
+## Was ich beim nächsten Mal anders mache
+
+- **Den Testserver in der App fest einstellen**, bevor die erste Messung läuft.
+- **Den Standort protokollieren**, nicht nur den Messwert – sonst ist die Messung in drei Jahren wertlos, wie die von 2023.
+- **Die Antwortzeit unter Last immer notieren**, auch beim Rekordwert vom Sofa.
+- **Eine Dateiübertragung als zweite Messgrösse** aufnehmen. Der Speedtest allein hat den Unterschied zwischen 900 und 40 Mbit/s nicht gezeigt.
+
+<Prompt>
+Wer das eigene WLAN messen will, statt es zu schätzen, kann diesen Auftrag an einen KI-Assistenten geben. Lade keine Screenshots und keine Netzwerkdaten hoch – die Antwort wird davon nicht besser, und du gibst mehr preis als nötig.
+
+„Ich möchte mein WLAN zu Hause sauber ausmessen, statt zu raten. Erstelle mir einen Messplan: Welche Standorte soll ich wählen und warum, welche Grössen notiere ich pro Messung, welche Einstellungen in einer Speedtest-App muss ich vorher fixieren, damit die Messungen untereinander vergleichbar bleiben? Frage mich nach Anzahl Stockwerke, Bauweise und Standort des Routers, bevor du antwortest. Erkläre am Schluss, warum die Antwortzeit unter Last mehr über die Abdeckung aussagt als der Durchsatz – und welche Messung ich zusätzlich brauche, wenn ich grosse Dateien im eigenen Netz kopiere.“
+</Prompt>
+
+## Und weiter?
+
+Vier von fünf Meilensteinen dieses Projekts stehen, der fünfte läuft. Das Netz ist gebaut, der Speicher ist gesichert, die Fotos und die Dokumente sind drin. Der nächste Beitrag handelt deshalb nicht von Hardware, sondern von der Frage, die dahinter steckt: Warum das Homelab nie das Ziel war – und was eine Firma an Ablage, Fristen und Auswertung selbstverständlich betreibt, das privat fast vollständig fehlt.
+
+Wer im eigenen Haus schon einmal gemessen hat: Schreib mir, welche Zahl bei dir überrascht hat. Bei mir waren es die 141 Millisekunden.
+
+— Cedric
