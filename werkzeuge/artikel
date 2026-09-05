@@ -1,0 +1,1030 @@
+#!/usr/bin/env bash
+#
+# artikel — der Weg vom fertigen Text bis zur gemessenen Seite, als ein Befehl.
+#
+#   ./werkzeuge/artikel
+#
+# Aufruf ohne Argumente: ein Menue. Nichts zu merken, nichts zu tippen ausser
+# einer Zahl. Jeder schreibende Schritt fragt vorher, und zeigt vorher, was er
+# tun wuerde.
+#
+# Warum es das gibt: Der Weg aus `claude/runbook_artikel_uebergabe_2026-08-29.md`
+# hat neun Schritte, und drei davon sind still. Der stillste ist der
+# Entwurfsschalter: `entwurf: true` erzeugt einen gruenen Bau und eine fehlende
+# Seite — 404, nicht bloss unverlinkt. Am 29.08.2026 stand er beim ersten
+# Artikel eine Handbewegung vor dem Deploy noch auf `true`.
+#
+# 🔑 Dieses Skript gibt NIE einen Klarwert aus, nur Datei und Zeilennummer —
+#    dieselbe Regel wie in werkzeuge/anonymisierung-pruefen.sh. Seine Ausgabe
+#    laesst sich gefahrlos weitergeben, auch an einen Assistenten.
+#
+# ⚠️ Was dieses Skript NICHT kann: sehen. Ob ein Diagramm blass wirkt, ob ein
+#    Bild eine Adresse im Hintergrund hat, ob ein Satz einen Ortshinweis traegt
+#    — das sieht nur ein Mensch. Die Sichtabnahme steht im Menue als eigener
+#    Punkt, damit sie nicht dadurch verschwindet, dass alles andere gruen ist.
+#
+# Bewusst bash 3.2: das ist die Version, die auf einem Mac ohne Homebrew liegt.
+# Keine assoziativen Arrays, kein mapfile, keine Abhaengigkeiten.
+
+set -u
+
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
+UEBERGABE="${BLOG_UEBERGABE:-$HOME/Downloads/blogbeitraege}"
+ERLEDIGT="$UEBERGABE/erledigt"
+ZIEL_BASIS="$REPO/src/content/artikel"
+PRUEFSKRIPT="$REPO/werkzeuge/anonymisierung-pruefen.sh"
+SEITE="https://www.pixelyard.ch"
+
+# --- Ausgabe --------------------------------------------------------------
+
+OK="✅"; WARN="⚠️ "; ROT="🔴"; INFO="  ·"
+BEFUNDE=0
+WARNUNGEN=0
+
+titel()  { echo; echo "=== $* ==="; echo; }
+ok()     { echo "$OK $*"; }
+warn()   { echo "$WARN $*"; WARNUNGEN=$((WARNUNGEN + 1)); }
+rot()    { echo "$ROT $*"; BEFUNDE=$((BEFUNDE + 1)); }
+info()   { echo "$INFO $*"; }
+weiter() { echo; printf "    [Enter] weiter "; read -r _; }
+
+frage() {
+  # frage "Text" -> 0 bei ja. Standard ist NEIN; Enter heisst abbrechen.
+  local antwort
+  echo
+  printf "    %s [j/N] " "$1"
+  read -r antwort
+  case "$antwort" in [jJyY]*) return 0 ;; *) echo "    abgebrochen."; return 1 ;; esac
+}
+
+# --- Frontmatter ----------------------------------------------------------
+
+frontmatter() {
+  # Gibt den Block zwischen der ersten und zweiten '---'-Zeile aus.
+  awk 'NR==1 && $0!="---" {exit} NR==1 {next} /^---[[:space:]]*$/ {exit} {print}' "$1"
+}
+
+feld() {
+  # feld <datei> <name> -> Wert ohne Anfuehrungszeichen, leer wenn nicht da.
+  frontmatter "$1" | awk -v f="$2" '
+    $0 ~ "^" f ":" {
+      sub("^" f ":[[:space:]]*", "")
+      gsub(/^"|"$/, "")
+      print
+      exit
+    }'
+}
+
+slug_von() { basename "$1" .mdx; }
+
+# --- Kandidaten -----------------------------------------------------------
+
+kandidaten() {
+  # Alle .mdx im Uebergabeordner, neueste zuerst.
+  [ -d "$UEBERGABE" ] || return 0
+  ls -t "$UEBERGABE"/*.mdx 2>/dev/null
+}
+
+raeume_weg() {
+  # raeume_weg <datei-im-uebergabeordner> — verschiebt nach erledigt/.
+  # Verschieben, nicht loeschen: die Fassung, die an Claude Code ging, bleibt
+  # nachlesbar. Ab dem Commit ist trotzdem das Repo die Quelle — der Ordner
+  # heisst deshalb erledigt und nicht archiv.
+  local d="$1" ziel
+  [ -e "$d" ] || return 1
+  mkdir -p "$ERLEDIGT"
+  ziel="$ERLEDIGT/$(basename "$d")"
+  if [ -e "$ziel" ]; then
+    ziel="$ERLEDIGT/$(slug_von "$d")-$(date +%Y%m%d).mdx"
+    info "Am Ziel lag schon eine Fassung — die neue heisst $(basename "$ziel")"
+  fi
+  mv "$d" "$ziel" && ok "verschoben nach erledigt/$(basename "$ziel")"
+}
+
+schritt_raeumen() {
+  local d slug gebaut anzahl
+  titel "Uebergabeordner aufraeumen"
+  echo "Was im Repo als Artikel liegt und dort nicht mehr auf Entwurf steht,"
+  echo "ist erledigt — die Fassung im Uebergabeordner ist ab dem Commit nur noch"
+  echo "Herkunft, keine Quelle mehr."
+  echo
+  if [ -z "$(kandidaten)" ]; then echo "$INFO Nichts da."; weiter; return; fi
+  anzahl=0
+  for d in $(kandidaten); do
+    slug=$(slug_von "$d")
+    gebaut=""
+    for f in "$ZIEL_BASIS"/*/"$slug.mdx"; do [ -e "$f" ] && gebaut="$f"; done
+    if [ -n "$gebaut" ] && [ "$(feld "$gebaut" entwurf)" != "true" ]; then
+      echo "   $(basename "$d")  ->  erledigt/   (im Repo live seit $(feld "$gebaut" datum))"
+      anzahl=$((anzahl + 1))
+    else
+      if [ -n "$gebaut" ]; then echo "   $(basename "$d")  bleibt liegen — im Repo noch Entwurf"
+      else echo "   $(basename "$d")  bleibt liegen — im Repo nicht vorhanden"; fi
+    fi
+  done
+  [ "$anzahl" -eq 0 ] && { echo; echo "$INFO Nichts zu verschieben."; weiter; return; }
+  frage "Die oben markierten verschieben?" || { weiter; return; }
+  for d in $(kandidaten); do
+    slug=$(slug_von "$d")
+    gebaut=""
+    for f in "$ZIEL_BASIS"/*/"$slug.mdx"; do [ -e "$f" ] && gebaut="$f"; done
+    if [ -n "$gebaut" ] && [ "$(feld "$gebaut" entwurf)" != "true" ]; then raeume_weg "$d"; fi
+  done
+  weiter
+}
+
+waehle_datei() {
+  # Setzt GEWAEHLT. Bei genau einem Kandidaten ohne Rueckfrage.
+  local liste anzahl i n auswahl
+  liste=$(kandidaten)
+  if [ -z "$liste" ]; then
+    echo "$ROT Keine .mdx in $UEBERGABE"
+    echo "$INFO Dort legt das Homelab-Projekt den fertigen Artikel ab."
+    return 1
+  fi
+  anzahl=$(echo "$liste" | wc -l | tr -d ' ')
+  if [ "$anzahl" = "1" ]; then GEWAEHLT="$liste"; return 0; fi
+  echo "Mehrere Artikel im Uebergabeordner:"
+  echo
+  i=1
+  echo "$liste" | while read -r n; do echo "   $i) $(basename "$n")"; i=$((i + 1)); done
+  printf "\n    Nummer: "
+  read -r auswahl
+  GEWAEHLT=$(echo "$liste" | sed -n "${auswahl}p")
+  [ -n "$GEWAEHLT" ] || { echo "$ROT Keine gueltige Auswahl."; return 1; }
+  return 0
+}
+
+# --- Die Pruefungen -------------------------------------------------------
+
+pruefe_schema() {
+  local d="$1" slug wert fehlend f
+  slug=$(slug_von "$d")
+  echo "-- Frontmatter gegen src/content.config.ts"
+
+  head -1 "$d" | grep -q '^---' || { rot "Die Datei beginnt nicht mit '---'. Kein Frontmatter, der Bau bricht ab."; return; }
+
+  fehlend=""
+  for f in titel beschreibung datum paar; do
+    [ -n "$(feld "$d" "$f")" ] || fehlend="$fehlend $f"
+  done
+  if [ -n "$fehlend" ]; then rot "Pflichtfelder fehlen:$fehlend"; else ok "Pflichtfelder da: titel, beschreibung, datum, paar"; fi
+
+  # Felder, die es im Schema nicht gibt. Sie sehen richtig aus und sind es nicht.
+  for f in title description pubDate tags draft author; do
+    if frontmatter "$d" | grep -q "^$f:"; then
+      rot "Feld '$f' gibt es im Schema nicht — gemeint ist wohl das deutsche Gegenstueck."
+    fi
+  done
+
+  wert=$(feld "$d" "paar")
+  if [ -n "$wert" ] && [ "$wert" != "$slug" ]; then
+    rot "paar ('$wert') und Dateiname ('$slug') stimmen nicht ueberein — davon haengt hreflang."
+  elif [ -n "$wert" ]; then
+    ok "paar stimmt mit dem Dateinamen ueberein"
+  fi
+
+  wert=$(feld "$d" "datum")
+  if echo "$wert" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+    if [ "$wert" = "$(date +%Y-%m-%d)" ]; then ok "datum ist heute ($wert)"
+    else warn "datum ist $wert, heute ist $(date +%Y-%m-%d) — bewusst so?"; fi
+  else
+    rot "datum ist kein Datum im Format JJJJ-MM-TT: '$wert'"
+  fi
+
+  wert=$(feld "$d" "sprache")
+  case "${wert:-de}" in
+    de|en) ok "sprache: ${wert:-de (Standard)}" ;;
+    *) rot "sprache '$wert' ist weder de noch en" ;;
+  esac
+}
+
+pruefe_entwurf() {
+  # $2: "erwartet_true" oder "erwartet_false"
+  local d="$1" erwartet="$2" zeile wert
+  echo
+  echo "-- Der Entwurfsschalter"
+  zeile=$(grep -n '^entwurf:' "$d" | head -1)
+  if [ -z "$zeile" ]; then
+    rot "Kein Feld 'entwurf'. Der Standard im Schema ist FALSE — der Artikel ginge mit dem naechsten Push live."
+    return
+  fi
+  wert=$(feld "$d" "entwurf")
+  info "Zeile ${zeile%%:*}: entwurf: $wert"
+  if [ "$erwartet" = "erwartet_true" ]; then
+    if [ "$wert" = "true" ]; then ok "entwurf: true — richtig fuer die Uebernahme ins Repo"
+    else rot "entwurf steht auf '$wert'. Fuer die Uebernahme gehoert er auf true."; fi
+  else
+    if [ "$wert" = "false" ]; then ok "entwurf: false — die Seite wird gebaut"
+    else rot "entwurf steht auf '$wert'. Der Bau waere gruen und die Seite fehlte — 404, nicht bloss unverlinkt."; fi
+  fi
+}
+
+pruefe_bauteile() {
+  local d="$1" n erstes
+  echo
+  echo "-- Editorial-Bauteile"
+  n=$(grep -c '<TLDR>' "$d")
+  erstes=$(awk 'NR>1 && /^---[[:space:]]*$/ {gefunden=1; next} gefunden && NF {print; exit}' "$d")
+  if [ "$n" = "1" ]; then
+    case "$erstes" in
+      "<TLDR>"*) ok "TL;DR: 1, und steht als erstes Element" ;;
+      *) warn "TL;DR ist da, steht aber nicht als erstes Element im Text" ;;
+    esac
+  elif [ "$n" = "0" ]; then warn "Kein <TLDR> — bewusst so?"
+  else rot "$n mal <TLDR>. Es gehoert genau eines an den Anfang."; fi
+
+  info "Erklaerungen: $(grep -c '<Erklaerung>' "$d") · Prompts: $(grep -c '<Prompt>' "$d") · FAQ-Eintraege: $(frontmatter "$d" | grep -c '^  - frage:')"
+
+  if grep -q '<Prompt>' "$d"; then
+    if grep -q 'Lade keine' "$d"; then ok "Prompt-Box enthaelt den Hinweis 'Lade keine ... hoch'"
+    else rot "Prompt-Box ohne den Hinweis, nichts hochzuladen — Editorial-Regel."; fi
+  fi
+
+  if grep -q '<Affiliatelink' "$d"; then
+    warn "<Affiliatelink> gesetzt: nur zulaessig, wenn der Link eine Provisionskennung traegt. Sonst normaler Markdown-Link."
+  fi
+
+  echo
+  echo "-- Erklaerungsboxen unter der Messregel (Befund 29.08.)"
+  info "Die Boxen werden als neutrale Definition gelesen und deshalb weniger streng geprueft."
+  info "Jede Box einmal selbst lesen: steht darin eine Behauptung, die eine Messung waere?"
+}
+
+pruefe_muster() {
+  # Nur Zeilennummern, nie der Fund selbst.
+  local d="$1" treffer name muster
+  echo
+  echo "-- Strukturelle Muster (Ausgabe ohne Klarwerte)"
+  set -- \
+    "IP-Adresse:([0-9]{1,3}\.){3}[0-9]{1,3}" \
+    "MAC-Adresse:([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}" \
+    "Hostname .local/.arpa:[a-z0-9-]+\.(local|arpa)\b" \
+    "VLAN-Nummer:VLAN ?[0-9]+" \
+    "Beleg-/Seriennummer:(Beleg|Bestell|Kunden|Serien)\w*nummer" \
+    "deutsches Eszett:ß"
+  for eintrag in "$@"; do
+    name="${eintrag%%:*}"; muster="${eintrag#*:}"
+    treffer=$(grep -nE "$muster" "$d" | cut -d: -f1 | tr '\n' ' ')
+    if [ -n "$treffer" ]; then rot "$name — Zeile(n): $treffer"; fi
+  done
+  [ "$BEFUNDE" -eq 0 ] && ok "Keine strukturellen Muster gefunden"
+
+  echo
+  echo "-- Was die Muster nicht finden"
+  info "Ortshinweise in Prosa ('als unsere Strasse angeschlossen wurde')"
+  info "unbelegte Aussagen ('kein einziges Byte')"
+  info "Anbieter + Zeitpunkt im selben Absatz — die Kombination lokalisiert, nicht der Einzelwert"
+  info "Topologie in Diagrammen · Etiketten und Adressen auf Bildern"
+}
+
+pruefe_technik() {
+  local d="$1" treffer woerter
+  echo
+  echo "-- Technische Fallen"
+  treffer=$(grep -n '^```mermaid' "$d" | cut -d: -f1 | tr '\n' ' ')
+  if [ -n "$treffer" ]; then
+    rot "Mermaid-Codeblock in Zeile(n): $treffer — es gibt kein Mermaid-Plugin. Quelle als Kommentar, Bild als SVG."
+  else ok "Kein roher Mermaid-Block"; fi
+
+  treffer=$(grep -n "$SEITE" "$d" | cut -d: -f1 | tr '\n' ' ')
+  if [ -n "$treffer" ]; then
+    warn "Absoluter interner Link in Zeile(n): $treffer — bekaeme target=_blank. Intern relativ schreiben."
+  fi
+
+  if grep -q '<svg' "$d"; then
+    treffer=$(grep -n 'py-line' "$d" | cut -d: -f1 | tr '\n' ' ')
+    if [ -n "$treffer" ]; then rot "--py-line im SVG, Zeile(n): $treffer — Kontrast 1.31/1.46, nur als Zierlinie auf --py-bg zulaessig."
+    else ok "SVG vorhanden, kein --py-line darin"; fi
+    info "Kontrast gehoert gerechnet: 4.5:1 fuer Text, 3:1 fuer Linien und Flaechen."
+  fi
+
+  # Fliesstext ohne Frontmatter, ohne Diagramm-Markup, ohne Kommentare.
+  woerter=$(awk '
+    NR==1 && $0 ~ /^---/ {fm=1; next}
+    fm==1 && /^---[[:space:]]*$/ {fm=0; next}
+    fm==1 {next}
+    /\{\/\*/ {kom=1}
+    kom==1 {if (/\*\/\}/) kom=0; next}
+    /<figure>/ {fig=1}
+    fig==1 {if (/<\/figure>/) fig=0; next}
+    {gsub(/<[^>]*>/, ""); n += NF}
+    END {print n + 0}' "$d")
+  info "Fliesstext: rund $woerter Woerter (ohne Frontmatter, Diagramm und Kommentare)"
+}
+
+pruefe_datei() {
+  local d="$1" modus="$2"
+  BEFUNDE=0; WARNUNGEN=0
+  titel "Pruefe $(basename "$d")"
+  pruefe_schema "$d"
+  pruefe_entwurf "$d" "$modus"
+  pruefe_bauteile "$d"
+  pruefe_muster "$d"
+  pruefe_technik "$d"
+  echo
+  if [ "$BEFUNDE" -eq 0 ]; then
+    echo "$OK Kein Befund, $WARNUNGEN Hinweis(e)."
+    echo "$INFO Das heisst: keine der Pruefungen oben hat angeschlagen. Es heisst nicht,"
+    echo "$INFO dass der Text stimmt — gelesen und angesehen hat ihn noch niemand."
+    return 0
+  else
+    echo "$ROT $BEFUNDE Befund(e), $WARNUNGEN Hinweis(e). Anhalten."
+    return 1
+  fi
+}
+
+# --- Die Schritte ---------------------------------------------------------
+
+schritt_lage() {
+  local d slug zustand n
+  titel "Lage"
+  echo "Repo:          $REPO"
+  echo "Uebergabe:     $UEBERGABE"
+  echo
+  echo "Im Uebergabeordner:"
+  if [ -z "$(kandidaten)" ]; then echo "   (leer)"; else
+    for d in $(kandidaten); do echo "   $(basename "$d")   entwurf: $(feld "$d" entwurf)"; done
+  fi
+  n=$(ls "$ERLEDIGT"/*.mdx 2>/dev/null | wc -l | tr -d ' ')
+  [ "$n" != "0" ] && echo "   erledigt/: $n abgelegte Fassung(en)"
+  echo
+  echo "Im Repo:"
+  for d in "$ZIEL_BASIS"/*/*.mdx; do
+    [ -e "$d" ] || continue
+    zustand=$(feld "$d" entwurf)
+    case "$zustand" in
+      true)  zustand="ENTWURF — wird nicht gebaut" ;;
+      false|"") zustand="live" ;;
+    esac
+    echo "   ${d#$ZIEL_BASIS/}   $zustand   $(feld "$d" datum)"
+  done
+  echo
+  if command -v git >/dev/null 2>&1 && [ -d "$REPO/.git" ]; then
+    echo "Git:"
+    echo "   Zweig:        $(cd "$REPO" && git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+    echo "   Letzter:      $(cd "$REPO" && git log -1 --format='%h %s' 2>/dev/null)"
+    n=$(cd "$REPO" && git status --porcelain | wc -l | tr -d ' ')
+    if [ "$n" = "0" ]; then echo "   Arbeitsbaum:  sauber"
+    else echo "   Arbeitsbaum:  $n geaenderte Datei(en)"; (cd "$REPO" && git status --short | sed 's/^/                 /'); fi
+  else
+    echo "Git: nicht gefunden oder kein Repo an dieser Stelle."
+  fi
+  weiter
+}
+
+schritt_pruefen() {
+  waehle_datei || { weiter; return; }
+  pruefe_datei "$GEWAEHLT" erwartet_true
+  weiter
+}
+
+schritt_uebernehmen() {
+  local sprache slug ziel
+  waehle_datei || { weiter; return; }
+  pruefe_datei "$GEWAEHLT" erwartet_true || {
+    frage "Trotz Befund uebernehmen?" || { weiter; return; }
+  }
+  sprache=$(feld "$GEWAEHLT" sprache); sprache="${sprache:-de}"
+  slug=$(slug_von "$GEWAEHLT")
+  ziel="$ZIEL_BASIS/$sprache/$slug.mdx"
+
+  titel "Ins Repo uebernehmen"
+  echo "    von:  $GEWAEHLT"
+  echo "    nach: $ziel"
+  echo
+  echo "$INFO Das Original bleibt im Uebergabeordner liegen — kopiert, nicht verschoben."
+  if [ -e "$ziel" ]; then
+    warn "Am Ziel liegt schon eine Datei. Unterschiede:"
+    diff "$ziel" "$GEWAEHLT" | head -40
+    frage "Bestehende Datei ueberschreiben?" || { weiter; return; }
+  fi
+  frage "Kopieren?" || { weiter; return; }
+  mkdir -p "$(dirname "$ziel")"
+  cp "$GEWAEHLT" "$ziel" && ok "kopiert"
+
+  echo
+  echo "-- Anonymisierungs-Pruefskript ueber den Arbeitsbaum"
+  if [ -x "$PRUEFSKRIPT" ]; then "$PRUEFSKRIPT"; else warn "$PRUEFSKRIPT nicht gefunden oder nicht ausfuehrbar"; fi
+
+  echo
+  echo "-- Bau"
+  bau_und_pruefe "$slug" "$sprache" erwartet_entwurf
+  echo
+  echo "$INFO Naechster Schritt: Vorschau (Menuepunkt 4) — hell UND dunkel ansehen."
+  weiter
+}
+
+bau_und_pruefe() {
+  # bau_und_pruefe <slug> <sprache> <erwartet_entwurf|erwartet_live>
+  local slug="$1" sprache="$2" modus="$3" vorher nachher ausgabe f
+  if ! command -v npm >/dev/null 2>&1; then warn "npm nicht gefunden — Bau uebersprungen."; return 1; fi
+  vorher=$(find "$REPO/dist" -name '*.html' 2>/dev/null | wc -l | tr -d ' ')
+  ausgabe=$( (cd "$REPO" && npm run build 2>&1) )
+  if [ $? -ne 0 ]; then
+    rot "Der Bau ist fehlgeschlagen. Letzte Zeilen:"
+    echo "$ausgabe" | tail -25
+    return 1
+  fi
+  nachher=$(find "$REPO/dist" -name '*.html' 2>/dev/null | wc -l | tr -d ' ')
+  ok "Bau gruen — Seiten im Bau: $nachher (vorher $vorher)"
+  echo
+  echo "-- Was im Bau tatsaechlich angekommen ist"
+  if [ -e "$REPO/dist/$sprache/artikel/$slug/index.html" ]; then
+    if [ "$modus" = "erwartet_entwurf" ]; then
+      rot "Die Seite wurde gebaut, obwohl der Artikel ein Entwurf sein soll. Entwurfsschalter pruefen."
+    else ok "Seite gebaut: dist/$sprache/artikel/$slug/index.html"; fi
+  else
+    if [ "$modus" = "erwartet_entwurf" ]; then
+      ok "Keine Seite gebaut — genau das tut ein Entwurf. Sichtbar nur im Dev-Server."
+    else
+      rot "KEINE Seite gebaut. Ein gruener Bau ohne Seite heisst 404. Entwurfsschalter pruefen."
+    fi
+  fi
+  if [ "$modus" = "erwartet_live" ]; then
+    for f in "$sprache/index.html" "rss.xml" "sitemap-0.xml" "llms.txt"; do
+      if [ -e "$REPO/dist/$f" ] && grep -q "$slug" "$REPO/dist/$f"; then ok "in dist/$f"
+      else rot "NICHT in dist/$f — alle vier ziehen aus derselben Funktion, es fehlt sonst ueberall."; fi
+    done
+  fi
+  return 0
+}
+
+schritt_vorschau() {
+  titel "Vorschau im Dev-Server"
+  echo "Der Dev-Server zeigt Entwuerfe, der Bau nicht. Genau dafuer ist er da."
+  echo
+  echo "$INFO Ansehen, was kein Skript sieht:"
+  echo "$INFO   hell UND dunkel · Desktop UND Handy"
+  echo "$INFO   Diagramm: blass? Beschriftung lesbar?"
+  echo "$INFO   Bilder: Etiketten, Seriennummern, Adressen im Hintergrund?"
+  echo "$INFO   Text: Ortshinweise, Zusagen ohne Messung, doppelte Pointen aus frueheren Artikeln"
+  echo
+  echo "    Beenden mit Ctrl-C, danach steht das Menue wieder da."
+  frage "Dev-Server jetzt starten?" || { weiter; return; }
+  (cd "$REPO" && npm run dev)
+  weiter
+}
+
+schritt_freigabe() {
+  local sprache slug ziel wert heute
+  titel "Freigabe und Livegang"
+  echo "Ab hier wird veroeffentlicht. Jeder Schritt fragt vorher."
+  echo
+  printf "    Welcher Artikel (Dateiname ohne .mdx)? "
+  read -r slug
+  sprache="de"
+  ziel="$ZIEL_BASIS/$sprache/$slug.mdx"
+  [ -e "$ziel" ] || ziel="$ZIEL_BASIS/en/$slug.mdx"
+  [ -e "$ziel" ] || { echo "$ROT Nicht gefunden im Repo: $slug"; weiter; return; }
+  sprache=$(basename "$(dirname "$ziel")")
+
+  echo
+  echo "-- Vor dem Umlegen"
+  echo "$INFO Sichtabnahme hell und dunkel gemacht? Wenn nein: Menuepunkt 4, nicht weiter hier."
+  frage "Gesehen und in Ordnung?" || { weiter; return; }
+
+  wert=$(feld "$ziel" entwurf)
+  if [ "$wert" != "false" ]; then
+    echo
+    echo "    entwurf: $wert  ->  entwurf: false"
+    frage "Entwurfsschalter jetzt umlegen?" || { weiter; return; }
+    # Punktgenau die eine Zeile, ohne Datumsformate oder Umlaute anzufassen.
+    sed -i.bak 's/^entwurf:.*/entwurf: false/' "$ziel" && rm -f "$ziel.bak"
+    ok "entwurf: $(feld "$ziel" entwurf)"
+  else
+    ok "entwurf steht bereits auf false"
+  fi
+
+  heute=$(date +%Y-%m-%d); wert=$(feld "$ziel" datum)
+  if [ "$wert" != "$heute" ]; then
+    echo
+    warn "datum: $wert — heute ist $heute."
+    if frage "Auf heute setzen?"; then
+      sed -i.bak "s/^datum:.*/datum: $heute/" "$ziel" && rm -f "$ziel.bak"
+      ok "datum: $(feld "$ziel" datum)"
+    else
+      info "bleibt bei $wert — bewusst so."
+    fi
+  fi
+
+  pruefe_datei "$ziel" erwartet_false || {
+    frage "Trotz Befund weiter zum Bau?" || { weiter; return; }
+  }
+
+  echo
+  echo "-- Anonymisierung, Arbeitsbaum"
+  if [ -x "$PRUEFSKRIPT" ]; then
+    "$PRUEFSKRIPT" || { frage "Trotz Befund weiter?" || { weiter; return; }; }
+  else warn "$PRUEFSKRIPT nicht gefunden"; fi
+
+  echo
+  echo "-- Bau mit dem Artikel als Seite"
+  bau_und_pruefe "$slug" "$sprache" erwartet_live || {
+    frage "Trotz Befund weiter zum Commit?" || { weiter; return; }
+  }
+
+  command -v git >/dev/null 2>&1 || { echo; rot "git nicht gefunden — hier ist Schluss."; weiter; return; }
+
+  echo
+  echo "-- Was committet wuerde"
+  (cd "$REPO" && git status --short)
+  echo
+  info "Es soll die Artikeldatei sein, sonst nichts Unerwartetes."
+  frage "Nur diese Datei vormerken und committen?" || { weiter; return; }
+  (cd "$REPO" && git add "$ziel")
+  echo
+  echo "-- Der Entwurfsschalter im Diff (die Zeile, auf die es ankommt)"
+  (cd "$REPO" && git diff --cached -- "$ziel" | grep -E '^[+-](entwurf|datum):' || echo "    (keine Aenderung an entwurf/datum in diesem Commit)")
+  echo
+  (cd "$REPO" && git commit -m "Artikel: $slug veroeffentlicht" -m "Entwurfsschalter auf false, Bau und Anonymisierung geprueft.") || { weiter; return; }
+  ok "committet"
+
+  echo
+  frage "Jetzt pushen? Danach baut Cloudflare, und die Seite geht live." || {
+    info "Nicht gepusht. Der Commit liegt lokal."
+    weiter; return
+  }
+  (cd "$REPO" && git push) && ok "gepusht"
+
+  echo
+  echo "$INFO Der Bau bei Cloudflare braucht ein bis zwei Minuten."
+  frage "Jetzt nachmessen?" && nachmessen "$slug" "$sprache"
+
+  if [ -e "$UEBERGABE/$slug.mdx" ]; then
+    echo
+    echo "-- Uebergabeordner"
+    info "Die Fassung dort ist ab diesem Commit nur noch Herkunft, nicht mehr Quelle."
+    frage "Original nach erledigt/ verschieben?" && raeume_weg "$UEBERGABE/$slug.mdx"
+  fi
+  echo
+  echo "$INFO Danach von Hand, nicht vergessen:"
+  echo "$INFO   1. Eintrag in claude/blog_artikel_index.md (Metadaten, kein Text)"
+  echo "$INFO   2. Haken in claude/offene_punkte.md"
+  echo "$INFO   3. Textaenderungen, die im Repo entstanden sind, ans Homelab-Projekt zuruecktragen: Zeile, alt, neu"
+  weiter
+}
+
+nachmessen() {
+  local slug="$1" sprache="${2:-de}" versuch code treffer
+  titel "Nachmessung an der veroeffentlichten Seite"
+  command -v curl >/dev/null 2>&1 || { rot "curl nicht gefunden."; return; }
+
+  versuch=1
+  while [ "$versuch" -le 10 ]; do
+    treffer=$(curl -s "$SEITE/$sprache/" | grep -c "$slug")
+    code=$(curl -s -o /dev/null -w '%{http_code}' "$SEITE/$sprache/artikel/$slug/")
+    echo "    Versuch $versuch: Liste nennt den Artikel ${treffer}x · Artikelseite HTTP $code"
+    if [ "$treffer" -ge 1 ] && [ "$code" = "200" ]; then break; fi
+    versuch=$((versuch + 1))
+    [ "$versuch" -le 10 ] && sleep 20
+  done
+
+  echo
+  [ "${treffer:-0}" -ge 1 ] && ok "Der Artikel steht in der Liste" || rot "Der Artikel steht NICHT in der Liste"
+  [ "${code:-000}" = "200" ] && ok "Die Artikelseite antwortet mit 200" || rot "Die Artikelseite antwortet mit $code"
+
+  # Die Kontrollmessung: ohne sie beweist die 200 oben nichts.
+  code=$(curl -s -o /dev/null -w '%{http_code}' "$SEITE/$sprache/gibt-es-nicht-$(date +%s)/")
+  if [ "$code" = "404" ]; then ok "Ein erfundener Pfad antwortet mit 404 — die 200 oben bedeutet also etwas"
+  else rot "Ein erfundener Pfad antwortet mit $code statt 404. Solange das so ist, beweist die 200 oben nichts."; fi
+}
+
+schritt_nachmessen() {
+  local slug
+  printf "\n    Dateiname ohne .mdx: "
+  read -r slug
+  [ -n "$slug" ] && nachmessen "$slug" de
+  weiter
+}
+
+schritt_auftrag() {
+  local d slug text
+  waehle_datei || { weiter; return; }
+  slug=$(slug_von "$GEWAEHLT")
+  text="Bitte den Artikel $slug.mdx aus ~/Downloads/blogbeitraege/ ins Repo uebernehmen.
+
+Reihenfolge und Pruefpunkte (runbook_artikel_uebergabe, §6):
+1. Kopie nach src/content/artikel/de/$slug.mdx, Frontmatter gegen src/content.config.ts. entwurf bleibt true.
+2. Diagramm: SVG ist in der Datei, Mermaid-Quelle steht als Kommentar daneben. Kontrast rechnen — 4.5:1 fuer Text, 3:1 fuer Linien und Flaechen, gegen --py-surface. Kein --py-line in Figuren.
+3. ./werkzeuge/anonymisierung-pruefen.sh, dazu den Text auf Ortshinweise und unbelegte Aussagen lesen. Funde melden, nicht selbst entscheiden.
+4. npm run build muss ohne Schemafehler durchlaufen; die Artikelseite darf dabei NICHT entstehen, solange entwurf true ist.
+5. npm run dev fuer die Sichtabnahme, ohne das Feld umzuschalten.
+6. Commit nur der Artikeldatei, entwurf: true im Diff sichtbar.
+
+Den Livegang mache ich selbst mit ./werkzeuge/artikel."
+
+  titel "Auftrag fuer Claude Code"
+  echo "$text"
+  echo
+  if command -v pbcopy >/dev/null 2>&1; then
+    printf '%s' "$text" | pbcopy && ok "In die Zwischenablage kopiert."
+  fi
+  weiter
+}
+
+# --- Handbuch -------------------------------------------------------------
+#
+# Die Doku liegt im Werkzeug, nicht daneben. Grund: eine Anleitung in einem
+# zweiten Dokument wird beim Arbeiten nicht aufgeschlagen — und eine, die
+# niemand aufschlägt, altert still. Was hier steht, wandert mit dem Skript.
+
+lies() {
+  # Text von stdin durch einen Pager, wenn es einen gibt.
+  if command -v less >/dev/null 2>&1; then less -R; else cat; fi
+}
+
+kap_weg() {
+cat <<'ENDE'
+==========================================================================
+ 1 · DER WEG IM ÜBERBLICK
+==========================================================================
+
+  Homelab-Projekt          →   ~/Downloads/blogbeitraege/   →   Repo   →   Cloudflare Pages
+  schreibt und anonymisiert     Übergabeordner                  dieses Werkzeug
+
+  Vier Beteiligte, und jeder kann etwas, das die anderen nicht können:
+
+  Claude im Homelab-Projekt   schreibt den Text — dort liegen die Belege.
+                              Mitten im Schreiben braucht man immer noch eine
+                              Zahl; ein kuratierter Auszug woanders hat sie nicht.
+  Cedric                      sieht. Sichtabnahme, Freigabe, Entscheide.
+  Dieses Werkzeug             prüft, was prüfbar ist, und veröffentlicht.
+  Claude Code                 macht die Arbeit am Repo, die Urteil braucht:
+                              SVG aus Mermaid, Kontrast rechnen, Text lesen.
+
+  Die Reihenfolge, wie sie im Menü steht:
+
+     2 prüfen  →  3 übernehmen  →  4 ansehen  →  5 freigeben  →  6 nachmessen
+                                                             →  8 aufräumen
+
+  Der Übergabeordner ist bewusst ausserhalb des Repos: dort läuft das
+  Anonymisierungs-Prüfskript nicht. Deshalb wird kopiert, nicht verschoben —
+  und ab dem Commit ist die Fassung im Repo die Quelle, nicht mehr die dort.
+
+  Anderer Ordner? BLOG_UEBERGABE=/pfad ./werkzeuge/artikel
+ENDE
+}
+
+kap_punkte() {
+cat <<'ENDE'
+==========================================================================
+ 2 · DIE MENÜPUNKTE IM EINZELNEN
+==========================================================================
+
+ 1 LAGE
+   Was liegt im Übergabeordner, was im Repo, welcher Artikel ist Entwurf,
+   was sagt git. Der Blick vor dem ersten Handgriff — er kostet nichts und
+   beantwortet die Frage, die man sonst rät: in welchem Zustand ist das hier?
+
+ 2 PRÜFEN
+   Liest die Datei im Übergabeordner und fasst nichts an. Vollständige Liste
+   der Prüfungen: Kapitel 3.
+
+ 3 ÜBERNEHMEN
+   Kopiert nach src/content/artikel/<sprache>/<slug>.mdx, führt danach
+   werkzeuge/anonymisierung-pruefen.sh aus und baut einmal.
+   Erwartung hier: der Bau ist grün UND die Artikelseite entsteht NICHT.
+   Ein Entwurf gehört nicht in den Bau — er ist nur im Dev-Server sichtbar.
+
+ 4 VORSCHAU
+   npm run dev. Der einzige Schritt, den kein Skript für dich tun kann.
+   Was dabei anzusehen ist: Kapitel 4.
+
+ 5 FREIGABE UND LIVEGANG
+   Der Reihe nach, jeder Schritt mit Rückfrage:
+     Sichtabnahme bestätigen · entwurf auf false · Datum prüfen ·
+     alle Prüfungen aus Kapitel 3 · Anonymisierung · Bau mit Seitenkontrolle ·
+     git add nur dieser Datei · Diff der Zeilen entwurf/datum · Commit ·
+     Push · Nachmessung · Original nach erledigt/
+   Abbrechen ist überall folgenlos, solange nicht gepusht ist.
+
+ 6 NUR NACHMESSEN
+   Für den Fall, dass der Cloudflare-Bau beim ersten Versuch noch lief.
+   Zehn Versuche, zwanzig Sekunden Abstand.
+
+ 7 AUFTRAG FÜR CLAUDE CODE
+   Erzeugt den fertigen Auftragstext mit Dateiname und Prüfpunkten und legt
+   ihn in die Zwischenablage. Für alles, was Urteil braucht: SVG aus der
+   Mermaid-Quelle, Kontrast rechnen, den Text auf Bedeutung lesen.
+
+ 8 ÜBERGABEORDNER AUFRÄUMEN
+   Verschiebt jede Fassung nach erledigt/, deren Artikel im Repo liegt und
+   dort nicht mehr auf Entwurf steht. Verschoben, nicht gelöscht.
+   Warum überhaupt: Die Auswahlliste wächst sonst mit jedem Beitrag, und
+   irgendwann wählt man in einer Liste von zwanzig die falsche Zeile aus —
+   dieselbe Fehlerklasse wie der Klick in einer umsortierten Portliste.
+
+ 9 SELBSTTEST
+   Ruft anonymisierung-pruefen.sh --selbsttest. Ein Test, der nie rot war,
+   hat seine Nützlichkeit nie belegt.
+ENDE
+}
+
+kap_pruefungen() {
+cat <<'ENDE'
+==========================================================================
+ 3 · DIE PRÜFUNGEN — UND WARUM JEDE DRIN IST
+==========================================================================
+
+ FRONTMATTER (gegen src/content.config.ts)
+   Pflicht: titel, beschreibung, datum, paar.
+   Fremdfelder title, description, pubDate, tags, draft, author → rot.
+     Sie sehen richtig aus und sind es nicht; das Schema ist deutsch.
+   paar muss dem Dateinamen ohne .mdx entsprechen — daran hängt hreflang.
+   datum als JJJJ-MM-TT; Abweichung von heute als Hinweis, nicht als Fehler.
+   sprache nur de oder en.
+
+ DER ENTWURFSSCHALTER — richtungsabhängig
+   Bei ÜBERNAHME muss er true sein, bei FREIGABE false.
+   Die beiden Prüfungen sehen gleich aus und prüfen Gegenteiliges. Wer sie
+   verwechselt, hat geprüft und nichts geprüft. Deshalb sagt das Werkzeug in
+   jedem Schritt dazu, welche Richtung es gerade erwartet.
+   Fehlt das Feld ganz → rot: der Schema-Standard ist false, der Artikel
+   ginge mit dem nächsten Push live.
+   Und der Fall, für den das alles gebaut ist: entwurf: true beim
+   Veröffentlichungs-Commit erzeugt einen grünen Bau und eine fehlende
+   Seite — 404, nicht bloss unverlinkt. Liste, RSS, Sitemap und llms.txt
+   fehlten alle vier, weil sie aus derselben Funktion gespeist werden.
+
+ BAUTEILE
+   <TLDR> genau einmal und als erstes Element.
+   Zählung von <Erklaerung>, <Prompt>, FAQ-Einträgen.
+   <Prompt> ohne den Hinweis "Lade keine ... hoch" → rot. Ein Prompt, der den
+   Leser implizit zum Hochladen zwingt, hält die Regel dem Wortlaut nach ein
+   und bricht sie in der Sache.
+   <Affiliatelink> → Hinweis: nur zulässig, wenn der Link eine
+   Provisionskennung trägt. Auf einem unbezahlten Link gesetzt, wäre die
+   Kennzeichnung selbst falsch.
+
+ STRUKTURELLE MUSTER (Ausgabe: nur Zeilennummern, nie der Fund)
+   IP-Adresse · MAC-Adresse · Hostname auf .local/.arpa · VLAN-Nummer ·
+   Beleg-/Bestell-/Kunden-/Seriennummer · deutsches Eszett.
+   Das sind Formen, keine Werte — deshalb dürfen sie hier stehen. Die
+   benannten Ersetzungen prüft anonymisierung-pruefen.sh gegen die Datei
+   eine Ebene über dem Repo; sie liegt dort, damit sie nicht committet
+   werden KANN. Eine gitignorierte Datei kann committet werden, eine nicht
+   vorhandene nicht.
+
+ TECHNISCHE FALLEN
+   Roher ```mermaid-Block → rot. Es gibt kein Mermaid-Plugin, und es kommt
+     keines: Quelle als Kommentar, Bild als SVG daneben.
+   Absoluter interner Link (https://www.pixelyard.ch/...) → Hinweis.
+     rehype-external-links unterscheidet nach Protokoll und gäbe ihm
+     target=_blank. Intern relativ schreiben.
+   --py-line im SVG → rot. Kontrast 1.31/1.46 — nur als Zierlinie auf
+     --py-bg zulässig, nie als Struktur in einer figure.
+   Wortzahl des Fliesstexts ohne Frontmatter, Diagramm und Kommentare.
+
+ NACH DEM BAU
+   Liegt dist/<sprache>/artikel/<slug>/index.html?
+   Steht der Slug in der Artikelliste, in rss.xml, in sitemap-0.xml und in
+   llms.txt? Alle vier ziehen aus alleArtikel() — es fehlt entweder keiner
+   oder alle. Dazu die Seitenzahl vorher/nachher.
+
+ NACHMESSUNG AN DER LIVE-SEITE
+   1. Die Artikelliste nennt den Slug.
+   2. Die Artikelseite antwortet mit 200.
+   3. Ein erfundener Pfad antwortet mit 404.
+   Die dritte Zeile gehört dazu. Vor der 404-Seite lieferte jeder unbekannte
+   Pfad 200 — dann bewiese die zweite Zeile nichts.
+ENDE
+}
+
+kap_checkliste() {
+cat <<'ENDE'
+==========================================================================
+ 4 · WAS KEIN SKRIPT PRÜFT
+==========================================================================
+
+  Ein grüner Lauf heisst: keine der eingebauten Prüfungen hat angeschlagen.
+  Er heisst nicht, dass der Artikel stimmt.
+
+ SICHTABNAHME (Menüpunkt 4)
+   · hell UND dunkel, Desktop UND Handy
+   · Diagramm: wirkt es blass? Sind die Beschriftungen lesbar?
+   · Bilder: Etiketten, Seriennummern, Adressen im Hintergrund
+   Claude Code sieht nicht. Er rechnet Kontrast, zählt Bauteile, misst
+   Statuscodes. Ob etwas blass wirkt, sieht nur ein Mensch am Bildschirm.
+
+ TEXT
+   · Ortshinweise in Prosa. Nicht der Einzelwert lokalisiert, die Kombination:
+     Anbieter + Zeitpunkt · Regionalversorger + Kanton + Anschlussdatum.
+     Eine Regel, die Werte einzeln prüft, übersieht genau die Fälle, für die
+     sie da ist.
+   · Behauptungen, die eine Messung wären — auch als Verneinung
+     ("schickt nichts nach draussen"), und auch in den Erklärungsboxen.
+     Die Boxen werden als neutrale Definition gelesen und deshalb weniger
+     streng geprüft; sie tragen Behauptungen wie jeder andere Satz.
+   · Zusagen an den nächsten Beitrag: nur anteasern, was schon gemessen ist.
+     Ein Teaser ist sonst ein Versprechen auf eine Messung, die es nicht gibt.
+   · Pointen, die in einem früheren Artikel schon stehen.
+
+ NACH DEM LIVEGANG (von Hand, im Projektwissen)
+   · Eintrag in claude/blog_artikel_index.md — Metadaten, kein Text
+   · Haken in claude/offene_punkte.md
+   · Textänderungen, die im Repo entstanden sind, zurück ans Homelab-Projekt:
+     Zeile, alt, neu. Sonst laufen Quelle und Repo auseinander.
+
+ EINMAL IM LEBEN EINES REPOS
+   · anonymisierung-pruefen.sh --historie vor dem Öffentlichschalten.
+     Der normale Lauf prüft den Arbeitsbaum — öffentlich wird die Historie.
+ENDE
+}
+
+kap_merksaetze() {
+cat <<'ENDE'
+==========================================================================
+ 5 · DIE MERKSÄTZE, DIE IN DIESEM WERKZEUG STECKEN
+==========================================================================
+
+  Der Entwurfsschalter ist die einzige Stelle im Bau, an der ein grüner
+  Durchlauf eine fehlende Seite erzeugt. Ein Fehler meldet sich; ein Filter
+  tut genau das, wofür er gebaut ist.
+
+  Wer eine Falle kommentiert, kommentiert meist nur ihre eine Richtung.
+  (Im Quelltext stand: "Ein Entwurf, der versehentlich live geht, meldet sich
+  nicht von selbst." Eingetreten ist der umgekehrte Fall.)
+
+  Ein grünes SUCCESS ist kein Mengennachweis. Der Nachweis ist die Zählung.
+
+  Ein Abruf, der einen Text durch ein Modell reicht, ist eine Aussage über
+  den Text, keine Zeile daraus. Wo es auf den Wortlaut ankommt, wird am
+  Original gegengelesen.
+
+  Eine Musterformulierung ist stärker als die Regel über ihr — beim Schreiben
+  greift man zum fertigen Satz, nicht zur Tabelle.
+
+  Nicht der einzelne Wert ist identifizierend, sondern die Kombination.
+
+  Eine Betriebsregel mit zwei Halbsätzen wird zur Regel mit einem. Der Teil,
+  der Arbeit macht und keinen sofortigen Nutzen bringt, fällt weg — deshalb
+  fragt Menüpunkt 5 am Ende selbst nach dem Aufräumen.
+
+  Ein Werkzeug, das alle prüfbaren Schritte übernimmt, macht die unprüfbaren
+  zur einzigen verbleibenden Arbeit. Es muss sie deshalb benennen, sonst
+  verschwinden sie hinter dem grünen Haken.
+ENDE
+}
+
+kap_ablage() {
+cat <<'ENDE'
+==========================================================================
+ 6 · ABLAGE — WELCHE DATEI WO LEBT
+==========================================================================
+
+  ~/Downloads/blogbeitraege/<slug>.mdx
+      Die gelieferte Fassung aus dem Homelab-Projekt. Ausserhalb des Repos,
+      deshalb läuft das Prüfskript dort nicht. Wird kopiert, nie verschoben.
+
+  ~/Downloads/blogbeitraege/erledigt/
+      Wohin Menüpunkt 8 und das Ende von Menüpunkt 5 die Fassung legen,
+      sobald der Artikel im Repo live ist. Verschoben, nicht gelöscht:
+      nachlesbar bleibt sie, aber sie steht nicht mehr zur Auswahl.
+
+  src/content/artikel/<sprache>/<slug>.mdx
+      Ab dem Commit die Quelle. Wer danach die Fassung im Übergabeordner
+      weiterpflegt, erzeugt zwei Stände.
+
+  ../pixelyard-klarwerte.md  (eine Ebene ÜBER dem Repo)
+      Die benannten Ersetzungen. Liegt dort, damit sie nicht committet
+      werden kann — nicht gitignoriert, sondern ausserhalb.
+      Eine Regel, die durchgesetzt ist, schlägt eine, die vereinbart ist.
+
+  claude/runbook_artikel_uebergabe_2026-08-29.md   (im Repo)
+      Der ausführliche Weg mit Zuständigkeiten. Gehört dem Pixelyard-Projekt.
+
+  Projektwissen Homelab
+      blog_01_gliederung.md  — die Werkbank: Gliederungen, Messreihen, Belege
+      blog_artikel_index.md  — was veröffentlicht ist, mit welcher Zahl
+      offene_punkte.md       — was als Nächstes dran ist
+      Kein Artikeltext, nirgends. Der Text lebt im Repo und auf der Seite.
+ENDE
+}
+
+kap_fehler() {
+cat <<'ENDE'
+==========================================================================
+ 7 · WENN ETWAS SCHIEFGEHT
+==========================================================================
+
+ Der Bau ist rot
+   Die letzten Zeilen der Ausgabe stehen im Terminal. Häufigster Fall:
+   Frontmatter gegen das Schema — ein Pflichtfeld fehlt oder ein Feld heisst
+   englisch. Menüpunkt 2 findet beides vor dem Bau.
+
+ Der Bau ist grün, die Seite fehlt in dist/
+   Der Entwurfsschalter. Genau dieser Fall ist der Grund für dieses Werkzeug.
+
+ Nach dem Push antwortet die Seite mit 404
+   Erst weitermessen (Menüpunkt 6): der Cloudflare-Bau braucht ein bis zwei
+   Minuten. Bleibt es dabei, ist der Artikel nicht im Bau — zurück zum
+   Entwurfsschalter und zur Seitenkontrolle in Menüpunkt 5.
+
+ Alles antwortet mit 200, auch erfundene Pfade
+   Dann ist die 404-Seite kaputt, und keine der Messungen bedeutet etwas.
+   Erst das reparieren, dann wieder messen.
+
+ git: "Unable to create index.lock: File exists"
+   Eine abgebrochene Git-Operation hat die Sperrdatei liegen lassen.
+   rm .git/index.lock — aber nur, wenn sicher kein git mehr läuft.
+
+ Das Prüfskript meldet "Kein markierter Werteblock"
+   Dann ist dieser Teil NICHT gelaufen. Die Datei über dem Repo braucht den
+   Block zwischen den Markern pixelyard:werte:anfang und :ende.
+   Ein sauberer Lauf ohne Werteliste bedeutet nichts.
+
+ Versehentlich gepusht, was noch nicht live sein sollte
+   Nicht die Historie umschreiben, sondern einen Commit hinterher, der
+   entwurf wieder auf true setzt — die Seite verschwindet mit dem nächsten
+   Bau. Danach im Projektwissen nachtragen, was passiert ist.
+ENDE
+}
+
+schritt_handbuch() {
+  local wahl
+  while :; do
+    clear 2>/dev/null
+    cat <<'ENDE'
+  Handbuch — artikel
+  ------------------------------------------------------------------
+   1  Der Weg im Überblick
+   2  Die Menüpunkte im Einzelnen
+   3  Die Prüfungen — und warum jede drin ist
+   4  Was kein Skript prüft
+   5  Die Merksätze, die in diesem Werkzeug stecken
+   6  Ablage — welche Datei wo lebt
+   7  Wenn etwas schiefgeht
+   8  Alles am Stück
+   0  zurück
+  ------------------------------------------------------------------
+ENDE
+    printf "\n  Auswahl: "
+    read -r wahl
+    case "$wahl" in
+      1) kap_weg | lies ;;
+      2) kap_punkte | lies ;;
+      3) kap_pruefungen | lies ;;
+      4) kap_checkliste | lies ;;
+      5) kap_merksaetze | lies ;;
+      6) kap_ablage | lies ;;
+      7) kap_fehler | lies ;;
+      8) { kap_weg; kap_punkte; kap_pruefungen; kap_checkliste; kap_merksaetze; kap_ablage; kap_fehler; } | lies ;;
+      0|q|Q) return ;;
+      *) ;;
+    esac
+  done
+}
+
+schritt_selbsttest() {
+  titel "Selbsttest des Pruefskripts"
+  echo "Ein Test, der nie rot war, hat seine Nuetzlichkeit nie belegt."
+  echo
+  if [ -x "$PRUEFSKRIPT" ]; then "$PRUEFSKRIPT" --selbsttest; else rot "$PRUEFSKRIPT nicht gefunden"; fi
+  weiter
+}
+
+# --- Menue ----------------------------------------------------------------
+
+menue() {
+  clear 2>/dev/null
+  cat <<ENDE
+  pixelyard · artikel
+  ------------------------------------------------------------------
+  Uebergabe: $UEBERGABE
+  Repo:      $REPO
+
+   1  Lage ansehen — was liegt wo, was ist Entwurf, was sagt git
+   2  Artikel pruefen (im Uebergabeordner, noch nichts anfassen)
+   3  Ins Repo uebernehmen — kopieren, Anonymisierung, Bau
+   4  Vorschau im Dev-Server — die Sichtabnahme
+   5  Freigabe und Livegang — Schalter, Bau, Commit, Push, Nachmessung
+   6  Nur nachmessen (wenn der Deploy noch lief)
+   7  Auftrag fuer Claude Code erzeugen
+   8  Uebergabeordner aufraeumen — Erledigtes nach erledigt/
+   9  Selbsttest des Anonymisierungs-Skripts
+   h  Handbuch — der ganze Weg, die Pruefungen, was kein Skript prueft
+   0  Ende
+  ------------------------------------------------------------------
+ENDE
+  printf "\n  Auswahl: "
+}
+
+while :; do
+  menue
+  read -r wahl
+  case "$wahl" in
+    1) schritt_lage ;;
+    2) schritt_pruefen ;;
+    3) schritt_uebernehmen ;;
+    4) schritt_vorschau ;;
+    5) schritt_freigabe ;;
+    6) schritt_nachmessen ;;
+    7) schritt_auftrag ;;
+    8) schritt_raeumen ;;
+    9) schritt_selbsttest ;;
+    h|H|help|--help|-h) schritt_handbuch ;;
+    0|q|Q) echo; exit 0 ;;
+    *) ;;
+  esac
+done
