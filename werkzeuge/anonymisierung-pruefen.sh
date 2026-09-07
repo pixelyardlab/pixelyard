@@ -46,8 +46,85 @@ cd "$ZIEL" || exit 1
 # ein relativer Pfad hätte beim Prüfen eines fremden Ordners still ins Leere
 # gezeigt, und der Lauf wäre zur halben Prüfung geworden, ohne es zu sagen.
 KLARWERTE="$(dirname "$EIGENER_ORDNER")/pixelyard-klarwerte.md"
-AUSNAHME="src/lib/seite.ts"   # die eine erlaubte Fundstelle, s. CLAUDE.md
+AUSNAHME="src/lib/seite.ts"   # nur noch fuer Abschnitt 2, s. dort
 BEFUNDE=0
+
+# --- Die Musterliste, ab jetzt genau einmal -------------------------------
+# Sie stand bis zum 07.09.2026 ZWEIMAL im Skript: einmal fuer den Arbeitsbaum,
+# einmal fuer --historie. Zwei Fassungen derselben Liste laufen auseinander,
+# und dann schuetzt die eine, was die andere laengst durchlaesst.
+STRUKTUR='([0-9]{1,3}\.){3}[0-9]{1,3}|([0-9a-f]{2}:){5}[0-9a-f]{2}|[a-z0-9-]+\.(local|arpa)\b|VLAN ?[0-9]+|(Beleg|Bestell|Kunden|Serien)\w*nummer'
+
+# 🔴 Adressmuster — neu am 07.09.2026, und der Grund fuer diesen Commit.
+#
+# Bis dahin kannte dieses Skript KEIN Adressmuster. Strasse, PLZ und Ort waren
+# fuer Abschnitt 1 schlicht nicht vorhanden: Es haette eine Postanschrift in
+# jeder Datei uebersehen, nicht nur in der einen, die ausgenommen war.
+# Genau so ist es zehn Tage lang gelaufen — s. CLAUDE.md, Abschnitt
+# „Die zurueckgenommene Ausnahme".
+#
+# Die Wortliste ist bewusst kurz gehalten (Strasse/Weg/Gasse/Platz/Wies).
+# ⚠️ Sie wird zwingend OHNE -i gesucht: Die Grossschreibung am Wortanfang ist
+# der halbe Filter. Mit -i meldete „1012 mbit" eine Postleitzahl.
+ADRESSE='[A-ZÄÖÜ][a-zäöü-]{2,}(strasse|str\.|weg|gasse|platz|wies)[ ]+[0-9]{1,4}[a-z]?\b|\b(CH-)?[1-9][0-9]{3}[ ]+[A-ZÄÖÜ][a-zäöü]{2,}'
+
+# --- Wert-Ausnahmen. Ausdruecklich KEINE Datei-Ausnahmen ------------------
+# Bauform wie bei 127.0.0.1: Der WERT wird aus der Fundzeile gestrichen, und
+# die Zeile wird danach ERNEUT geprueft. Steht dort noch eine echte Adresse,
+# schlaegt sie weiterhin an. Eine Datei-Ausnahme kann das nicht — sie macht
+# die ganze Datei blind, und genau daran ist die Adresse zehn Tage lang
+# vorbeigekommen.
+#
+#   127.0.0.1        bedeutet „dieser Rechner", auf jedem Geraet dasselbe.
+#   Musterstrasse …  Doku-Platzhalter, wie 203.0.113.0/24 bei den Adressen.
+#                    Steht so im Artikel drei-stille-fehler-an-einem-tag.
+#   1234 Mbit …      Messwert mit Einheit, keine Postleitzahl.
+#   2016 The …       englische Lizenzzeile in public/fonts, kein Ortsname.
+#
+# ⚠️ Die letzten beiden sind WORTGENAU ausgenommen. „4106 The" wird NICHT
+# gestrichen, weil dort „Therwil" weitergeht — eine unsaubere Ausnahme haette
+# eine echte Adresse still verschwinden lassen.
+entwerten() {
+  sed -E -e 's/127\.0\.0\.1//g' \
+         -e 's/[Mm]uster(strasse|weg|gasse|platz|wies) [0-9]{1,4}//g' \
+         -e 's/[0-9]{4} *(Mbit|Gbit|Kbit|Mio|Mrd|The)([^a-zA-ZäöüÄÖÜß]|$)/\2/g'
+}
+
+# --- Werte, die im Repo stehen DUERFEN ------------------------------------
+# Name und Mailadresse auf der eigenen Domain sind Autorangaben; sie stehen
+# oeffentlich auf jeder Seite und sind kein Klarwert im Sinne der Regel.
+#
+# Sie werden aus seite.ts GELESEN, nicht hier hingeschrieben: Eine zweite
+# Liste, die man von Hand nachfuehren muss, wird nicht nachgefuehrt — und ein
+# Werkzeug, das dann bei sauberem Bestand Alarm schlaegt, versteckt den echten
+# Treffer.
+#
+# Absolut aufgeloest, aus demselben Grund wie bei KLARWERTE: Beim Pruefen
+# eines fremden Ordners haette ein relativer Pfad still ins Leere gezeigt.
+ERLAUBT=$(mktemp)
+trap 'rm -f "$ERLAUBT"' EXIT INT TERM
+grep -E "^[[:space:]]+(name|kontakt): '" "$EIGENER_ORDNER/$AUSNAHME" 2>/dev/null \
+  | cut -d"'" -f2 | grep -v '^$' | grep -v '^PLATZHALTER' | sort -u > "$ERLAUBT"
+
+# Streicht die erlaubten Werte BUCHSTAEBLICH aus stdin — ueber index(), nicht
+# ueber einen regulaeren Ausdruck: Ein Wert mit Punkt oder Klammer haette sonst
+# als Muster gewirkt und mehr weggestrichen, als er soll.
+ohne_erlaubte() {
+  [ -s "$ERLAUBT" ] || { cat; return; }
+  awk -v datei="$ERLAUBT" '
+    BEGIN { n = 0; while ((getline z < datei) > 0) if (z != "") w[++n] = z }
+    {
+      for (i = 1; i <= n; i++) {
+        p = index($0, w[i])
+        while (p > 0) {
+          $0 = substr($0, 1, p - 1) substr($0, p + length(w[i]))
+          p = index($0, w[i])
+        }
+      }
+      print
+    }
+  '
+}
 
 # --- Selbsttest -----------------------------------------------------------
 # „Ein Test, der nie rot war, hat seine Nützlichkeit nie belegt."
@@ -69,7 +146,7 @@ if [ "${1:-}" = "--historie" ]; then
   echo "    (jeder je committete Stand, nicht nur der aktuelle)"
   echo
 
-  MUSTER='([0-9]{1,3}\.){3}[0-9]{1,3}|([0-9a-f]{2}:){5}[0-9a-f]{2}|[a-z0-9-]+\.(local|arpa)\b|VLAN ?[0-9]+|(Beleg|Bestell|Kunden|Serien)\w*nummer'
+  # Kein eigenes MUSTER mehr — STRUKTUR und ADRESSE stehen oben, einmal.
   WERTE=$(mktemp)
   if [ -f "$KLARWERTE" ]; then
     sed -n "/pixelyard:werte:anfang/,/pixelyard:werte:ende/p" "$KLARWERTE" 2>/dev/null \
@@ -90,12 +167,20 @@ if [ "${1:-}" = "--historie" ]; then
     esac
     inhalt=$(git cat-file blob "$sha" 2>/dev/null) || continue
     GEPRUEFT=$((GEPRUEFT + 1))
-    if printf '%s' "$inhalt" | sed 's/127\.0\.0\.1//g' | grep -qEi "$MUSTER"; then
+    # Zwei Laeufe, weil nur STRUKTUR ohne Ruecksicht auf Gross-/Kleinschreibung
+    # gesucht werden darf. ADRESSE mit -i meldete jeden Messwert als Adresse.
+    if printf '%s' "$inhalt" | entwerten | grep -qEi "$STRUKTUR" \
+    || printf '%s' "$inhalt" | entwerten | grep -qE  "$ADRESSE"; then
       echo "  🔴 strukturelles Muster: $pfad  (Objekt ${sha:0:8})"
       TREFFER=$((TREFFER + 1))
     fi
-    if [ -s "$WERTE" ] && [ "$pfad" != "$AUSNAHME" ]; then
-      if printf '%s' "$inhalt" | grep -qwF -f "$WERTE"; then
+    # 🔴 Ohne Datei-Ausnahme, seit 07.09.2026. Vorher stand hier
+    # `&& [ "$pfad" != "$AUSNAHME" ]` — und damit war die eine Datei, in der
+    # die Adresse tatsaechlich lag, ueber die ganze Historie hinweg blind.
+    # Der Lauf meldete „✅ Kein Befund" ueber 291 Objekte, waehrend die
+    # Adresse in 32 Commits stand.
+    if [ -s "$WERTE" ]; then
+      if printf '%s' "$inhalt" | ohne_erlaubte | grep -qwF -f "$WERTE"; then
         echo "  🔴 benannter Wert:      $pfad  (Objekt ${sha:0:8})"
         TREFFER=$((TREFFER + 1))
       fi
@@ -124,7 +209,7 @@ fi
 
 if [ "${1:-}" = "--selbsttest" ]; then
   PROBE=".anon-selbsttest.tmp"
-  trap 'rm -f "$PROBE"' EXIT INT TERM
+  trap 'rm -f "$PROBE" "$ERLAUBT"' EXIT INT TERM
   printf 'Testzeile mit 203.0.113.7 — darf nur Sekunden existieren.\n' > "$PROBE"
   echo "=== Selbsttest: das Skript muss jetzt anschlagen ==="
   if "$SELBST" --ordner "$ZIEL" > /dev/null 2>&1; then
@@ -144,8 +229,22 @@ if [ "${1:-}" = "--selbsttest" ]; then
 fi
 
 
-sucheliste() {   # $1 = Datei mit Suchbegriffen, $2 = Beschriftung
-  local liste="$1" was="$2" treffer hinweise kurz
+sucheliste() {   # $1 = Liste, $2 = Beschriftung, $3 = datei|wert
+  #
+  # $3 entscheidet, WIE ausgenommen wird — und das ist der Kern der Korrektur
+  # vom 07.09.2026:
+  #
+  #   datei  Abschnitt 2. Er sucht Werte, die AUS src/lib/seite.ts stammen;
+  #          ohne diese Ausnahme faende er bei jedem Lauf die Quelle selbst.
+  #          Das ist richtig so und bleibt.
+  #   wert   Abschnitt 3. Er sucht verbotene Klarwerte UEBERALL, auch in
+  #          seite.ts. Nur die Autorangaben werden aus der Fundzeile
+  #          gestrichen, danach wird die Zeile erneut geprueft.
+  #
+  # Bis zum 07.09.2026 benutzten beide Abschnitte die Datei-Ausnahme. Damit
+  # war seite.ts die einzige Datei im Repo, in der ein beliebiger Klarwert
+  # unbemerkt stehen konnte — ausgerechnet die, die beim Push oeffentlich wird.
+  local liste="$1" was="$2" art="${3:-datei}" treffer hinweise kurz roh rohteil
   [ -s "$liste" ] || { printf '  %-34s keine Suchbegriffe gefunden\n' "$was"; return; }
 
   # 🔴 Gesucht wird an WORTGRENZEN (-w), nicht als Buchstabenfolge.
@@ -154,18 +253,24 @@ sucheliste() {   # $1 = Datei mit Suchbegriffen, $2 = Beschriftung
   # „Kanonische". Eine Teilstring-Suche meldet solche Zufälle als Fund. Ein
   # Werkzeug, das viel Belangloses meldet, wird nicht schärfer, sondern
   # ignoriert, und dann versteckt es den echten Treffer.
-  treffer=$(grep -rnwF -f "$liste" . \
+  roh=$(grep -rnwF -f "$liste" . \
       --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist \
-      --exclude-dir=.astro --exclude-dir=werkzeuge 2>/dev/null \
-    | grep -v "^\./$AUSNAHME:" | cut -d: -f1,2)
+      --exclude-dir=.astro --exclude-dir=werkzeuge 2>/dev/null)
 
   # Teilwort-Vorkommen gehen NICHT verloren — sie erscheinen als Hinweis,
   # nicht als Befund. Verschweigen wäre die andere Hälfte desselben Fehlers.
-  hinweise=$(grep -rnF -f "$liste" . \
+  rohteil=$(grep -rnF -f "$liste" . \
       --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist \
-      --exclude-dir=.astro --exclude-dir=werkzeuge 2>/dev/null \
-    | grep -v "^\./$AUSNAHME:" | cut -d: -f1,2 \
-    | grep -vxF "$treffer" 2>/dev/null)
+      --exclude-dir=.astro --exclude-dir=werkzeuge 2>/dev/null)
+
+  if [ "$art" = "wert" ]; then
+    treffer=$(printf '%s\n' "$roh"     | ohne_erlaubte | grep -wF -f "$liste" | cut -d: -f1,2)
+    hinweise=$(printf '%s\n' "$rohteil" | ohne_erlaubte | grep -F  -f "$liste" | cut -d: -f1,2)
+  else
+    treffer=$(printf '%s\n' "$roh"     | grep -v "^\./$AUSNAHME:" | cut -d: -f1,2)
+    hinweise=$(printf '%s\n' "$rohteil" | grep -v "^\./$AUSNAHME:" | cut -d: -f1,2)
+  fi
+  hinweise=$(printf '%s\n' "$hinweise" | grep -vxF "$treffer" 2>/dev/null)
 
   if [ -z "$treffer" ]; then
     printf '  %-34s sauber (%s Begriffe geprüft)\n' "$was" "$(wc -l < "$liste" | tr -d ' ')"
@@ -190,23 +295,27 @@ sucheliste() {   # $1 = Datei mit Suchbegriffen, $2 = Beschriftung
   fi
 }
 
-echo "=== 1. Strukturelle Muster (IP, MAC, Hostname, VLAN, Nummern) ==="
-STRUKTUR='([0-9]{1,3}\.){3}[0-9]{1,3}|([0-9a-f]{2}:){5}[0-9a-f]{2}|[a-z0-9-]+\.(local|arpa)\b|VLAN ?[0-9]+|(Beleg|Bestell|Kunden|Serien)\w*nummer'
-# 🔑 127.0.0.1 ist KEIN Heimnetzwert. Die Adresse bedeutet „dieser Rechner"
-# und steht auf jedem Gerät der Welt für dasselbe — sie verrät nichts. Im
-# Leitstand steht sie dutzendfach, weil genau sie dort die Sicherheitsgrenze
-# ist. Ohne diese Ausnahme meldete die Prüfung bei jedem Lauf dieselben
-# harmlosen Zeilen — und ein Werkzeug, das immer rot ist, wird weggeklickt.
+echo "=== 1. Strukturelle Muster (IP, MAC, Hostname, VLAN, Nummern, Adresse) ==="
+# Muster und Wert-Ausnahmen stehen oben, einmal — s. STRUKTUR, ADRESSE,
+# entwerten(). Hier steht nur noch, WIE gesucht wird.
 #
-# Ausgenommen wird der WERT, nicht die Datei: die Fundzeile wird ein zweites
-# Mal geprüft, nachdem die Loopback-Adresse herausgestrichen wurde. Steht in
-# derselben Zeile noch eine echte Adresse, schlägt sie weiterhin an.
-S_ROH=$(grep -rnEi "$STRUKTUR" . \
+# ⚠️ Zwei getrennte Läufe, und das ist kein Schönheitsfehler:
+#   STRUKTUR  ohne Rücksicht auf Gross-/Kleinschreibung (-i) — MAC-Adressen
+#             und Hostnamen kommen in beiden Schreibungen vor.
+#   ADRESSE   ausdrücklich MIT Rücksicht darauf. Ein Ortsname beginnt gross;
+#             mit -i meldete „1012 mbit/s" eine Postleitzahl, und ein
+#             Werkzeug, das bei jeder Messtabelle rot wird, wird weggeklickt.
+S_ROH_S=$(grep -rnEi "$STRUKTUR" . \
     --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist \
     --exclude-dir=.astro --exclude-dir=werkzeuge --exclude-dir='*.app' \
     --exclude=CLAUDE.md --exclude=.gitignore 2>/dev/null)
-S_TREFFER=$(printf '%s\n' "$S_ROH" | sed 's/127\.0\.0\.1//g' \
-    | grep -Ei "$STRUKTUR" | cut -d: -f1,2)
+S_ROH_A=$(grep -rnE "$ADRESSE" . \
+    --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist \
+    --exclude-dir=.astro --exclude-dir=werkzeuge --exclude-dir='*.app' \
+    --exclude=CLAUDE.md --exclude=.gitignore 2>/dev/null)
+S_TREFFER=$( { printf '%s\n' "$S_ROH_S" | entwerten | grep -Ei "$STRUKTUR"
+                printf '%s\n' "$S_ROH_A" | entwerten | grep -E  "$ADRESSE"; } \
+    | cut -d: -f1,2 | sort -u)
 if [ -z "$S_TREFFER" ]; then
   echo "  sauber"
 else
@@ -221,7 +330,7 @@ echo "=== 2. Werte aus $AUSNAHME, ausserhalb davon gesucht ==="
 TMP_A=$(mktemp)
 grep -E "^[[:space:]]+(strasse|ort|kontakt):" "$AUSNAHME" 2>/dev/null \
   | cut -d"'" -f2 | grep -v '^$' | grep -v '^PLATZHALTER' > "$TMP_A"
-sucheliste "$TMP_A" "Impressumsangaben"
+sucheliste "$TMP_A" "Impressumsangaben" datei
 rm -f "$TMP_A"
 if [ "$FREMD" -eq 1 ] && [ ! -f "$AUSNAHME" ]; then
   echo "     ℹ️  Diese Datei gibt es nur im Blog-Ordner. Die Werte, um die es hier"
@@ -232,6 +341,7 @@ fi
 
 echo
 echo "=== 3. Benannte Ersetzungen aus $KLARWERTE ==="
+echo "  (sucht ÜBERALL, auch in $AUSNAHME — keine Datei ist mehr ausgenommen.)"
 if [ ! -f "$KLARWERTE" ]; then
   echo "  ⚠️  Datei nicht gefunden — dieser Teil ist NICHT gelaufen."
   echo "     Sie liegt bewusst ausserhalb des Repos. Ohne sie ist die Prüfung halb."
@@ -266,7 +376,7 @@ else
     echo "     Skript nichts mehr — und ein sauberer Lauf bedeutet wieder etwas."
     BEFUNDE=$((BEFUNDE + 1))
   else
-    sucheliste "$TMP_K" "markierte Werte"
+    sucheliste "$TMP_K" "markierte Werte" wert
   fi
   rm -f "$TMP_K"
 fi
