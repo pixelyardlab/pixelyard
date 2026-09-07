@@ -18,9 +18,34 @@
 #
 set -u
 
-cd "$(dirname "$0")/.." || exit 1
+# --- Welcher Ordner geprüft wird -----------------------------------------
+# Ohne Angabe: der Projektordner dieses Skripts (der Blog).
+# Mit --ordner <pfad>: irgendein anderer Ordner auf demselben Mac.
+#
+# Warum parametrierbar statt kopiert: Eine zweite Fassung derselben Prüfung
+# läuft irgendwann auseinander — und dann schützt die eine, was die andere
+# längst durchlässt. Die Musterliste steht deshalb genau einmal, hier.
+SELBST="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+EIGENER_ORDNER="$(cd "$(dirname "$0")/.." && pwd)"
+ZIEL="$EIGENER_ORDNER"
+FREMD=0
 
-KLARWERTE="../pixelyard-klarwerte.md"
+if [ "${1:-}" = "--ordner" ]; then
+  [ -n "${2:-}" ] || { echo "🔴 --ordner braucht einen Pfad."; exit 1; }
+  [ -d "$2" ]     || { echo "🔴 Ordner nicht gefunden: $2"; exit 1; }
+  ZIEL="$(cd "$2" && pwd)"
+  [ "$ZIEL" = "$EIGENER_ORDNER" ] || FREMD=1
+  shift 2
+fi
+
+cd "$ZIEL" || exit 1
+[ "$FREMD" -eq 1 ] && { echo "Geprüft wird: $ZIEL"; echo; }
+
+# Die Klarwerte-Datei liegt eine Ebene über dem BLOG-Ordner — unabhängig
+# davon, welcher Ordner gerade geprüft wird. Deshalb absolut, nicht relativ:
+# ein relativer Pfad hätte beim Prüfen eines fremden Ordners still ins Leere
+# gezeigt, und der Lauf wäre zur halben Prüfung geworden, ohne es zu sagen.
+KLARWERTE="$(dirname "$EIGENER_ORDNER")/pixelyard-klarwerte.md"
 AUSNAHME="src/lib/seite.ts"   # die eine erlaubte Fundstelle, s. CLAUDE.md
 BEFUNDE=0
 
@@ -65,7 +90,7 @@ if [ "${1:-}" = "--historie" ]; then
     esac
     inhalt=$(git cat-file blob "$sha" 2>/dev/null) || continue
     GEPRUEFT=$((GEPRUEFT + 1))
-    if printf '%s' "$inhalt" | grep -qEi "$MUSTER"; then
+    if printf '%s' "$inhalt" | sed 's/127\.0\.0\.1//g' | grep -qEi "$MUSTER"; then
       echo "  🔴 strukturelles Muster: $pfad  (Objekt ${sha:0:8})"
       TREFFER=$((TREFFER + 1))
     fi
@@ -102,7 +127,7 @@ if [ "${1:-}" = "--selbsttest" ]; then
   trap 'rm -f "$PROBE"' EXIT INT TERM
   printf 'Testzeile mit 203.0.113.7 — darf nur Sekunden existieren.\n' > "$PROBE"
   echo "=== Selbsttest: das Skript muss jetzt anschlagen ==="
-  if "$0" > /dev/null 2>&1; then
+  if "$SELBST" --ordner "$ZIEL" > /dev/null 2>&1; then
     echo "🔴 FEHLGESCHLAGEN: Das Skript meldete sauber, obwohl eine Testadresse dalag."
     echo "   Es prüft also nichts. Nicht benutzen, bis das geklärt ist."
     exit 1
@@ -167,10 +192,21 @@ sucheliste() {   # $1 = Datei mit Suchbegriffen, $2 = Beschriftung
 
 echo "=== 1. Strukturelle Muster (IP, MAC, Hostname, VLAN, Nummern) ==="
 STRUKTUR='([0-9]{1,3}\.){3}[0-9]{1,3}|([0-9a-f]{2}:){5}[0-9a-f]{2}|[a-z0-9-]+\.(local|arpa)\b|VLAN ?[0-9]+|(Beleg|Bestell|Kunden|Serien)\w*nummer'
-S_TREFFER=$(grep -rnEi "$STRUKTUR" . \
+# 🔑 127.0.0.1 ist KEIN Heimnetzwert. Die Adresse bedeutet „dieser Rechner"
+# und steht auf jedem Gerät der Welt für dasselbe — sie verrät nichts. Im
+# Leitstand steht sie dutzendfach, weil genau sie dort die Sicherheitsgrenze
+# ist. Ohne diese Ausnahme meldete die Prüfung bei jedem Lauf dieselben
+# harmlosen Zeilen — und ein Werkzeug, das immer rot ist, wird weggeklickt.
+#
+# Ausgenommen wird der WERT, nicht die Datei: die Fundzeile wird ein zweites
+# Mal geprüft, nachdem die Loopback-Adresse herausgestrichen wurde. Steht in
+# derselben Zeile noch eine echte Adresse, schlägt sie weiterhin an.
+S_ROH=$(grep -rnEi "$STRUKTUR" . \
     --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist \
-    --exclude-dir=.astro --exclude-dir=werkzeuge \
-    --exclude=CLAUDE.md --exclude=.gitignore 2>/dev/null | cut -d: -f1,2)
+    --exclude-dir=.astro --exclude-dir=werkzeuge --exclude-dir='*.app' \
+    --exclude=CLAUDE.md --exclude=.gitignore 2>/dev/null)
+S_TREFFER=$(printf '%s\n' "$S_ROH" | sed 's/127\.0\.0\.1//g' \
+    | grep -Ei "$STRUKTUR" | cut -d: -f1,2)
 if [ -z "$S_TREFFER" ]; then
   echo "  sauber"
 else
@@ -187,6 +223,12 @@ grep -E "^[[:space:]]+(strasse|ort|kontakt):" "$AUSNAHME" 2>/dev/null \
   | cut -d"'" -f2 | grep -v '^$' | grep -v '^PLATZHALTER' > "$TMP_A"
 sucheliste "$TMP_A" "Impressumsangaben"
 rm -f "$TMP_A"
+if [ "$FREMD" -eq 1 ] && [ ! -f "$AUSNAHME" ]; then
+  echo "     ℹ️  Diese Datei gibt es nur im Blog-Ordner. Die Werte, um die es hier"
+  echo "        geht, stehen zusätzlich im markierten Block der Klarwerte-Datei —"
+  echo "        Abschnitt 3 sucht sie also trotzdem. Fällt der Block weg, fällt"
+  echo "        dieser Schutz hier ganz weg, und Abschnitt 3 sagt das dann laut."
+fi
 
 echo
 echo "=== 3. Benannte Ersetzungen aus $KLARWERTE ==="
