@@ -63,50 +63,118 @@ Nie in Artikeln, Code, Commit-Nachrichten, Dateinamen oder Bildern:
   ausdrücklich Inhalt des Blogs — `designbrief.md` §5a. Verboten ist die Verengung auf
   das *Wo*, nicht die Struktur, die das *Was* erklärt.
 - **Serien-, Beleg-, Bestell- und Kundennummern**
-- **Wohnadresse** — auch auf Fotos und Screenshots. ⚠️ **Eine benannte Ausnahme, s. unten**
+- **Wohnadresse** — auch auf Fotos und Screenshots. **Ohne Ausnahme, seit 07.09.2026.**
+  Die frühere Ausnahme fürs Impressum ist zurückgenommen, s. unten.
 
-### ⚠️ Die eine benannte Ausnahme: die Adresse im Impressum
+### 🔴 ZURÜCKGENOMMEN am 07.09.2026: die Adresse im Impressum
 
-**Entscheid vom 28.08.2026** (`claude/entscheid_impressum_datenschutz.md`): Die Wohnadresse
-wird im **Impressum** genannt, weil der Blog mit Preisvergleichs-Links unter die
-Impressumspflicht nach UWG Art. 3 Abs. 1 lit. s fällt.
+> **Diese Ausnahme gilt nicht mehr.** Der Abschnitt bleibt stehen, weil das, was an ihm
+> schiefging, mehr wert ist als der Entscheid selbst. Was hier eingerückt folgt, ist
+> **Vergangenheit** — Regel ist der Text darunter.
 
-**Die Regel oben bleibt im Übrigen vollständig bestehen.** Ausgenommen ist **genau eine
-Datei**: `src/lib/seite.ts`. Überall sonst — Artikel, Code, Commit-Nachrichten,
-Dateinamen, Bilder, Screenshots — gilt die Regel unverändert.
+> **Entscheid vom 28.08.2026** (`claude/entscheid_impressum_datenschutz.md`): Die
+> Wohnadresse wird im **Impressum** genannt, weil der Blog mit Preisvergleichs-Links
+> unter die Impressumspflicht nach UWG Art. 3 Abs. 1 lit. s fällt. Ausgenommen war
+> **genau eine Datei**: `src/lib/seite.ts` — nicht die Impressumsseite, die die Werte
+> nur liest. Begründet wurde die enge Fassung damit, dass ein Wert an *einer*
+> kontrollierten Stelle zurücknehmbar bleibt.
 
-⚠️ **Nicht `src/pages/[sprache]/impressum.astro`.** Die Seite *zeigt* die Adresse, aber sie
-*enthält* sie nicht — sie liest die Werte aus `src/lib/seite.ts`. Wer die Ausnahme auf die
-Impressumsseite setzt, nimmt die falsche Datei aus: Der Abgleich schweigt dort, wo nichts
-steht, und schlägt weiter dort an, wo der Wert wirklich liegt.
+**Was jetzt gilt:** Die Postanschrift steht nirgends im Repo. Das Impressum nennt Vor- und
+Nachnamen und die Mailadresse auf der eigenen Domain; beide waren schon vorher öffentlich.
+`src/lib/seite.ts` hat **keinen Sonderstatus mehr** — für die Klarwerte-Suche ist sie eine
+Datei wie jede andere.
 
-> **Warum die Ausnahme so eng gefasst ist:** Das Impressum ist **eine** Stelle,
-> kontrolliert und jederzeit änderbar. Eine Adresse, die in Bildern und Artikeltexten
-> verstreut auftaucht, ist nicht mehr einzusammeln. Der Unterschied ist nicht die
-> Öffentlichkeit des Werts, sondern **ob man ihn zurücknehmen kann**.
+**Der Grund für die Rücknahme:** `MERKMALE.affiliate` steht auf `false`. Es fliesst kein
+Geld, also greift die Begründung nicht, die die Adresse dorthin gebracht hat. ⚠️ **Wer
+`affiliate` wieder einschaltet, holt sich die Frage zurück** — und zwar als Rechtsfrage,
+nicht als Codefrage.
 
-### 🔴 Was die Ausnahme am Prüfwerkzeug ändert — der Punkt, der leicht untergeht
+### 🔴 Was daran schiefging — der eigentliche Grund, warum das hier stehen bleibt
 
-Der Abgleich gegen `../pixelyard-klarwerte.md` wird ab jetzt **bei jedem Lauf** einen
-Treffer auf die Adresse melden — in der Impressumsdatei, wo sie hingehört.
+Die Adresse stand vom **28.08. bis zum 07.09.2026** in einer committeten Datei. **Zehn
+Tage, 32 von 38 Commits, ein öffentliches Repo, alles gepusht.** Das Prüfwerkzeug hat sie
+in dieser Zeit **kein einziges Mal gemeldet**. Drei Ursachen, gleichzeitig wirksam:
 
-⚠️ **Ein Prüfwerkzeug, das bei sauberem Bestand Alarm schlägt, ist kein Test, sondern
-Rauschen** — und es versteckt den echten Treffer. Genau das ist am 28.08.2026 beim
-ersten Klarwerte-Extraktor schon einmal passiert (80 Treffer wie „sondern", „beide").
+1. **Das Skript kannte kein Adressmuster.** Es suchte IP, MAC, Hostname, VLAN und
+   Nummern — Strasse, PLZ und Ort waren für Abschnitt 1 schlicht nicht vorhanden. Es
+   hätte eine Anschrift in **jeder** Datei übersehen, nicht nur in der ausgenommenen.
+2. **Die Ausnahme war eine Datei-Ausnahme statt einer Wert-Ausnahme.** Abschnitt 3
+   filterte `grep -v "^\./src/lib/seite.ts:"` — und damit war die einzige Datei, in der
+   der Wert lag, für die Klarwerte-Suche **ganz** blind. Nicht nur für die Adresse: für
+   **jeden** Klarwert.
+3. **Der Hook kam zu spät und hätte auch nichts geändert.** `core.hooksPath` ist eine
+   lokale Einstellung; der Hook wurde erst am 05.09.2026 committet, acht Tage und 31
+   Commits nach dem Eintritt der Adresse. Und er hätte durchgewunken — das Skript
+   meldete sauber.
 
-**Der Abgleich muss die Ausnahme deshalb kennen**, nicht der Mensch, der ihn liest:
-Treffer auf die Adresse werden **nur in `src/lib/seite.ts`** unterdrückt, überall sonst
-bleiben sie Treffer. Ein Ausschluss, der pauschal für das ganze Repo gilt, wäre die
-Abschaffung der Regel und nicht ihre Ausnahme.
+🔑 **Der Befund, der über den Einzelfall hinausgeht:** `--historie` meldete
+**„✅ Kein Befund" über 291 Objekte**, während die Adresse in 32 Commits stand. Das ist
+die eigene Regel „ein grüner Status ist kein Nachweis", angewandt auf das Werkzeug, das
+den Nachweis liefern soll. **Ein Wächter, der den offensichtlichsten Wert übersieht, ist
+gefährlicher als gar keiner — weil man ihm vertraut.**
+
+**Was daraus folgt, als Regel:**
+
+> **Eine Ausnahme wird auf den WERT gesetzt, nie auf die DATEI.** Der Wert wird aus der
+> Fundzeile gestrichen, die Zeile danach **erneut** geprüft. Steht dort noch etwas
+> anderes, schlägt es weiterhin an. Eine Datei-Ausnahme kann das nicht: Sie nimmt nicht
+> einen Wert aus, sondern alle künftigen dazu.
+
+Die Bauform steht im Skript bei `127.0.0.1` und bei den Doku-Platzhaltern
+(`Musterstrasse`, `1234 Mbit`, `2016 The`) — **nicht neu erfinden, dort abschauen.**
+
+⚠️ **Die einzige verbliebene Datei-Ausnahme ist Abschnitt 2**, und sie ist richtig: Er
+sucht Werte, die **aus** `src/lib/seite.ts` stammen, und fände sonst bei jedem Lauf die
+Quelle selbst.
+
+### 🔴 Entscheid vom 07.09.2026: die Historie bleibt, wie sie ist
+
+**Kein Rewrite, kein Force-Push, das Repo bleibt öffentlich.** Die Adresse bleibt in den
+32 Commits stehen, in denen sie steht.
+
+**Begründung:** Der Wert war öffentlich und ist über andere Wege ohnehin auffindbar. Ein
+Rewrite eines **gepushten** Standes erreicht Forks, vorhandene Klone und GitHubs eigene
+Objektaufbewahrung nicht mehr — er erzeugt die Gewissheit, die er nicht deckt. Genau davor
+warnt die Regel weiter oben: *„Ab dem ersten Push nie wieder ganz."*
+
+⚠️ **Das ist ein Entscheid und kein Versäumnis.** Wer in drei Monaten über die Fundstellen
+stolpert, hat nichts entdeckt, was hier nicht schon stünde.
+
+🔑 **Die Historie ist ab jetzt der Regressionstest für das Prüfskript.** Sie enthält einen
+bekannten, echten Klarwert an bekannter Stelle:
+
+```
+./werkzeuge/anonymisierung-pruefen.sh --historie
+→ muss 6 Fundstellen in 3 Objekten melden, EXIT 1
+  (3 Blob-Fassungen von src/lib/seite.ts = 1 + 23 + 8 = 32 Commits)
+```
+
+**Meldet dieser Lauf eines Tages wieder grün, ist nicht der Bestand sauber geworden,
+sondern das Skript kaputt.** Das ist der einzige Test im Projekt, der einen echten
+Klarwert benutzt — und der einzige, der beweist, dass Abschnitt 1 und Abschnitt 3
+tatsächlich greifen.
 
 **Prüfbar statt vereinbart.** Vor jedem Commit über die vorgemerkten Änderungen:
 
 ```
 git diff --cached | grep -nEi \
   '([0-9]{1,3}\.){3}[0-9]{1,3}|([0-9a-f]{2}:){5}[0-9a-f]{2}|[a-z0-9-]+\.(local|arpa)\b|VLAN ?[0-9]+|(Beleg|Bestell|Kunden|Serien)\w*nummer'
+git diff --cached | grep -nE \
+  '[A-ZÄÖÜ][a-zäöü-]{2,}(strasse|str\.|weg|gasse|platz|wies)[ ]+[0-9]{1,4}[a-z]?\b|\b(CH-)?[1-9][0-9]{3}[ ]+[A-ZÄÖÜ][a-zäöü]{2,}'
 ```
 
+⚠️ **Zwei Zeilen, und die zweite ohne `-i`.** Ein Ortsname beginnt gross; mit `-i` meldet
+jede Messtabelle `1012 mbit/s` als Postleitzahl, und ein Werkzeug, das immer rot ist, wird
+weggeklickt. **Die zweite Zeile fehlte bis zum 07.09.2026 ganz** — das ist der Grund,
+warum die Adresse zehn Tage lang durchkam.
+
 **Kein Treffer = sauber. Treffer = anhalten**, nicht „ist ja nur ein Beispiel".
+
+> 🔑 Beide Zeilen zusammen sind trotzdem nur die halbe Prüfung: Sie sehen den
+> **vorgemerkten Diff**, nicht den Bestand und nicht die Historie. Der ganze Lauf ist
+> `./werkzeuge/anonymisierung-pruefen.sh`, und er hängt als pre-commit-Hook davor.
+> ⚠️ `core.hooksPath` ist **lokal** und wandert nicht mit — nach einem frischen Klon
+> einmal `git config core.hooksPath werkzeuge/git-hooks` setzen, sonst läuft gar nichts.
 
 > Diese Zeile ist der eigentliche Schutz. **Eine Regel, deren Einhaltung man prüfen kann, ist mehr wert als zehn, die man vorsorglich hinschreibt.**
 
