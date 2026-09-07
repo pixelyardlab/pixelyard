@@ -25,22 +25,21 @@ export const SEITE = {
     kontakt: 'cedric@pixelyard.ch',
   },
 
-  /* --- Impressum (Entscheid 28.08.2026) -----------------------------
-   * Die Wohnadresse wird im Impressum genannt — das ist die EINE benannte
-   * Ausnahme von der Anonymisierungsregel (CLAUDE.md). Sie gilt fuer genau
-   * diese Datei und die Impressumsseite, nirgends sonst.
+  /* --- Impressum ----------------------------------------------------
+   * 🔴 Hier steht KEINE Postanschrift mehr — Entscheid 07.09.2026.
    *
-   * 🔴 Die Klarwerte stehen bewusst NICHT hier drin. Sie werden von Hand
-   * eingetragen; der Bau bricht ab, solange die Platzhalter stehen —
-   * s. src/pages/[sprache]/impressum.astro.
+   * Vom 28.08. bis zum 07.09.2026 stand sie hier, als die eine benannte
+   * Ausnahme von der Anonymisierungsregel (CLAUDE.md), begruendet mit der
+   * Impressumspflicht nach UWG Art. 3 Abs. 1 lit. s. Die Ausnahme ist
+   * zurueckgenommen. Genannt werden Name und Mailadresse — beide stehen
+   * oben unter `autor`, beide waren schon vorher oeffentlich.
    *
-   * Pflichtangaben nach UWG Art. 3 Abs. 1 lit. s: Vor- und Nachname,
-   * Postadresse mit Strasse/PLZ/Ort, E-Mail-Adresse. */
-  impressum: {
-    strasse: 'Wirbelwies 12',
-    ort: '8200 Schaffhausen',
-    land: 'Schweiz',
-  },
+   * ⚠️ Wer hier wieder ein Adressfeld eintraegt, hebt nicht nur einen
+   * Entscheid auf, sondern auch die Wirkung der Anonymisierungspruefung:
+   * Sie nimmt genau diese Datei von der Suche aus (AUSNAHME in
+   * werkzeuge/anonymisierung-pruefen.sh). Was hier steht, prueft niemand
+   * mehr ausser dem Menschen, der es hinschreibt.
+   */
 } as const;
 
 /* --- Was die Seite tatsaechlich tut --------------------------------------

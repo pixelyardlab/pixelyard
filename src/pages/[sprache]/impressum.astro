@@ -6,8 +6,14 @@
  * Geschaeftsverkehr. Ein Blog ohne jede Monetarisierung braeuchte sie nicht.
  * Entscheid und Belege: claude/entscheid_impressum_datenschutz.md.
  *
- * 🔴 Die Adresse ist die EINE benannte Ausnahme von der Anonymisierungsregel
- * (CLAUDE.md). Sie steht hier — und nirgends sonst im Repo. */
+ * 🔴 Ohne Postanschrift, Entscheid 07.09.2026. Bis dahin nannte diese Seite
+ * die Wohnadresse — die eine benannte Ausnahme von der Anonymisierungsregel.
+ * Die Ausnahme ist zurueckgenommen; genannt werden Name und Mailadresse.
+ *
+ * ⚠️ Die Seite ENTHIELT die Adresse nie selbst, sie las sie aus
+ * src/lib/seite.ts. Wer sie wieder aufnehmen will, aendert dort — und hebt
+ * damit zugleich die Ausnahme in werkzeuge/anonymisierung-pruefen.sh
+ * wieder in Kraft. */
 import Basis from '../../layouts/Basis.astro';
 import { SEITE, SPRACHEN, MERKMALE, texte } from '../../lib/seite';
 import type { Sprache } from '../../lib/seite';
@@ -28,8 +34,6 @@ const t = texte(sprache);
  * Eine Regel, die durchgesetzt ist, schlaegt eine, die vereinbart ist. */
 const felder = {
   'SEITE.autor.kontakt': SEITE.autor.kontakt,
-  'SEITE.impressum.strasse': SEITE.impressum.strasse,
-  'SEITE.impressum.ort': SEITE.impressum.ort,
 };
 const offen = Object.entries(felder)
   .filter(([, wert]) => String(wert).startsWith('PLATZHALTER'))
@@ -83,12 +87,14 @@ const schema = {
     <h2>Verantwortlich für diese Website</h2>
     <p>
       {SEITE.autor.name}<br />
-      {SEITE.impressum.strasse}<br />
-      {SEITE.impressum.ort}<br />
-      {SEITE.impressum.land}
+      E-Mail: <a href={`mailto:${SEITE.autor.kontakt}`}>{SEITE.autor.kontakt}</a>
     </p>
     <p>
-      E-Mail: <a href={`mailto:${SEITE.autor.kontakt}`}>{SEITE.autor.kontakt}</a>
+      Betrieben von einer Privatperson in der Schweiz. Kein Handelsregistereintrag,
+      keine Mehrwertsteuernummer, kein Team dahinter.{' '}
+      <strong>Die Mailadresse oben ist der Weg zu mir</strong> — es gibt keinen zweiten.
+      Anfragen zu Inhalten, Korrekturen und Rechtliches gehen dorthin und werden
+      dort beantwortet.
     </p>
 
     <h2>Was diese Website ist</h2>
