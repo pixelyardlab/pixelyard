@@ -1,0 +1,73 @@
+---
+/* <Artikelleiste> — die linke Seitenleiste.
+ *
+ * Drei Blöcke: alle Artikel, die Themen, der Feed.
+ *
+ * 🔑 Warum nicht nur die Artikelliste, obwohl die Leiste dafür gedacht war:
+ * Der Bestand sind zwei Artikel. Eine Leiste, die daneben dieselben zwei
+ * Titel wiederholt, macht die Seite nicht voller, sondern zeigt zweimal,
+ * wie leer sie ist. Die Themen wachsen mit jedem Artikel mit und sind das,
+ * wonach jemand tatsächlich sucht.
+ *
+ * Die Leiste steht im HTML NACH dem Hauptinhalt (Basis.astro) und wird per
+ * Grid nach links gestellt. So liest ein Screenreader und ein Handy zuerst
+ * den Text und danach die Navigation — und nicht umgekehrt.
+ */
+import { texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+import { alleArtikel, schlagworte, pfadVon, isoTag } from '../lib/artikel';
+
+interface Props {
+  sprache: Sprache;
+  /** Pfad der gerade offenen Seite — markiert den laufenden Eintrag. */
+  aktuell?: string;
+}
+const { sprache, aktuell } = Astro.props;
+const t = texte(sprache);
+
+const artikel = await alleArtikel(sprache);
+const themen = await schlagworte(sprache);
+---
+
+<nav class="py-leiste py-leiste--links" aria-label={t.alleArtikel}>
+  <section class="py-leiste__block">
+    <h2 class="py-leiste__marke">{t.artikel}</h2>
+    {artikel.length === 0 ? (
+      <p class="py-leiste__leer">—</p>
+    ) : (
+      <ul class="py-leiste__liste">
+        {artikel.map((a) => {
+          const pfad = pfadVon(a);
+          const istHier = aktuell === pfad;
+          return (
+            <li>
+              <span class="py-leiste__datum">{isoTag(a.data.datum)}</span>
+              <a href={pfad} aria-current={istHier ? 'page' : undefined}>{a.data.titel}</a>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </section>
+
+  {themen.length > 0 && (
+    <section class="py-leiste__block">
+      <h2 class="py-leiste__marke">{t.themen}</h2>
+      <ul class="py-leiste__marken">
+        {themen.map(({ wort, anzahl }) => (
+          <li>
+            <a href={`/${sprache}/thema/${wort}/`}>#{wort}</a>
+            <span class="py-leiste__anzahl" aria-hidden="true">{anzahl}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="py-leiste__block">
+    <h2 class="py-leiste__marke">{t.feed}</h2>
+    <ul class="py-leiste__liste">
+      <li><a href="/rss.xml">{t.rss}</a></li>
+    </ul>
+  </section>
+</nav>

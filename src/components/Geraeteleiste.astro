@@ -1,0 +1,82 @@
+---
+/* <Geraeteleiste> — die rechte Seitenleiste: was hier tatsächlich läuft.
+ *
+ * Die Liste selbst steht in src/lib/geraete.ts, samt der Regel, warum ein
+ * Eintrag dort stehen darf. Diese Datei stellt sie nur dar.
+ *
+ * 🔑 Drei Dinge stehen sichtbar in der Leiste und nicht in einer Fussnote:
+ * 1. „Nur Geräte, die in einem Artikel vorkommen" — die Regel, nach der die
+ *    Liste entsteht
+ * 2. „Keine Provisionslinks" — der Zustand, nicht die Absicht. Ändert er
+ *    sich, ändert sich der Satz, und `<Affiliatelink>` schaltet zugleich die
+ *    Abschnitte in Impressum und Datenschutz
+ * 3. das Datum, an dem die Links zuletzt geöffnet wurden
+ *
+ * Punkt 1 und 2 kosten je eine Zeile und machen die Regel für den Leser
+ * sichtbar, statt sie nur einzuhalten — derselbe Gedanke wie beim Hinweis
+ * an der <Prompt>-Box.
+ *
+ * Externe Links tragen rel="noopener" von Hand: das rehype-Plugin aus
+ * astro.config.mjs fasst nur Markdown und MDX an, eine Komponente sieht es
+ * nicht.
+ */
+import { texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+import { GERAETE_IM_EINSATZ, GERAETE_ABGELOEST, GERAETE_GEPRUEFT } from '../lib/geraete';
+
+interface Props { sprache: Sprache }
+const { sprache } = Astro.props;
+const t = texte(sprache);
+
+/* Stammt alles aus demselben Artikel, steht der Beleg EINMAL unter der Liste
+ * statt viermal darin. Sobald Geraete aus mehreren Artikeln kommen, wandert
+ * er automatisch an jeden Eintrag — die Bedingung entscheidet, nicht ein
+ * Schalter, den jemand nachfuehren muesste. */
+const belege = [...new Set(GERAETE_IM_EINSATZ.map((g) => g.beleg))];
+const einBeleg = belege.length === 1 ? belege[0] : null;
+---
+
+<aside class="py-leiste py-leiste--rechts" aria-labelledby="py-leiste-geraete">
+  <section class="py-leiste__block">
+    <h2 class="py-leiste__marke" id="py-leiste-geraete">{t.wasHierLaeuft}</h2>
+    <p class="py-leiste__notiz">{t.nurBelegtes}</p>
+    <ul class="py-leiste__geraete">
+      {GERAETE_IM_EINSATZ.map((g) => (
+        <li>
+          <span class="py-leiste__rolle">{g.rolle}</span>
+          {g.href ? (
+            <a href={g.href} rel="noopener" target="_blank">{g.name}</a>
+          ) : (
+            <span class="py-leiste__name">{g.name}</span>
+          )}
+          {!einBeleg && <a class="py-leiste__beleg" href={g.beleg}>{t.stehtImArtikel}</a>}
+        </li>
+      ))}
+    </ul>
+    {einBeleg && (
+      <p class="py-leiste__notiz">
+        <a class="py-leiste__beleg" href={einBeleg}>{t.alleImArtikel(GERAETE_IM_EINSATZ.length)}</a>
+      </p>
+    )}
+  </section>
+
+  {GERAETE_ABGELOEST.length > 0 && (
+    <section class="py-leiste__block">
+      <h2 class="py-leiste__marke">{t.abgeloest}</h2>
+      <ul class="py-leiste__geraete py-leiste__geraete--alt">
+        {GERAETE_ABGELOEST.map((g) => (
+          <li>
+            <span class="py-leiste__rolle">{g.rolle}</span>
+            <span class="py-leiste__name">{g.name}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <p class="py-leiste__hinweis">{t.keineProvision}</p>
+  {/* Erscheint erst, wenn in geraete.ts ein Datum steht — und dort steht eines
+      erst, wenn die Links wirklich geoeffnet wurden. Eine leere Zeile ist
+      ehrlicher als ein Datum, das eine Pruefung behauptet. */}
+  {GERAETE_GEPRUEFT && <p class="py-leiste__notiz">{t.linksGeprueft} {GERAETE_GEPRUEFT}</p>}
+</aside>

@@ -171,6 +171,31 @@ figcaption {
   .py-huelle { padding-inline: var(--py-r4); }
 }
 
+/* Seiten mit Seitenleisten weiten die Huelle — Kopf, Inhalt und Fuss
+ * gemeinsam, sonst steht die Kopfzeile schmaler als der Text darunter. */
+body[data-raster] .py-huelle { max-width: var(--py-mass-raster); }
+
+/* --- Dreispaltiges Raster --------------------------------------------
+ * Unter 64rem passiert hier NICHTS: eine Spalte, Leisten unter dem Text.
+ * Das ist die Voreinstellung und nicht der Sonderfall — der Lesestrom soll
+ * in jeder Breite gleich breit sein, die Leisten sind Zugabe. */
+
+.py-raster { display: block; }
+
+@media (min-width: 64rem) {
+  .py-raster {
+    display: grid;
+    grid-template-columns: var(--py-leiste-links) minmax(0, 1fr) var(--py-leiste-rechts);
+    column-gap: var(--py-r6);
+    align-items: start;
+  }
+  /* Die Spalten werden ZUGEWIESEN, nicht aus der HTML-Reihenfolge abgeleitet.
+   * Deshalb darf im HTML der Inhalt zuerst stehen (Basis.astro). */
+  .py-raster__mitte      { grid-column: 2; grid-row: 1; }
+  .py-raster .py-leiste--links  { grid-column: 1; grid-row: 1; }
+  .py-raster .py-leiste--rechts { grid-column: 3; grid-row: 1; }
+}
+
 /* Der Lesestrom ist schmaler als die Huelle. Breite Elemente — Terminal,
  * Tabellen, Diagramme — duerfen ausbrechen. */
 .py-lesestrom > * {

@@ -304,6 +304,11 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   font-size: 0.8125rem;
   color: var(--py-text-leise);
 }
+/* Schlagworte fuehren auf ihre Themenseite. Der Abstand steht im CSS und
+ * nicht als Leerzeichen im HTML — sonst haengt er am Link und ist
+ * mitmarkiert, wenn jemand das Wort kopiert. */
+.py-schlagwort a { color: inherit; text-decoration: none; margin-right: 0.75em; }
+.py-schlagwort a:hover { color: var(--py-link); text-decoration: underline; }
 
 /* ====================================================================
  * Entwurfs-Fahne — nur im Dev-Server sichtbar, weil Entwuerfe
@@ -352,6 +357,155 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   margin: 0 0 var(--py-r2);
 }
 .py-fehlt > :last-child { margin-bottom: 0; }
+
+/* ====================================================================
+ * Seitenleisten (links: Artikel und Themen · rechts: was hier läuft)
+ *
+ * Gestaltungsregel, die aus designbrief §1 folgt: Die Leisten sind
+ * NEBENTEXT. Sie bekommen deshalb keine Kästen, keine Flächen und keine
+ * zweite Schriftgrösse im Fliesstext-Font — nur Monospace, klein, leise,
+ * und eine Linie unter jeder Bereichsüberschrift. Ein Kasten links und ein
+ * Kasten rechts hätten aus einer ruhigen Seite ein Portal gemacht.
+ * ==================================================================== */
+
+.py-leiste {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--py-text-leise);
+}
+
+/* Unter 64rem stehen die Leisten UNTER dem Text. Dort bekommen sie die
+ * Breite des Lesestroms und eine Trennlinie — sonst kleben sie am Text. */
+@media (max-width: 63.999rem) {
+  .py-leiste {
+    max-width: var(--py-mass);
+    margin-inline: auto;
+    padding-top: var(--py-r5);
+    border-top: var(--py-rand) solid var(--py-line);
+  }
+  .py-leiste--links { margin-top: var(--py-r7); }
+  .py-leiste--rechts { margin-top: var(--py-r5); }
+}
+
+/* Ab 64rem stehen sie daneben und laufen mit. `align-self: start` steht im
+ * Raster (basis.css); `sticky` braucht beides, sonst dehnt sich das Element
+ * über die ganze Zeilenhöhe und klebt nie. */
+@media (min-width: 64rem) {
+  .py-leiste {
+    position: sticky;
+    top: var(--py-r5);
+    max-height: calc(100vh - 2 * var(--py-r5));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+.py-leiste__block { margin-bottom: var(--py-r6); }
+
+.py-leiste__marke {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--py-text-leise);
+  margin: 0 0 var(--py-r3);
+  padding-bottom: var(--py-r2);
+  border-bottom: var(--py-rand) solid var(--py-line);
+}
+
+.py-leiste ul { list-style: none; padding: 0; margin: 0; }
+.py-leiste li { margin-bottom: var(--py-r3); }
+
+.py-leiste a { color: var(--py-link); text-decoration: none; }
+.py-leiste a:hover { text-decoration: underline; }
+/* Der laufende Eintrag ist nicht verlinkt-aussehend, sondern markiert. */
+.py-leiste a[aria-current='page'] {
+  color: var(--py-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* --- links: Artikel ---------------------------------------------------- */
+
+.py-leiste__liste a { display: block; }
+
+.py-leiste__datum {
+  display: block;
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  color: var(--py-text-leise);
+  opacity: 0.85;
+}
+
+.py-leiste__leer { margin: 0; }
+
+/* --- links: Themen ----------------------------------------------------- */
+
+.py-leiste__marken li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--py-r2);
+  margin-bottom: var(--py-r2);
+}
+/* Die Anzahl ist eine Zählung, keine Zierde — deshalb rechts, in
+ * Ziffern gleicher Breite, und für den Screenreader ausgeblendet:
+ * vorgelesen wäre „homelab zwei" eine Falschaussage. */
+.py-leiste__anzahl {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.6875rem;
+  /* NICHT --py-line: das misst 1.46:1 auf der Seitenflaeche (tokens.css) und
+   * waere derselbe Fehler wie der dort dokumentierte — nur diesmal an einer
+   * Zahl, die eine Aussage traegt. */
+  color: var(--py-text-leise);
+}
+
+/* --- rechts: Geräte ---------------------------------------------------- */
+
+.py-leiste__geraete li { margin-bottom: var(--py-r4); }
+
+.py-leiste__rolle {
+  display: block;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  color: var(--py-text-leise);
+  opacity: 0.85;
+}
+.py-leiste__geraete a { display: block; }
+.py-leiste__name { display: block; color: var(--py-text); }
+
+/* Abgelöste Geräte tragen keinen Link (src/lib/geraete.ts) und stehen
+ * deshalb auch optisch zurück. */
+.py-leiste__geraete--alt .py-leiste__name { color: var(--py-text-leise); }
+.py-leiste__geraete--alt li { margin-bottom: var(--py-r3); }
+
+.py-leiste__beleg {
+  display: inline-block;
+  font-size: 0.6875rem;
+  margin-top: 0.15em;
+}
+
+.py-leiste__notiz {
+  margin: 0 0 var(--py-r3);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: var(--py-text-leise);
+}
+
+/* Der Satz „Keine Provisionslinks" ist eine Kennzeichnung, keine Fussnote.
+ * Camel als Schrift, im Hellmodus im dunkleren Ton (tokens.css) — dieselbe
+ * Regel wie bei .py-werbung, nur mit umgekehrter Aussage. */
+.py-leiste__hinweis {
+  margin: 0 0 var(--py-r2);
+  padding-top: var(--py-r3);
+  border-top: var(--py-rand) solid var(--py-line);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: var(--py-accent-text);
+}
 
 /* ====================================================================
  * Werbekennzeichnung am Provisionslink

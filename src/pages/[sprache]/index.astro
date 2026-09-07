@@ -42,7 +42,7 @@ const schema = {
 };
 ---
 
-<Basis titel="Homelab, mitgeschrieben" sprache={sprache} istStartseite schema={schema}>
+<Basis titel="Homelab, mitgeschrieben" sprache={sprache} istStartseite schema={schema} leisten>
   <div class="py-lesestrom">
     <h1>Ein Homelab, mitgeschrieben<span class="py-h1-cursor" aria-hidden="true">_</span></h1>
 
@@ -83,7 +83,11 @@ const schema = {
           <h2><a href={pfadVon(a)}>{a.data.titel}</a></h2>
           <p>{a.data.beschreibung}</p>
           {a.data.schlagworte.length > 0 && (
-            <p class="py-schlagwort">{a.data.schlagworte.map((s) => `#${s}`).join(' ')}</p>
+            <p class="py-schlagwort">
+              {a.data.schlagworte.map((s) => (
+                <a href={`/${sprache}/thema/${s}/`}>#{s}</a>
+              ))}
+            </p>
           )}
         </li>
       ))}

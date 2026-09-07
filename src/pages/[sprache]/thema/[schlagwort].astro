@@ -1,0 +1,100 @@
+---
+/* Themenseite — /de/thema/<schlagwort>/
+ *
+ * Sie existiert, weil die Seitenleiste sonst Schlagworte zeigt, die nirgends
+ * hinführen. Und sie zahlt auf designbrief §6 ein: eine Antwortmaschine, die
+ * „Homelab NAS Schweiz" beantwortet, findet hier eine Seite, die genau diese
+ * Sammlung IST, statt sie aus einer Liste zusammenzusuchen.
+ *
+ * ⚠️ Ehrlich dazu: Bei zwei Artikeln ist eine Themenseite dünn. Sie wird
+ * trotzdem indexiert, weil sie keine erfundenen Inhalte enthält, sondern nur
+ * eine echte Auswahl — und weil sie mit jedem Artikel dichter wird.
+ */
+import Basis from '../../../layouts/Basis.astro';
+import { SPRACHEN, SEITE, texte } from '../../../lib/seite';
+import type { Sprache } from '../../../lib/seite';
+import { schlagworte, artikelZuSchlagwort, pfadVon, isoTag } from '../../../lib/artikel';
+
+export async function getStaticPaths() {
+  const pfade = [];
+  for (const sprache of SPRACHEN) {
+    for (const { wort } of await schlagworte(sprache)) {
+      pfade.push({ params: { sprache, schlagwort: wort } });
+    }
+  }
+  return pfade;
+}
+
+const sprache = Astro.params.sprache as Sprache;
+const schlagwort = Astro.params.schlagwort as string;
+const t = texte(sprache);
+const artikel = await artikelZuSchlagwort(schlagwort, sprache);
+
+const beschreibung =
+  `Alle Beiträge auf ${SEITE.name} zum Thema ${schlagwort} — ` +
+  `${t.artikelZaehlung(artikel.length)}, mit Zahlen, Irrtümern und dem, was sie gekostet haben.`;
+
+/* CollectionPage statt Blog: Diese Seite ist eine AUSWAHL, keine Publikation.
+ * Der Unterschied ist für eine Antwortmaschine der zwischen „hier steht ein
+ * Blog" und „hier stehen genau diese n Beiträge zu diesem Thema". */
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `${t.thema}: ${schlagwort}`,
+  description: beschreibung,
+  inLanguage: sprache,
+  url: new URL(`/${sprache}/thema/${schlagwort}/`, Astro.site).href,
+  isPartOf: { '@type': 'Blog', name: SEITE.name, url: new URL(`/${sprache}/`, Astro.site).href },
+  about: schlagwort,
+  hasPart: artikel.map((a) => ({
+    '@type': 'TechArticle',
+    headline: a.data.titel,
+    description: a.data.beschreibung,
+    datePublished: isoTag(a.data.datum),
+    url: new URL(pfadVon(a), Astro.site).href,
+    author: { '@type': 'Person', name: a.data.autor },
+  })),
+};
+---
+
+<Basis
+  titel={`${t.thema}: #${schlagwort}`}
+  beschreibung={beschreibung}
+  sprache={sprache}
+  schema={schema}
+  leisten
+>
+  <div class="py-lesestrom">
+    <p class="py-meta">
+      <span class="py-meta__eingabe" aria-hidden="true">$</span>
+      <span>{t.thema}</span>
+      <span class="py-meta__punkt" aria-hidden="true">·</span>
+      <span>{t.artikelZaehlung(artikel.length)}</span>
+    </p>
+
+    <h1>#{schlagwort}</h1>
+
+    {artikel.length === 0 ? (
+      <p class="py-schlagwort">{t.keinArtikelZumThema}</p>
+    ) : (
+      <ul class="py-liste">
+        {artikel.map((a) => (
+          <li>
+            <p class="py-meta">
+              <span class="py-meta__eingabe" aria-hidden="true">$</span>
+              <time datetime={isoTag(a.data.datum)}>{isoTag(a.data.datum)}</time>
+              {a.data.entwurf && <span class="py-entwurf">{t.entwurf}</span>}
+            </p>
+            <h2><a href={pfadVon(a)}>{a.data.titel}</a></h2>
+            <p>{a.data.beschreibung}</p>
+            {a.data.schlagworte.length > 0 && (
+              <p class="py-schlagwort">{a.data.schlagworte.map((s) => `#${s}`).join(' ')}</p>
+            )}
+          </li>
+        ))}
+      </ul>
+    )}
+
+    <p><a href={`/${sprache}/`}>← {t.alleArtikel}</a></p>
+  </div>
+</Basis>

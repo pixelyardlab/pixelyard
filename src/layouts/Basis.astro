@@ -11,6 +11,8 @@ import { SEITE, SPRACHEN, SPRACHEN_BEKANNT, texte } from '../lib/seite';
 import type { Sprache } from '../lib/seite';
 import Kopf from '../components/Kopf.astro';
 import Fuss from '../components/Fuss.astro';
+import Artikelleiste from '../components/Artikelleiste.astro';
+import Geraeteleiste from '../components/Geraeteleiste.astro';
 
 import '../styles/tokens.css';
 import '../styles/schriften.css';
@@ -30,6 +32,10 @@ interface Props {
   uebersetzungen?: Partial<Record<Sprache, string>>;
   /** Setzt <meta name="robots" content="noindex">, z. B. fuer Werkzeugseiten. */
   nichtIndexieren?: boolean;
+  /** Zwei Seitenleisten links und rechts des Lesestroms (Uebersichtsseiten).
+   *  Unter 64rem klappen beide unter den Text — der Lesestrom bleibt in jeder
+   *  Breite gleich breit, die Leisten sind Zugabe, nicht Bedingung. */
+  leisten?: boolean;
 }
 
 const {
@@ -41,6 +47,7 @@ const {
   schema,
   uebersetzungen,
   nichtIndexieren = false,
+  leisten = false,
 } = Astro.props;
 
 const t = texte(sprache);
@@ -115,11 +122,21 @@ const alternativen = [
     </script>
   </head>
 
-  <body>
+  {/* data-raster weitet die Huelle — und zwar Kopf, Inhalt und Fuss
+      GEMEINSAM. Waere nur der Inhalt breiter, staende die Kopfzeile schmaler
+      als der Text darunter. */}
+  <body data-raster={leisten ? '' : undefined}>
     <a class="py-sprung" href="#inhalt">{t.zumInhalt}</a>
     <Kopf sprache={sprache} istStartseite={istStartseite} />
-    <main id="inhalt" class="py-huelle">
-      <slot />
+    <main id="inhalt" class:list={['py-huelle', leisten && 'py-raster']}>
+      {/* Reihenfolge im HTML: erst der Text, dann die Leisten. Auf dem Handy
+          und im Screenreader kommt damit der Inhalt zuerst; auf dem grossen
+          Bildschirm setzt das Raster die Leisten links und rechts daneben. */}
+      <div class="py-raster__mitte">
+        <slot />
+      </div>
+      {leisten && <Artikelleiste sprache={sprache} aktuell={Astro.url.pathname} />}
+      {leisten && <Geraeteleiste sprache={sprache} />}
     </main>
     <Fuss sprache={sprache} />
     <script>

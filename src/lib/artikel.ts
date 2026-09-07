@@ -41,6 +41,32 @@ export async function uebersetzungenVon(eintrag: Artikel): Promise<Partial<Recor
   return treffer;
 }
 
+/** Alle Schlagworte einer Sprache mit ihrer Anzahl, haeufigstes zuerst,
+ *  bei Gleichstand alphabetisch.
+ *
+ *  Steht hier und nicht in der Seitenleiste, weil die Themenseiten DIESELBE
+ *  Auswahl treffen muessen wie die Leiste. Zwei Zaehlungen mit je eigener
+ *  Filterregel driften — derselbe Grund wie oben bei `alleArtikel`. */
+export async function schlagworte(sprache?: Sprache): Promise<{ wort: string; anzahl: number }[]> {
+  const zaehler = new Map<string, number>();
+  for (const a of await alleArtikel(sprache)) {
+    for (const wort of a.data.schlagworte) {
+      zaehler.set(wort, (zaehler.get(wort) ?? 0) + 1);
+    }
+  }
+  return [...zaehler.entries()]
+    .map(([wort, anzahl]) => ({ wort, anzahl }))
+    .sort((a, b) => b.anzahl - a.anzahl || a.wort.localeCompare(b.wort, 'de'));
+}
+
+/** Die Artikel zu einem Schlagwort. Der Vergleich ist case-insensitiv, damit
+ *  ein `#Homelab` im Frontmatter nicht still eine zweite Themenseite erzeugt. */
+export async function artikelZuSchlagwort(wort: string, sprache?: Sprache): Promise<Artikel[]> {
+  const gesucht = wort.toLowerCase();
+  const alle = await alleArtikel(sprache);
+  return alle.filter((a) => a.data.schlagworte.some((s) => s.toLowerCase() === gesucht));
+}
+
 /** Lesezeit aus dem Rohtext. 200 Woerter pro Minute ist eine ANNAHME —
  *  gemessen ist sie nicht, und deshalb steht sie hier und nicht als Zahl
  *  in einer Vorlage, wo sie wie ein Messwert aussaehe. */

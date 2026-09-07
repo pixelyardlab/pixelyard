@@ -118,6 +118,26 @@ export const TEXTE = {
     alsMarkdown: 'Als Markdown ansehen',
     artikel: 'Artikel',
     entwurf: 'Entwurf',
+
+    /* --- Seitenleisten ------------------------------------------------ */
+    alleArtikel: 'Alle Artikel',
+    themen: 'Themen',
+    thema: 'Thema',
+    feed: 'Feed',
+    rss: 'RSS-Feed',
+    /* Rechte Leiste. Die Ueberschrift sagt „laeuft", nicht „empfehle ich" —
+     * der Unterschied ist der ganze Punkt der Liste. */
+    wasHierLaeuft: 'Was hier läuft',
+    abgeloest: 'Abgelöst',
+    nurBelegtes: 'Nur Geräte, die in einem Artikel vorkommen.',
+    stehtImArtikel: 'steht im Artikel',
+    /* Die Zahl wird GEZAEHLT und nicht hingeschrieben — „alle vier" waere beim
+     * fuenften Eintrag still falsch geworden. */
+    alleImArtikel: (n: number) => `Alle ${n} stehen in einem Artikel →`,
+    keineProvision: 'Keine Provisionslinks — nichts davon bringt mir Geld.',
+    linksGeprueft: 'Links geprüft',
+    keinArtikelZumThema: 'Zu diesem Thema steht noch kein Artikel.',
+    artikelZaehlung: (n: number) => (n === 1 ? '1 Artikel' : `${n} Artikel`),
     autorVon: 'Geschrieben von',
     impressum: 'Impressum',
     datenschutz: 'Datenschutz',
