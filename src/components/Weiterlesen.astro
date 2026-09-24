@@ -1,0 +1,101 @@
+---
+/* <Weiterlesen> — drei Plätze am Fuss jeder Inhaltsseite:
+ *   Der Aufbau dazu · Der Beitrag dazu · Die Regel dazu
+ *
+ * 🔑 Ein leerer Platz wird BENANNT, nicht versteckt. Eine Seite, die nur
+ * zeigt, was schon da ist, sieht vollständig aus, obwohl sie es nicht ist —
+ * genau der stille Fehlermodus, gegen den dieser Blog anschreibt.
+ *
+ * Die Zuordnung kommt aus dem Feld `bund` in navigation.ts und, für die
+ * Artikel, aus BUND_JE_BEITRAG. Sie wird NICHT je Seite gepflegt: Ein Eintrag
+ * nennt seinen Zusammenhang, die drei Plätze fallen daraus ab.
+ */
+import { texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+import {
+  eintragZuPfad,
+  eintragImBund,
+  pfadVon,
+  sichtbar,
+  BUND_JE_BEITRAG,
+  GEPLANTE_BEITRAEGE,
+} from '../lib/navigation';
+import { alleArtikel, pfadVon as artikelPfad, slugVon } from '../lib/artikel';
+
+interface Props {
+  sprache: Sprache;
+  pfad: string;
+}
+const { sprache, pfad } = Astro.props;
+const t = texte(sprache);
+
+/* Welcher Zusammenhang gilt hier? Entweder steht er am Eintrag, oder die
+ * Seite ist ein Artikel und steht in der Zuordnungstabelle. */
+const eigener = eintragZuPfad(pfad);
+let bund = eigener?.bund;
+
+const artikel = await alleArtikel(sprache);
+if (!bund) {
+  const treffer = artikel.find((a) => artikelPfad(a) === pfad);
+  if (treffer) bund = BUND_JE_BEITRAG[slugVon(treffer)];
+}
+
+interface Platz {
+  marke: string;
+  titel: string | null;
+  ziel: string | null;
+  istHier: boolean;
+}
+
+function ausEintrag(marke: string, bereich: 'aufbau' | 'vorgehen'): Platz {
+  const e = bund ? eintragImBund(bund, bereich) : undefined;
+  const leer = { marke, titel: null, ziel: null, istHier: false };
+  if (!e) return leer;
+  const ziel = pfadVon(e, sprache);
+  /* Im Bau zeigt ein Entwurfsziel weder Link noch Titel — es steht da wie ein
+   * Platz, den es noch nicht gibt. Den Titel trotzdem zu nennen hiesse, die
+   * Seite auffindbar zu machen, die man gerade nicht verlinken wollte.
+   * Ausnahme: die Seite, auf der man steht. Die kennt man schon. */
+  if (!sichtbar(e) && ziel !== pfad) return leer;
+  return { marke, titel: e.titel, ziel, istHier: ziel === pfad };
+}
+
+function ausBeitrag(marke: string): Platz {
+  if (!bund) return { marke, titel: null, ziel: null, istHier: false };
+  const treffer = artikel.find((a) => BUND_JE_BEITRAG[slugVon(a)] === bund);
+  if (treffer) {
+    const ziel = artikelPfad(treffer);
+    return { marke, titel: treffer.data.titel, ziel, istHier: ziel === pfad };
+  }
+  /* Ein Beitrag, der geplant ist, steht als Titel da — ohne Link.
+   * Im Bau gilt auch hier: was `entwurf` traegt, wird nicht genannt. */
+  const geplant = GEPLANTE_BEITRAEGE.filter(sichtbar).find((e) => e.bund === bund);
+  return { marke, titel: geplant?.titel ?? null, ziel: null, istHier: false };
+}
+
+const plaetze: Platz[] = [
+  ausEintrag(t.platzAufbau, 'aufbau'),
+  ausBeitrag(t.platzBeitrag),
+  ausEintrag(t.platzRegel, 'vorgehen'),
+];
+---
+
+<nav class="py-weiterlesen" aria-label={t.weiterlesen}>
+  <h2 class="py-weiterlesen__marke">{t.weiterlesen}</h2>
+  <ul>
+    {plaetze.map((p) => (
+      <li>
+        <span class="py-weiterlesen__platz">{p.marke}</span>
+        {p.titel === null ? (
+          <span class="py-weiterlesen__leer">{t.nochKeiner}</span>
+        ) : p.istHier ? (
+          <span class="py-weiterlesen__hier">{p.titel} <span class="py-weiterlesen__zusatz">({t.bistHier})</span></span>
+        ) : p.ziel === null ? (
+          <span class="py-weiterlesen__leer">{p.titel} — {t.nochKeiner}</span>
+        ) : (
+          <a href={p.ziel}>{p.titel}</a>
+        )}
+      </li>
+    ))}
+  </ul>
+</nav>

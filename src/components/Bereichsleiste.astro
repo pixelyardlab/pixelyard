@@ -1,0 +1,200 @@
+---
+/* <Bereichsleiste> — die linke Seitenleiste, auf jeder Inhaltsseite.
+ *
+ * Sie löst die <Artikelleiste> ab (Commit 65caccc). Deren Schlagwort-Block ist
+ * bewusst NICHT mitgewandert: Die Themenseiten bleiben bestehen und bleiben
+ * indexiert, sie sind über die Artikel erreichbar. Eine Navigationsleiste, die
+ * drei Bereiche UND neun Schlagworte zeigt, zeigt keine Struktur mehr.
+ *
+ * 🔑 Alles hier kommt aus `navigation.ts` und `artikel.ts`. In dieser Datei
+ * steht kein einziger Seitentitel und keine einzige Adresse.
+ *
+ * Die Leiste steht im HTML NACH dem Hauptinhalt (Basis.astro) und wird per
+ * Grid nach links gestellt — Inhalt zuerst für Screenreader und Handy.
+ *
+ * ⚠️ Der mobile Schalter steht NICHT hier, sondern in <Leistenschalter>:
+ * Er gehört nach oben, diese Liste hinter den Inhalt. Warum er ein
+ * Kontrollkästchen ist und kein <details>:
+ * Die Leiste soll mobil ZU und ab 64rem AUF sein. `open` lässt sich per CSS
+ * nicht setzen; ein <details> aufzuzwingen verlangt, gegen die Vorgabe des
+ * Browsers anzuschreiben (`::details-content` hier, `display` dort) — und
+ * schlägt das fehl, steht die Leiste auf dem grossen Bildschirm zugeklappt.
+ * Das Kästchen tut in jedem Browser dasselbe. Es bleibt fokussierbar (die
+ * Klasse blendet es optisch aus, nicht für die Bedienung).
+ * Die GRUPPEN darin sind <details> — dort ist das Zuklappen genau das,
+ * was der Browser ohnehin tut.
+ */
+import { texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+import Statusmarke from './Statusmarke.astro';
+import {
+  EINTRAEGE,
+  GEPLANTE_BEITRAEGE,
+  sichtbar,
+  sichtbareKapitelVon,
+  uebersichtVon,
+  pfadVon,
+  bereichZuPfad,
+  type Bereich,
+  type Status,
+} from '../lib/navigation';
+import { alleArtikel, pfadVon as artikelPfad, isoTag } from '../lib/artikel';
+
+interface Props {
+  sprache: Sprache;
+  /** Pfad der offenen Seite — markiert den laufenden Eintrag. */
+  aktuell: string;
+}
+const { sprache, aktuell } = Astro.props;
+const t = texte(sprache);
+
+interface Zeile {
+  titel: string;
+  /** null = es gibt die Seite noch nicht. Dann kein Link. */
+  pfad: string | null;
+  status: Status;
+  datum?: string;
+  uebersicht?: boolean;
+}
+
+const artikel = await alleArtikel(sprache);
+
+/* Die Beiträge kommen aus der Sammlung, nicht aus navigation.ts. Nur was es
+ * noch NICHT als Datei gibt, steht dort — und steht hier ohne Link. */
+const beitragsZeilen: Zeile[] = [
+  ...artikel.map((a) => ({
+    titel: a.data.titel,
+    pfad: artikelPfad(a),
+    status: 'belegt' as Status,
+    datum: isoTag(a.data.datum),
+  })),
+  ...GEPLANTE_BEITRAEGE.filter(sichtbar).map((e) => ({
+    titel: e.titel,
+    pfad: null,
+    status: e.status,
+  })),
+];
+
+function zeilenAus(bereich: Bereich): Zeile[] {
+  return sichtbareKapitelVon(bereich).map((e) => ({
+    titel: e.titel,
+    pfad: pfadVon(e, sprache),
+    status: e.status,
+  }));
+}
+
+const bereiche: Bereich[] = ['aufbau', 'beitrag', 'vorgehen'];
+
+const gruppen = bereiche
+  .map((bereich) => {
+    const uebersicht = uebersichtVon(bereich)!;
+    const zeilen = bereich === 'beitrag' ? beitragsZeilen : zeilenAus(bereich);
+    /* Gezählt wird, was es gibt, und getrennt davon, was angekündigt ist.
+     * `3 + 4` sagt mehr als `7` — und `7` wäre eine Behauptung. */
+    const vorhanden = zeilen.filter((z) => z.pfad !== null).length;
+    const geplant = zeilen.filter((z) => z.pfad === null).length;
+    return {
+      bereich,
+      uebersicht,
+      zeigeUebersicht: sichtbar(uebersicht),
+      zeilen,
+      zaehler: geplant > 0 ? `${vorhanden} + ${geplant}` : `${vorhanden}`,
+      offen: bereichZuPfad(aktuell) === bereich,
+    };
+  })
+  /* Eine Gruppe, aus der im Bau alles herausfaellt, faellt ganz weg. Eine
+   * leere aufgeklappte Ueberschrift waere ein Versprechen ohne Inhalt. */
+  .filter((g) => g.zeigeUebersicht || g.zeilen.length > 0);
+
+const einzelne = EINTRAEGE.filter((e) => e.bereich === 'einzeln').filter(sichtbar);
+const startpfad = `/${sprache}/`;
+/* Die Legende zeigt die Marken, die auf DIESER Leiste vorkommen. Drei zu
+ * erklaeren, wo nur eine steht, waere dieselbe Sorte Behauptung wie ein
+ * Zaehler, der etwas mitzaehlt, was man nicht sieht. */
+const vorhandeneMarken = new Set<Status>([
+  ...gruppen.flatMap((g) => [
+    ...(g.zeigeUebersicht ? [g.uebersicht.status] : []),
+    ...g.zeilen.map((z) => z.status),
+  ]),
+  ...einzelne.map((e) => e.status),
+]);
+const marken: Status[] = (['belegt', 'teilweise', 'geplant'] as Status[]).filter((m) =>
+  vorhandeneMarken.has(m),
+);
+const markenText: Record<Status, string> = {
+  belegt: t.markeBelegt,
+  teilweise: t.markeTeilweise,
+  geplant: t.markeGeplant,
+};
+---
+
+<nav class="py-leiste py-leiste--links" aria-label={t.bereiche}>
+  <div class="py-leiste__rumpf">
+    <ul class="py-leiste__liste py-leiste__aussen">
+      <li class="py-leiste__ohnemarke">
+        <a href={startpfad} aria-current={aktuell === startpfad ? 'page' : undefined}>
+          {t.startseite}
+        </a>
+      </li>
+    </ul>
+
+    {gruppen.map((g) => (
+      <details class="py-leiste__gruppe" open={g.offen}>
+        <summary class="py-leiste__marke">
+          <span>{g.uebersicht.titel}</span>
+          <span class="py-leiste__anzahl" aria-hidden="true">{g.zaehler}</span>
+        </summary>
+
+        <ul class="py-leiste__liste">
+          {g.zeigeUebersicht && (
+            <li class="py-leiste__uebersicht">
+              <Statusmarke status={g.uebersicht.status} sprache={sprache} />
+              <a
+                href={pfadVon(g.uebersicht, sprache)}
+                aria-current={aktuell === pfadVon(g.uebersicht, sprache) ? 'page' : undefined}
+              >{g.uebersicht.titel}</a>
+            </li>
+          )}
+
+          {g.zeilen.map((z) => (
+            <li class:list={[z.pfad === null && 'py-leiste__geplant']}>
+              <Statusmarke status={z.status} sprache={sprache} />
+              {z.datum && <span class="py-leiste__datum">{z.datum}</span>}
+              {z.pfad === null ? (
+                <span class="py-leiste__ohnelink">{z.titel}</span>
+              ) : (
+                <a href={z.pfad} aria-current={aktuell === z.pfad ? 'page' : undefined}>{z.titel}</a>
+              )}
+            </li>
+          ))}
+        </ul>
+      </details>
+    ))}
+
+    {einzelne.length > 0 && (
+    <ul class="py-leiste__liste py-leiste__aussen">
+      {einzelne.map((e) => (
+        <li>
+          <Statusmarke status={e.status} sprache={sprache} />
+          <a
+            href={pfadVon(e, sprache)}
+            aria-current={aktuell === pfadVon(e, sprache) ? 'page' : undefined}
+          >{e.titel}</a>
+        </li>
+      ))}
+    </ul>
+    )}
+
+    {marken.length > 0 && (
+    <dl class="py-leiste__legende">
+      <dt class="py-nur-fuer-screenreader">{t.legende}</dt>
+      {marken.map((m) => (
+        <dd>
+          <Statusmarke status={m} sprache={sprache} ohneText />
+          <span>{markenText[m]}</span>
+        </dd>
+      ))}
+    </dl>
+    )}
+  </div>
+</nav>

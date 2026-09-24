@@ -63,10 +63,19 @@
   --py-mass:          34rem;      /* ~68 Zeichen, Brief: max ~70 */
   --py-mass-breit:    52rem;      /* Tabellen, Terminal, Diagramme */
   /* Nur auf Seiten mit Seitenleisten (body[data-raster]). Gerechnet, nicht
-   * geraten: 71rem Inhaltsbreite − 13rem links − 14rem rechts − 2×2rem Spalt
-   * = 40rem Mitte. Der Lesestrom darin bleibt bei 34rem. */
-  --py-mass-raster:   74rem;
+   * geraten: 55rem Inhaltsbreite − 13rem links − 2rem Spalt = 40rem Mitte.
+   * Der Lesestrom darin bleibt bei 34rem.
+   *
+   * ⚠️ Am 24.09.2026 von 74rem auf 58rem gesenkt, weil die RECHTE Leiste aus
+   * dem Layout fiel. Die Mitte bleibt dabei bei 40rem — der Lesestrom steht
+   * exakt dort, wo er vorher stand. Wäre der Wert stehen geblieben, wäre die
+   * Mitte um 16rem gewachsen und der Text hätte sich nach rechts verschoben,
+   * ohne dass eine Zeile CSS danach ausgesehen hätte. */
+  --py-mass-raster:   58rem;
   --py-leiste-links:  13rem;
+  /* Bleibt definiert, obwohl das Raster sie nicht mehr benutzt:
+   * src/components/Geraeteleiste.astro liegt weiterhin im Baum (ihr Inhalt
+   * wandert nach /de/aufbau/hardware/) und würde sie brauchen. */
   --py-leiste-rechts: 14rem;
 
   /* ---- Mass und Rhythmus ---- */

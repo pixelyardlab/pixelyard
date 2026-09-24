@@ -1,0 +1,38 @@
+---
+/* <Leistenschalter> — die Zeile „Du bist hier" und das Kästchen dahinter.
+ *
+ * 🔑 Warum das von <Bereichsleiste> GETRENNT ist, obwohl es zusammengehört:
+ * Der Schalter soll oben stehen, direkt unter den Brotkrumen. Die Liste, die
+ * er öffnet, steht hinter dem Inhalt — „Inhalt zuerst im HTML". Beides an
+ * einem Ort ginge nur, wenn eines von beiden am falschen Platz stünde.
+ *
+ * ⚠️ Kästchen und Beschriftung stehen deshalb in DIESER Datei, die ID also
+ * genau einmal. Die CSS-Regel, die den Rumpf aufklappt, kommt ohne sie aus:
+ * sie greift über `~` auf die Geschwister unter <main> und braucht nur
+ * Klassen. Eine zweite ID in einer zweiten Datei hätte driften können.
+ *
+ * Beide Elemente müssen direkte Kinder von <main> bleiben und VOR
+ * `.py-leiste` stehen — sonst findet `.py-leiste__kasten:checked ~ .py-leiste`
+ * nichts mehr. Steht in Basis.astro so.
+ */
+import { texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+
+interface Props {
+  sprache: Sprache;
+  /** Titel der offenen Seite. */
+  seitentitel: string;
+}
+const { sprache, seitentitel } = Astro.props;
+const t = texte(sprache);
+---
+
+<input
+  type="checkbox"
+  id="py-leiste-auf"
+  class="py-leiste__kasten py-nur-fuer-screenreader"
+/>
+<label class="py-leiste__schalter" for="py-leiste-auf">
+  <span class="py-leiste__hier">{t.duBistHier}</span>
+  <span class="py-leiste__hiertitel">{seitentitel}</span>
+</label>

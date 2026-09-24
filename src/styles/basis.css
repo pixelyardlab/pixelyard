@@ -175,25 +175,53 @@ figcaption {
  * gemeinsam, sonst steht die Kopfzeile schmaler als der Text darunter. */
 body[data-raster] .py-huelle { max-width: var(--py-mass-raster); }
 
-/* --- Dreispaltiges Raster --------------------------------------------
- * Unter 64rem passiert hier NICHTS: eine Spalte, Leisten unter dem Text.
+/* --- Zweispaltiges Raster ---------------------------------------------
+ * Unter 64rem passiert hier NICHTS: eine Spalte, die Leiste unter dem Text.
  * Das ist die Voreinstellung und nicht der Sonderfall — der Lesestrom soll
- * in jeder Breite gleich breit sein, die Leisten sind Zugabe. */
+ * in jeder Breite gleich breit sein, die Leiste ist Zugabe.
+ *
+ * ⚠️ Bis zum 24.09.2026 waren es DREI Spalten; die rechte trug die
+ * Geräteleiste. Deren Inhalt gehört nach /de/aufbau/hardware/, also ist die
+ * Spalte weg. Mitgezogen wurde --py-mass-raster (tokens.css): Ohne das wäre
+ * die Mitte um die Breite der alten Spalte gewachsen. */
 
 .py-raster { display: block; }
+
+/* Unter 64rem: eine Spalte, aber die Reihenfolge wird GESETZT.
+ *
+ * 🔑 Der Grund steht in Basis.astro: Im HTML kommt der Inhalt vor der Leiste.
+ * Im Bild soll die aufgeklappte Leiste aber direkt unter ihrem Schalter
+ * stehen und nicht am Seitenende — ein Schalter, nach dessen Betaetigung
+ * scheinbar nichts passiert, ist schlimmer als gar keiner.
+ *
+ * ⚠️ Der Preis, und er ist benannt: Die Fokusreihenfolge folgt weiter dem
+ * HTML. Wer aufklappt und weitertabbt, landet im Text, nicht in der Liste.
+ * Das ist derselbe Handel, den das Raster ab 64rem seit dem 28.08.2026
+ * eingeht — die Leiste steht links und kommt im HTML zuletzt. Hier wird er
+ * auf das Handy ausgedehnt, nicht neu aufgemacht. */
+@media (max-width: 63.999rem) {
+  .py-raster {
+    display: flex;
+    flex-direction: column;
+  }
+  .py-raster > .py-brotkrumen     { order: 1; }
+  .py-raster > .py-leiste__schalter { order: 2; }
+  .py-raster > .py-leiste--links  { order: 3; }
+  .py-raster__mitte               { order: 4; }
+}
 
 @media (min-width: 64rem) {
   .py-raster {
     display: grid;
-    grid-template-columns: var(--py-leiste-links) minmax(0, 1fr) var(--py-leiste-rechts);
+    grid-template-columns: var(--py-leiste-links) minmax(0, 1fr);
     column-gap: var(--py-r6);
     align-items: start;
   }
   /* Die Spalten werden ZUGEWIESEN, nicht aus der HTML-Reihenfolge abgeleitet.
    * Deshalb darf im HTML der Inhalt zuerst stehen (Basis.astro). */
-  .py-raster__mitte      { grid-column: 2; grid-row: 1; }
-  .py-raster .py-leiste--links  { grid-column: 1; grid-row: 1; }
-  .py-raster .py-leiste--rechts { grid-column: 3; grid-row: 1; }
+  .py-raster > .py-brotkrumen  { grid-column: 2; grid-row: 1; }
+  .py-raster__mitte            { grid-column: 2; grid-row: 2; }
+  .py-raster .py-leiste--links { grid-column: 1; grid-row: 1 / span 2; }
 }
 
 /* Der Lesestrom ist schmaler als die Huelle. Breite Elemente — Terminal,

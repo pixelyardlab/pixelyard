@@ -141,6 +141,37 @@ export const TEXTE = {
     impressum: 'Impressum',
     datenschutz: 'Datenschutz',
     werbung: 'Werbung',
+
+    /* --- Bereichsleiste (24.09.2026) ---------------------------------- */
+    bereiche: 'Bereiche',
+    startseite: 'Startseite',
+    duBistHier: 'Du bist hier:',
+    leisteOeffnen: 'Bereiche anzeigen',
+    /* Die Beschriftungen der drei Statusmarken. Sie stehen ZWEIMAL auf der
+     * Seite: an jedem Eintrag (fuer den Screenreader) und einmal sichtbar in
+     * der Legende. Deshalb genau ein Ort fuer den Wortlaut. */
+    markeBelegt: 'belegt',
+    markeTeilweise: 'läuft, Nachweis fehlt',
+    markeGeplant: 'geplant',
+    legende: 'Marken',
+
+    /* --- Brotkrumen ---------------------------------------------------- */
+    seitenpfad: 'Seitenpfad',
+
+    /* --- Weiterlesen-Fuss ---------------------------------------------- */
+    weiterlesen: 'Weiterlesen',
+    platzAufbau: 'Der Aufbau dazu',
+    platzBeitrag: 'Der Beitrag dazu',
+    platzRegel: 'Die Regel dazu',
+    /* Der leere Platz wird BENANNT. „Versteckt" hiesse: es sieht vollstaendig
+     * aus, obwohl es das nicht ist — genau der stille Fehlermodus, gegen den
+     * dieser Blog anschreibt. */
+    nochKeiner: 'noch keiner — geplant',
+    bistHier: 'du bist hier',
+
+    /* --- Platzhalterseiten --------------------------------------------- */
+    platzhalter: 'Platzhalter',
+    nochNichtGeschrieben: 'Diese Seite ist angelegt, aber noch nicht geschrieben.',
   },
 } as const;
 

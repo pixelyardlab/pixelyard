@@ -1,0 +1,69 @@
+---
+/* Übersicht über die Beiträge — /<sprache>/artikel/
+ *
+ * Die Liste ist echt: Sie kommt aus `alleArtikel()`, derselben Auswahl, die
+ * auch Startseite, RSS und llms.txt benutzen. Der Bereichstext darüber fehlt
+ * noch — deshalb steht der Eintrag in navigation.ts auf `teilweise` und
+ * trägt weiterhin `entwurf: true`.
+ *
+ * ⚠️ Das ist der einzige neue Eintrag, der nicht `geplant` ist. Er ist es
+ * nicht, weil die Liste funktioniert — und er ist trotzdem kein `belegt`,
+ * weil der Text fehlt, der sagt, wonach hier geordnet wird.
+ */
+import Basis from '../../../layouts/Basis.astro';
+import Statusmarke from '../../../components/Statusmarke.astro';
+import { SPRACHEN, texte } from '../../../lib/seite';
+import type { Sprache } from '../../../lib/seite';
+import { alleArtikel, pfadVon, isoTag } from '../../../lib/artikel';
+import { uebersichtVon } from '../../../lib/navigation';
+
+export function getStaticPaths() {
+  return SPRACHEN.map((sprache) => ({ params: { sprache } }));
+}
+
+const sprache = Astro.params.sprache as Sprache;
+const t = texte(sprache);
+const eintrag = uebersichtVon('beitrag')!;
+const artikel = await alleArtikel(sprache);
+---
+
+<Basis titel={eintrag.titel} beschreibung={eintrag.kurzbeschreibung} sprache={sprache}>
+  <div class="py-lesestrom">
+    <p class="py-meta">
+      <span class="py-meta__eingabe" aria-hidden="true">$</span>
+      <Statusmarke status={eintrag.status} sprache={sprache} ohneText />
+      <span>{t.markeTeilweise}</span>
+      <span class="py-meta__punkt" aria-hidden="true">·</span>
+      <span>{t.artikelZaehlung(artikel.length)}</span>
+    </p>
+
+    <h1>{eintrag.titel}</h1>
+
+    <p>{eintrag.kurzbeschreibung}</p>
+
+    {artikel.length === 0 ? (
+      <p class="py-schlagwort">Noch kein Artikel veröffentlicht.</p>
+    ) : (
+      <ul class="py-liste">
+        {artikel.map((a) => (
+          <li>
+            <p class="py-meta">
+              <span class="py-meta__eingabe" aria-hidden="true">$</span>
+              <time datetime={isoTag(a.data.datum)}>{isoTag(a.data.datum)}</time>
+              {a.data.entwurf && <span class="py-entwurf">{t.entwurf}</span>}
+            </p>
+            <h2><a href={pfadVon(a)}>{a.data.titel}</a></h2>
+            <p>{a.data.beschreibung}</p>
+            {a.data.schlagworte.length > 0 && (
+              <p class="py-schlagwort">
+                {a.data.schlagworte.map((s) => (
+                  <a href={`/${sprache}/thema/${s}/`}>#{s}</a>
+                ))}
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</Basis>

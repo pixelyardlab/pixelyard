@@ -1,0 +1,36 @@
+---
+/* Unterkapitel — /<sprache>/aufbau/<kapitel>/
+ *
+ * EINE Datei für alle Kapitel des Bereichs. Die Routen entstehen aus
+ * navigation.ts: Wer dort ein Kapitel einträgt, bekommt die Seite; wer eines
+ * herausnimmt, verliert sie. Eine Datei je Kapitel wäre eine zweite Liste.
+ */
+import Basis from '../../../layouts/Basis.astro';
+import Platzhalter from '../../../components/Platzhalter.astro';
+import { SPRACHEN } from '../../../lib/seite';
+import type { Sprache } from '../../../lib/seite';
+import { kapitelVon, type Eintrag } from '../../../lib/navigation';
+
+export function getStaticPaths() {
+  const pfade = [];
+  for (const sprache of SPRACHEN) {
+    for (const eintrag of kapitelVon('aufbau')) {
+      /* `aufbau/hardware` → `hardware`. Der Bereich steht schon im Ordner. */
+      pfade.push({
+        params: { sprache, kapitel: eintrag.slug.split('/').slice(1).join('/') },
+        props: { eintrag },
+      });
+    }
+  }
+  return pfade;
+}
+
+const sprache = Astro.params.sprache as Sprache;
+const { eintrag } = Astro.props as { eintrag: Eintrag };
+---
+
+<Basis titel={eintrag.titel} beschreibung={eintrag.kurzbeschreibung} sprache={sprache}>
+  <div class="py-lesestrom">
+    <Platzhalter eintrag={eintrag} sprache={sprache} />
+  </div>
+</Basis>

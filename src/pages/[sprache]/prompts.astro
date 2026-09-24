@@ -1,0 +1,22 @@
+---
+/* /<sprache>/prompts/ — Platzhalter, Schritt 1 des Umbaus (24.09.2026).
+ * Titel und Kurzbeschreibung stehen in navigation.ts, nicht hier. */
+import Basis from '../../layouts/Basis.astro';
+import Platzhalter from '../../components/Platzhalter.astro';
+import { SPRACHEN } from '../../lib/seite';
+import type { Sprache } from '../../lib/seite';
+import { EINTRAEGE } from '../../lib/navigation';
+
+export function getStaticPaths() {
+  return SPRACHEN.map((sprache) => ({ params: { sprache } }));
+}
+
+const sprache = Astro.params.sprache as Sprache;
+const eintrag = EINTRAEGE.find((e) => e.slug === 'prompts')!;
+---
+
+<Basis titel={eintrag.titel} beschreibung={eintrag.kurzbeschreibung} sprache={sprache}>
+  <div class="py-lesestrom">
+    <Platzhalter eintrag={eintrag} sprache={sprache} />
+  </div>
+</Basis>

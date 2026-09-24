@@ -375,16 +375,21 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   color: var(--py-text-leise);
 }
 
-/* Unter 64rem stehen die Leisten UNTER dem Text. Dort bekommen sie die
- * Breite des Lesestroms und eine Trennlinie — sonst kleben sie am Text. */
+/* Unter 64rem bekommt die Leiste die Breite des Lesestroms und eine
+ * Trennlinie — sonst klebt sie am Text.
+ *
+ * ⚠️ Die Box sitzt auf dem RUMPF, nicht auf dem <nav>. Sonst zeichnete eine
+ * zugeklappte Leiste einen Strich und einen Abstand fuer nichts — und seit
+ * dem 24.09.2026 steht sie im Bild nicht mehr am Seitenende, sondern mitten
+ * zwischen Schalter und Text, wo das sofort auffiele. */
 @media (max-width: 63.999rem) {
-  .py-leiste {
+  .py-leiste__rumpf {
     max-width: var(--py-mass);
     margin-inline: auto;
+    margin-block: var(--py-r4) var(--py-r6);
     padding-top: var(--py-r5);
     border-top: var(--py-rand) solid var(--py-line);
   }
-  .py-leiste--links { margin-top: var(--py-r7); }
   .py-leiste--rechts { margin-top: var(--py-r5); }
 }
 
@@ -530,4 +535,266 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   border-radius: var(--py-radius);
   vertical-align: 0.1em;
   white-space: nowrap;
+}
+
+/* ====================================================================
+ * Bereichsleiste, Statusmarke, Brotkrumen, Weiterlesen — 24.09.2026
+ *
+ * Die Struktur des Umbaus. Gestalterisch bewusst nichts Neues: dieselbe
+ * Monospace, dieselben Farbtoken, dieselben Abstände wie die alte Leiste.
+ * Dieser Schritt baut Struktur, nicht Aussehen.
+ * ==================================================================== */
+
+/* --- Statusmarke -------------------------------------------------------
+ * ⚠️ Sie heisst `py-status` und NICHT `py-marke`. Diesen Namen trägt seit dem
+ * 28.08.2026 die WORTMARKE (Zeile 16, Wortmarke.astro). Am 24.09.2026 einmal
+ * gleich benannt — die Folge war eine Kopfzeile, in der „pixelyard_" auf
+ * 10 × 10 px zusammenfiel und den Navigationslink überlagerte. Der Bau blieb
+ * grün, die Seite stand schief; sichtbar wurde es erst im Bild bei 420 px.
+ *
+ * Die FORM trägt die Aussage, die Farbe kommt dazu. Deshalb `currentColor`
+ * für Fläche und Rand: Der Zustand setzt eine Farbe, das SVG erbt sie, und
+ * im Schwarzweissdruck bleiben die drei Formen trotzdem drei Formen. */
+.py-status {
+  flex: none;
+  width: 0.625rem;
+  height: 0.625rem;
+  vertical-align: baseline;
+}
+.py-status__fuell { fill: currentColor; }
+.py-status__rand  { fill: none; stroke: currentColor; stroke-width: 1.2; }
+
+.py-status[data-status='belegt']    { color: var(--py-text); }
+.py-status[data-status='teilweise'] { color: var(--py-accent-text); }
+.py-status[data-status='geplant']   { color: var(--py-text-leise); }
+
+/* --- Bereichsleiste: mobiler Schalter -----------------------------------
+ * Ein Kontrollkästchen, kein <details>. Der Grund steht in
+ * src/components/Bereichsleiste.astro: `open` lässt sich per CSS nicht
+ * setzen, und ein <details> auf dem grossen Bildschirm aufzuzwingen heisst,
+ * gegen die Browservorgabe anzuschreiben. Misslingt das, steht die Leiste
+ * zugeklappt da — ein Fehler, der beim Bauen nicht auffällt. */
+/* 🔑 Diese Regel traegt die ganze Bedienung. Sie kommt ohne ID und ohne
+ * `:has()` aus: Kaestchen und <nav> sind Geschwister unter <main>, also
+ * genuegt `~`. Eine ID in zwei Dateien haette driften koennen; `:has()`
+ * haette eine Browservoraussetzung fuer das EINZIGE Bedienelement der
+ * Leiste geschaffen. */
+.py-leiste__rumpf { display: none; }
+.py-leiste__kasten:checked ~ .py-leiste .py-leiste__rumpf { display: block; }
+
+/* Der Schalter ist seit dem 24.09.2026 ein direktes Kind von <main> und
+ * steht ueber dem Text, nicht in der Leiste. Er richtet sich deshalb am
+ * Lesestrom aus, wie die Brotkrumen darueber. */
+.py-leiste__schalter {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: var(--py-r2);
+  cursor: pointer;
+  max-width: var(--py-mass);
+  margin-inline: auto;
+  width: 100%;
+  padding-block: var(--py-r2);
+  margin-block: 0 var(--py-r5);
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+}
+.py-leiste__hier { flex: none; }
+/* Der Titel wird abgeschnitten statt umgebrochen. Der Schalter ist EINE
+ * Zeile — das war die Vorgabe, und bei einem langen Artikeltitel wuerde er
+ * sonst dreizeilig und das Karat rutschte allein nach unten.
+ * Abgeschnitten ist nur das Bild: im HTML steht der ganze Titel, und er
+ * steht ohnehin als Ueberschrift direkt darunter. */
+.py-leiste__hiertitel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.py-leiste__hier { color: var(--py-text-leise); }
+.py-leiste__hiertitel { color: var(--py-text); }
+.py-leiste__schalter::after {
+  content: '▸';
+  flex: none;
+  color: var(--py-text-leise);
+}
+.py-leiste__kasten:checked ~ .py-leiste__schalter::after { content: '▾'; }
+.py-leiste__kasten:checked ~ .py-leiste__schalter { margin-block-end: var(--py-r2); }
+/* Das Kästchen ist optisch versteckt, aber bedienbar. Der Fokusring muss
+ * deshalb auf der Beschriftung erscheinen — sonst sieht man beim Tabben
+ * nicht, wo man ist. */
+.py-leiste__kasten:focus-visible ~ .py-leiste__schalter {
+  outline: 2px solid var(--py-link);
+  outline-offset: 2px;
+}
+
+/* Ab 64rem gibt es nichts zu klappen. Das Kaestchen wird `display: none`
+ * und nicht nur unsichtbar: Sonst bliebe es ein Halt in der Tabreihenfolge,
+ * der nichts tut. */
+@media (min-width: 64rem) {
+  .py-leiste__schalter,
+  .py-leiste__kasten { display: none; }
+  .py-leiste__rumpf { display: block; }
+}
+
+/* --- Bereichsleiste: Gruppen ------------------------------------------- */
+.py-leiste__gruppe { margin-bottom: var(--py-r5); }
+
+.py-leiste__gruppe > summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--py-r2);
+  cursor: pointer;
+  list-style: none;
+}
+.py-leiste__gruppe > summary::-webkit-details-marker { display: none; }
+.py-leiste__gruppe > summary::after {
+  content: '▸';
+  order: 3;
+  color: var(--py-text-leise);
+}
+.py-leiste__gruppe[open] > summary::after { content: '▾'; }
+/* Die Anzahl steht an der ZUGEKLAPPTEN Gruppe — offen zählt die Liste
+ * selbst, und eine Zahl daneben wäre eine zweite Auskunft über dasselbe. */
+.py-leiste__gruppe > summary .py-leiste__anzahl { margin-left: auto; order: 2; }
+.py-leiste__gruppe[open] > summary .py-leiste__anzahl { display: none; }
+
+/* Die Marke steht in einer eigenen Spalte links, damit die Titel bündig
+ * stehen — auch dort, wo darüber noch ein Datum sitzt. */
+.py-leiste__liste li {
+  position: relative;
+  padding-left: 1.05rem;
+}
+.py-leiste__liste .py-status {
+  position: absolute;
+  left: 0;
+  top: 0.4em;
+}
+/* Ein Eintrag ohne Statusmarke braucht die Spalte dafuer auch nicht.
+ * „Startseite" ist kein Kapitel in einer Gruppe, sondern steht neben den
+ * Gruppen — und stand bis zum 24.09.2026 um die Markenspalte eingerueckt da,
+ * buendig mit nichts. */
+/* ⚠️ Mit der Liste davor, sonst gewinnt `.py-leiste__liste li` (zwei
+ * Bestandteile gegen einen) und die Einrueckung bleibt stehen. */
+.py-leiste__liste .py-leiste__ohnemarke { padding-left: 0; }
+
+/* Die Bereichsübersicht ist der erste Eintrag jeder Gruppe und kursiv:
+ * sie ist die Gruppe selbst, kein Kapitel darin. */
+.py-leiste__uebersicht a { font-style: italic; }
+
+/* Geplante Beiträge STEHEN DRIN. Kursiv und blass, ohne Link — weil sie
+ * angekündigt sind und noch nicht existieren. Wegzulassen, was geplant ist,
+ * ergäbe eine Liste, die vollständig aussieht. */
+.py-leiste__geplant .py-leiste__ohnelink {
+  font-style: italic;
+  color: var(--py-text-leise);
+  opacity: 0.85;
+}
+
+.py-leiste__aussen { margin-bottom: var(--py-r5); }
+
+/* --- Bereichsleiste: Legende ------------------------------------------- */
+.py-leiste__legende {
+  margin: var(--py-r5) 0 0;
+  padding-top: var(--py-r3);
+  border-top: var(--py-rand) solid var(--py-line);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+.py-leiste__legende dd {
+  margin: 0 0 var(--py-r1);
+  display: flex;
+  align-items: baseline;
+  gap: var(--py-r2);
+}
+
+/* --- Brotkrumen --------------------------------------------------------
+ * Eine Zeile, kein Bauteil. Sie steht über dem Titel und richtet sich am
+ * Lesestrom aus, nicht an der Spalte — sonst hinge sie links daneben. */
+.py-brotkrumen {
+  max-width: var(--py-mass);
+  margin: 0 auto var(--py-r5);
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  color: var(--py-text-leise);
+}
+.py-brotkrumen ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+.py-brotkrumen li + li::before {
+  content: '›';
+  margin: 0 var(--py-r2);
+  opacity: 0.7;
+}
+.py-brotkrumen a { color: var(--py-link); text-decoration: none; }
+.py-brotkrumen a:hover { text-decoration: underline; }
+.py-brotkrumen [aria-current='page'] { color: var(--py-text); }
+
+/* --- Weiterlesen-Fuss --------------------------------------------------
+ * Drei Plätze, und der leere trägt seinen Namen. Wer nur zeigt, was da ist,
+ * baut eine Seite, die vollständig aussieht — dieselbe Sorte stiller Fehler
+ * wie ein grüner Bau ohne Nachweis. */
+.py-weiterlesen {
+  max-width: var(--py-mass);
+  margin: var(--py-r7) auto 0;
+  padding-top: var(--py-r5);
+  border-top: var(--py-rand) solid var(--py-line);
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.py-weiterlesen__marke {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--py-text-leise);
+  margin: 0 0 var(--py-r4);
+}
+.py-weiterlesen ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--py-r5);
+}
+.py-weiterlesen__platz {
+  display: block;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--py-text-leise);
+  margin-bottom: var(--py-r1);
+}
+.py-weiterlesen a { color: var(--py-link); text-decoration: none; }
+.py-weiterlesen a:hover { text-decoration: underline; }
+.py-weiterlesen__hier { color: var(--py-text); }
+.py-weiterlesen__zusatz { color: var(--py-text-leise); }
+.py-weiterlesen__leer {
+  font-style: italic;
+  color: var(--py-text-leise);
+  opacity: 0.85;
+}
+
+/* --- Kapitelliste auf den Bereichsübersichten -------------------------- */
+.py-kapitel { list-style: none; padding: 0; margin-block: var(--py-r6) 0; }
+.py-kapitel li { margin-bottom: var(--py-r5); }
+.py-kapitel__kopf {
+  display: flex;
+  align-items: baseline;
+  gap: var(--py-r2);
+  margin: 0 0 var(--py-r1);
+  font-family: var(--py-schrift-mono);
+}
+.py-kapitel__text {
+  margin: 0;
+  color: var(--py-text-leise);
+  font-size: 0.9375rem;
 }

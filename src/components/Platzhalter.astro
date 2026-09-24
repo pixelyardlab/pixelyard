@@ -1,0 +1,41 @@
+---
+/* <Platzhalter> — der Rumpf einer Seite, die angelegt, aber nicht
+ * geschrieben ist.
+ *
+ * 🔑 Sie sagt das ausdrücklich, statt leer zu wirken. Eine Seite, die
+ * aussieht, als stünde etwas darauf, ist dieselbe Sorte stiller Fehler wie
+ * ein grüner Bau ohne Nachweis.
+ *
+ * Erfundener Inhalt steht hier bewusst nicht: Die Kurzbeschreibung sagt, was
+ * an diese Stelle kommt — sie behauptet nichts über das, was gebaut wurde.
+ */
+import { texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+import type { Eintrag } from '../lib/navigation';
+import Statusmarke from './Statusmarke.astro';
+
+interface Props {
+  eintrag: Eintrag;
+  sprache: Sprache;
+}
+const { eintrag, sprache } = Astro.props;
+const t = texte(sprache);
+---
+
+<p class="py-meta">
+  <span class="py-meta__eingabe" aria-hidden="true">$</span>
+  <Statusmarke status={eintrag.status} sprache={sprache} ohneText />
+  <span>{t.platzhalter}</span>
+  <span class="py-meta__punkt" aria-hidden="true">·</span>
+  <span>{eintrag.status === 'geplant' ? t.markeGeplant : t.markeTeilweise}</span>
+</p>
+
+<h1>{eintrag.titel}</h1>
+
+<p>{eintrag.kurzbeschreibung}</p>
+
+<p class="py-schlagwort">
+  {t.nochNichtGeschrieben} Sie ist erreichbar, damit die Struktur prüfbar ist —
+  sie steht nicht in der Sitemap, nicht im Feed und trägt <code>noindex</code>,{' '}
+  bis hier etwas steht, das eine Zahl oder ein Protokoll nennt.
+</p>

@@ -1,0 +1,28 @@
+---
+/* Bereichsübersicht — /<sprache>/aufbau/
+ *
+ * Platzhalter (Schritt 1 des Umbaus, 24.09.2026). Titel, Kurzbeschreibung und
+ * die Liste der Unterkapitel kommen aus navigation.ts; auf dieser Seite steht
+ * kein Seitentitel und kein Pfad zum zweiten Mal.
+ */
+import Basis from '../../../layouts/Basis.astro';
+import Platzhalter from '../../../components/Platzhalter.astro';
+import Kapitelliste from '../../../components/Kapitelliste.astro';
+import { SPRACHEN } from '../../../lib/seite';
+import type { Sprache } from '../../../lib/seite';
+import { uebersichtVon } from '../../../lib/navigation';
+
+export function getStaticPaths() {
+  return SPRACHEN.map((sprache) => ({ params: { sprache } }));
+}
+
+const sprache = Astro.params.sprache as Sprache;
+const eintrag = uebersichtVon('aufbau')!;
+---
+
+<Basis titel={eintrag.titel} beschreibung={eintrag.kurzbeschreibung} sprache={sprache}>
+  <div class="py-lesestrom">
+    <Platzhalter eintrag={eintrag} sprache={sprache} />
+    <Kapitelliste bereich="aufbau" sprache={sprache} />
+  </div>
+</Basis>

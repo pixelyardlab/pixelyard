@@ -1,0 +1,29 @@
+---
+/* <Kapitelliste> — die Unterkapitel eines Bereichs, auf dessen Übersicht.
+ *
+ * Dieselbe Quelle wie die Seitenleiste (navigation.ts). Eine Übersicht, die
+ * ihre eigene Liste führte, wäre die zweite Fassung, vor der CLAUDE.md warnt.
+ */
+import type { Sprache } from '../lib/seite';
+import Statusmarke from './Statusmarke.astro';
+import { kapitelVon, pfadVon, type Bereich } from '../lib/navigation';
+
+interface Props {
+  bereich: Bereich;
+  sprache: Sprache;
+}
+const { bereich, sprache } = Astro.props;
+const kapitel = kapitelVon(bereich);
+---
+
+<ul class="py-kapitel">
+  {kapitel.map((e) => (
+    <li>
+      <p class="py-kapitel__kopf">
+        <Statusmarke status={e.status} sprache={sprache} />
+        <a href={pfadVon(e, sprache)}>{e.titel}</a>
+      </p>
+      <p class="py-kapitel__text">{e.kurzbeschreibung}</p>
+    </li>
+  ))}
+</ul>

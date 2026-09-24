@@ -4,6 +4,24 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import rehypeExternalLinks from 'rehype-external-links';
 
+/* 🔑 Die Entwurfspfade kommen aus DEM Datenmodell, aus dem auch die
+ * Seitenleiste, die Brotkrumen und der Weiterlesen-Fuss kommen.
+ *
+ * ⚠️ Der Grund, warum das hier stehen muss und nicht als zweite Liste:
+ * Der Sitemap-Filter arbeitet ueber PFADE und kennt das Feld `entwurf`
+ * nicht — er nimmt jede gebaute Seite auf. Eine handgepflegte Pfadliste
+ * daneben waere eine zweite Wahrheit, und die faengt beim naechsten neuen
+ * Kapitel an zu altern. Genau dieser Fehler — zwei Orte, einer davon alt —
+ * steht in CLAUDE.md als der teuerste des Projekts.
+ *
+ * `navigation.ts` darf deshalb NICHTS aus `astro:content` importieren:
+ * Zum Zeitpunkt, an dem diese Datei geladen wird, gibt es die Sammlung
+ * noch nicht. */
+import { entwurfsPfade } from './src/lib/navigation.ts';
+import { SPRACHEN } from './src/lib/seite.ts';
+
+const nichtInDieSitemap = new Set(entwurfsPfade(SPRACHEN));
+
 /* Eigenes Farbschema fuer Code-Bloecke.
  *
  * Warum nicht das mitgelieferte `github-dark`: Dessen Kommentarfarbe #6A737D
@@ -66,9 +84,13 @@ export default defineConfig({
 			// Was nicht indexiert werden soll, gehoert auch nicht in die Sitemap.
 			// Sonst widersprechen sich zwei Signale, und Suchmaschinen entscheiden
 			// selbst, welches gilt.
-			filter: (seite) =>
-				!seite.endsWith('/design/') &&
-				new URL(seite).pathname !== '/',
+			filter: (seite) => {
+				const pfad = new URL(seite).pathname;
+				if (nichtInDieSitemap.has(pfad)) return false;
+				if (pfad.endsWith('/design/')) return false;
+				if (pfad === '/') return false;
+				return true;
+			},
 			i18n: {
 				defaultLocale: 'de',
 				locales: { de: 'de-CH' },

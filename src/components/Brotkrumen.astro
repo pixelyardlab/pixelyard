@@ -1,0 +1,50 @@
+---
+/* <Brotkrumen> — eine Zeile oben im Inhalt: Bereich › Seite.
+ *
+ * Sie steht da für den, der über eine Suchmaschine mitten hineinfällt und
+ * ohne sie nicht sähe, wovon diese Seite ein Teil ist.
+ *
+ * Die Bereichsstufe kommt aus `navigation.ts` und wird weggelassen, wo es
+ * keine gibt (Prompts, Über), wo die Seite selbst die Bereichsübersicht IST
+ * — ein Glied, das auf sich selbst zeigt, ist kein Weg — und im Bau dort, wo
+ * die Übersicht noch ein Entwurf ist. Sie fällt dann ganz weg statt als
+ * Text ohne Link stehenzubleiben: ein totes Glied ist kein Weg, sondern eine
+ * Andeutung von einem.
+ */
+import { texte } from '../lib/seite';
+import type { Sprache } from '../lib/seite';
+import { eintragZuPfad, bereichZuPfad, uebersichtVon, pfadVon, sichtbar } from '../lib/navigation';
+
+interface Props {
+  sprache: Sprache;
+  pfad: string;
+  titel: string;
+}
+const { sprache, pfad, titel } = Astro.props;
+const t = texte(sprache);
+
+const eigener = eintragZuPfad(pfad);
+const bereich = bereichZuPfad(pfad);
+const uebersicht = bereich ? uebersichtVon(bereich) : undefined;
+const zeigeBereich = Boolean(uebersicht) && !eigener?.uebersicht && sichtbar(uebersicht!);
+
+const stufen: { titel: string; pfad: string | null }[] = [
+  { titel: t.startseite, pfad: `/${sprache}/` },
+  ...(zeigeBereich ? [{ titel: uebersicht!.titel, pfad: pfadVon(uebersicht!, sprache) }] : []),
+  { titel, pfad: null },
+];
+---
+
+<nav class="py-brotkrumen" aria-label={t.seitenpfad}>
+  <ol>
+    {stufen.map((s) => (
+      <li>
+        {s.pfad === null ? (
+          <span aria-current="page">{s.titel}</span>
+        ) : (
+          <a href={s.pfad}>{s.titel}</a>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>

@@ -11,8 +11,11 @@ import { SEITE, SPRACHEN, SPRACHEN_BEKANNT, texte } from '../lib/seite';
 import type { Sprache } from '../lib/seite';
 import Kopf from '../components/Kopf.astro';
 import Fuss from '../components/Fuss.astro';
-import Artikelleiste from '../components/Artikelleiste.astro';
-import Geraeteleiste from '../components/Geraeteleiste.astro';
+import Bereichsleiste from '../components/Bereichsleiste.astro';
+import Brotkrumen from '../components/Brotkrumen.astro';
+import Leistenschalter from '../components/Leistenschalter.astro';
+import Weiterlesen from '../components/Weiterlesen.astro';
+import { eintragZuPfad, zeigtLeiste } from '../lib/navigation';
 
 import '../styles/tokens.css';
 import '../styles/schriften.css';
@@ -30,12 +33,10 @@ interface Props {
   schema?: unknown;
   /** Pfade der Uebersetzungen, je Sprache. Erzeugt die hreflang-Angaben. */
   uebersetzungen?: Partial<Record<Sprache, string>>;
-  /** Setzt <meta name="robots" content="noindex">, z. B. fuer Werkzeugseiten. */
+  /** Setzt <meta name="robots" content="noindex">, z. B. fuer Werkzeugseiten.
+   *  Seiten mit `entwurf: true` in navigation.ts setzen es von selbst — diese
+   *  Prop ist fuer alles andere (404, Weiterleitungsstumpf). */
   nichtIndexieren?: boolean;
-  /** Zwei Seitenleisten links und rechts des Lesestroms (Uebersichtsseiten).
-   *  Unter 64rem klappen beide unter den Text — der Lesestrom bleibt in jeder
-   *  Breite gleich breit, die Leisten sind Zugabe, nicht Bedingung. */
-  leisten?: boolean;
 }
 
 const {
@@ -47,10 +48,23 @@ const {
   schema,
   uebersetzungen,
   nichtIndexieren = false,
-  leisten = false,
 } = Astro.props;
 
 const t = texte(sprache);
+const pfad = Astro.url.pathname;
+
+/* 🔑 Beides kommt aus navigation.ts und nicht aus einer Prop:
+ *
+ * - Ob die Bereichsleiste erscheint, entscheidet EINE Liste. Eine Prop je
+ *   Seite waere ein Menue pro Seite mit anderem Namen — und die naechste
+ *   Seite vergisst sie.
+ * - `noindex` haengt am Feld `entwurf`. Eine Platzhalterseite, die es zu
+ *   setzen vergisst, waere genau der Fehler, den diese Struktur verhindern
+ *   soll: erreichbar ist beabsichtigt, indexiert nicht.
+ *   Die Prop bleibt zusaetzlich gueltig — ODER, nicht ERSETZT. */
+const eintrag = eintragZuPfad(pfad);
+const leisten = zeigtLeiste(pfad, SPRACHEN);
+const ausIndex = nichtIndexieren || eintrag?.entwurf === true;
 const meta = SPRACHEN_BEKANNT[sprache];
 const kanonisch = new URL(Astro.url.pathname, Astro.site).href;
 const beschreibungText = beschreibung ?? t.beschreibungStandard;
@@ -78,7 +92,7 @@ const alternativen = [
     <title>{seitentitel}</title>
     <meta name="description" content={beschreibungText} />
     <link rel="canonical" href={kanonisch} />
-    {nichtIndexieren && <meta name="robots" content="noindex, follow" />}
+    {ausIndex && <meta name="robots" content="noindex, follow" />}
 
     {alternativen.map((a) => (
       <link rel="alternate" hreflang={SPRACHEN_BEKANNT[a.sprache].htmlLang} href={new URL(a.pfad, Astro.site).href} />
@@ -129,14 +143,25 @@ const alternativen = [
     <a class="py-sprung" href="#inhalt">{t.zumInhalt}</a>
     <Kopf sprache={sprache} istStartseite={istStartseite} />
     <main id="inhalt" class:list={['py-huelle', leisten && 'py-raster']}>
-      {/* Reihenfolge im HTML: erst der Text, dann die Leisten. Auf dem Handy
-          und im Screenreader kommt damit der Inhalt zuerst; auf dem grossen
-          Bildschirm setzt das Raster die Leisten links und rechts daneben. */}
+      {/* Reihenfolge im HTML — und sie ist ein Entscheid, kein Zufall:
+          zwei kurze Orientierungszeilen, dann der Text, dann die Leiste.
+          Auf dem Handy und im Screenreader kommt der Inhalt damit fast
+          zuerst; nur Brotkrumen und der Schalter stehen davor, und beide
+          sind einzeilig.
+
+          ⚠️ Kasten und Beschriftung (<Leistenschalter>) MUESSEN direkte
+          Kinder von <main> sein und VOR <Bereichsleiste> stehen: Die
+          CSS-Regel, die aufklappt, greift ueber `~` auf die Geschwister.
+          Ein Wrapper-<div> dazwischen bricht sie lautlos. */}
+      {leisten && !istStartseite && <Brotkrumen sprache={sprache} pfad={pfad} titel={titel} />}
+      {leisten && <Leistenschalter sprache={sprache} seitentitel={titel} />}
       <div class="py-raster__mitte">
         <slot />
+        {/* Nicht auf der Startseite: Sie steht ausserhalb der drei Bereiche,
+            und dreimal „noch keiner" waere dort kein Hinweis, sondern Leere. */}
+        {leisten && !istStartseite && <Weiterlesen sprache={sprache} pfad={pfad} />}
       </div>
-      {leisten && <Artikelleiste sprache={sprache} aktuell={Astro.url.pathname} />}
-      {leisten && <Geraeteleiste sprache={sprache} />}
+      {leisten && <Bereichsleiste sprache={sprache} aktuell={pfad} />}
     </main>
     <Fuss sprache={sprache} />
     <script>
