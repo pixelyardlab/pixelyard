@@ -42,6 +42,16 @@ export interface Eintrag {
   uebersicht?: boolean;
 }
 
+/* --- Status: was er hier heisst (Umbau Schritt 3, 28.10.2026) ----------
+ * Der Status sagt, wie weit die Aussagen DER SEITE belegt sind — nicht, ob
+ * die Seite geschrieben ist (das sagt `entwurf`).
+ *   belegt     jede Zahl gemessen, jeder Ablauf einmal wirklich durchgeführt
+ *   teilweise  die Seite enthält Teile, deren Nachweis fehlt oder die nur
+ *              gerechnet sind (Situationen 3–5, die Modell-Leiter, die nicht
+ *              gebauten Möglichkeiten) — und sagt das an der Stelle selbst
+ *   geplant    die Seite beschreibt, was noch nicht existiert („Offen")
+ * ⚠️ Vorschlag von Claude, 28.10.2026 — von Cedric gegenzulesen. */
+
 /* --- Die Struktur ------------------------------------------------------
  * ⚠️ Die Kurzbeschreibungen sind VORSCHLÄGE vom 24.09.2026. Sie sagen, was
  * dort hinkommt — sie behaupten nichts über das, was gebaut wurde. Wer sie
@@ -50,37 +60,37 @@ export const EINTRAEGE: Eintrag[] = [
   /* ---- Der Aufbau — was gebaut wurde ---- */
   {
     slug: 'aufbau', titel: 'Der Aufbau', bereich: 'aufbau', uebersicht: true,
-    status: 'geplant', entwurf: true,
+    status: 'teilweise', entwurf: true,
     kurzbeschreibung: 'Was zuhause steht, in Teilen — und warum jedes Teil so und nicht anders ausfiel.',
   },
   {
     slug: 'aufbau/was-es-kann', titel: 'Was es kann', bereich: 'aufbau', bund: 'nachweis',
-    status: 'geplant', entwurf: true,
+    status: 'teilweise', entwurf: true,
     kurzbeschreibung: 'Was der Aufbau im Alltag leistet, und woran du das ablesen kannst.',
   },
   {
     slug: 'aufbau/hardware', titel: 'Hardware', bereich: 'aufbau', bund: 'hardware',
-    status: 'geplant', entwurf: true,
+    status: 'belegt', entwurf: true,
     kurzbeschreibung: 'Die Geräte, die laufen — mit dem, was sie abgelöst haben.',
   },
   {
     slug: 'aufbau/software', titel: 'Software', bereich: 'aufbau', bund: 'software',
-    status: 'geplant', entwurf: true,
+    status: 'belegt', entwurf: true,
     kurzbeschreibung: 'Was auf den Geräten läuft, wofür — und was wieder herunterflog.',
   },
   {
     slug: 'aufbau/maschine-modelle', titel: 'Maschine und Modelle', bereich: 'aufbau', bund: 'modelle',
-    status: 'geplant', entwurf: true,
+    status: 'teilweise', entwurf: true,
     kurzbeschreibung: 'Die Maschine für die lokale KI und die Modelle, die darauf laufen.',
   },
   {
     slug: 'aufbau/reihenfolge', titel: 'Die Reihenfolge', bereich: 'aufbau', bund: 'anfang',
-    status: 'geplant', entwurf: true,
+    status: 'belegt', entwurf: true,
     kurzbeschreibung: 'In welcher Reihenfolge die Teile entstanden sind — und welche Reihenfolge du dir sparen kannst.',
   },
   {
     slug: 'aufbau/moeglichkeiten', titel: 'Möglichkeiten', bereich: 'aufbau', bund: 'moeglichkeiten',
-    status: 'geplant', entwurf: true,
+    status: 'teilweise', entwurf: true,
     kurzbeschreibung: 'Was der Aufbau noch hergibt, ohne dass du etwas dazukaufst.',
   },
   {
@@ -102,37 +112,37 @@ export const EINTRAEGE: Eintrag[] = [
   /* ---- Das Vorgehen — wie man so etwas angeht ---- */
   {
     slug: 'vorgehen', titel: 'Das Vorgehen', bereich: 'vorgehen', uebersicht: true,
-    status: 'geplant', entwurf: true,
+    status: 'belegt', entwurf: true,
     kurzbeschreibung: 'Wie du so etwas angehst, ohne dieselben Umwege zu gehen.',
   },
   {
     slug: 'vorgehen/bevor-man-anfaengt', titel: 'Bevor du anfängst', bereich: 'vorgehen', bund: 'anfang',
-    status: 'geplant', entwurf: true,
+    status: 'belegt', entwurf: true,
     kurzbeschreibung: 'Was du klären solltest, bevor du das erste Gerät bestellst.',
   },
   {
     slug: 'vorgehen/mit-einer-ki', titel: 'Mit einer KI', bereich: 'vorgehen', bund: 'software',
-    status: 'geplant', entwurf: true,
+    status: 'belegt', entwurf: true,
     kurzbeschreibung: 'Wie eine KI beim Bauen hilft — und wo sie dir zuverlässig nicht hilft.',
   },
   {
     slug: 'vorgehen/dokumentieren', titel: 'Dokumentieren', bereich: 'vorgehen', bund: 'hardware',
-    status: 'geplant', entwurf: true,
+    status: 'belegt', entwurf: true,
     kurzbeschreibung: 'Warum das Mitschreiben zum Bauen gehört und nicht zur Nacharbeit.',
   },
   {
     slug: 'vorgehen/stolpersteine', titel: 'Stolpersteine', bereich: 'vorgehen', bund: 'nachweis',
-    status: 'geplant', entwurf: true,
+    status: 'belegt', entwurf: true,
     kurzbeschreibung: 'Fehler, die sich nicht melden, weil sie Erfolg zurückmelden.',
   },
   {
     slug: 'vorgehen/anders-machen', titel: 'Anders machen', bereich: 'vorgehen', bund: 'moeglichkeiten',
-    status: 'geplant', entwurf: true,
+    status: 'belegt', entwurf: true,
     kurzbeschreibung: 'Was ich heute anders bauen würde, und woran ich das gemerkt habe.',
   },
   {
     slug: 'vorgehen/ohne-daten', titel: 'Ohne Daten', bereich: 'vorgehen', bund: 'modelle',
-    status: 'geplant', entwurf: true,
+    status: 'belegt', entwurf: true,
     kurzbeschreibung: 'Wie du Werkzeuge nutzt, ohne deine Unterlagen aus dem Haus zu geben.',
   },
 

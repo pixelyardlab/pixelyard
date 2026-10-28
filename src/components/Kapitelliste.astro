@@ -10,9 +10,9 @@ import { kapitelVon, pfadVon, type Bereich } from '../lib/navigation';
 
 interface Props {
   bereich: Bereich;
-  sprache: Sprache;
+  sprache?: Sprache;
 }
-const { bereich, sprache } = Astro.props;
+const { bereich, sprache = 'de' } = Astro.props;
 const kapitel = kapitelVon(bereich);
 ---
 

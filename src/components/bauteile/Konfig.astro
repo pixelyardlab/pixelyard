@@ -8,11 +8,13 @@
  */
 interface Props {
   titel: string;
+  /** Anker. Andere Seiten verlinken `#zum-nachbauen`. */
+  id?: string;
 }
-const { titel } = Astro.props;
+const { titel, id = 'zum-nachbauen' } = Astro.props;
 ---
 
-<section class="py-konfig py-breit" aria-label={titel}>
+<section class="py-konfig py-breit" id={id} aria-label={titel}>
   <p class="py-konfig__marke">Zum Nachbauen · {titel}</p>
   <slot />
   <p class="py-konfig__hinweis">

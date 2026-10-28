@@ -6,7 +6,7 @@
  * herausnimmt, verliert sie. Eine Datei je Kapitel wäre eine zweite Liste.
  */
 import Basis from '../../../layouts/Basis.astro';
-import Platzhalter from '../../../components/Platzhalter.astro';
+import Kapitelseite from '../../../components/Kapitelseite.astro';
 import { SPRACHEN } from '../../../lib/seite';
 import type { Sprache } from '../../../lib/seite';
 import { kapitelVon, type Eintrag } from '../../../lib/navigation';
@@ -31,6 +31,6 @@ const { eintrag } = Astro.props as { eintrag: Eintrag };
 
 <Basis titel={eintrag.titel} beschreibung={eintrag.kurzbeschreibung} sprache={sprache}>
   <div class="py-lesestrom">
-    <Platzhalter eintrag={eintrag} sprache={sprache} />
+    <Kapitelseite eintrag={eintrag} sprache={sprache} />
   </div>
 </Basis>

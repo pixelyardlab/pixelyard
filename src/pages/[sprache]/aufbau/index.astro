@@ -1,13 +1,13 @@
 ---
 /* Bereichsübersicht — /<sprache>/aufbau/
  *
- * Platzhalter (Schritt 1 des Umbaus, 24.09.2026). Titel, Kurzbeschreibung und
- * die Liste der Unterkapitel kommen aus navigation.ts; auf dieser Seite steht
- * kein Seitentitel und kein Pfad zum zweiten Mal.
+ * Titel und Status kommen aus navigation.ts, der Text aus
+ * src/content/kapitel/de/aufbau.mdx (Umbau Schritt 3, 28.10.2026). Die Liste
+ * der Unterkapitel steht IM Text (<Kapitelliste>), damit sie dort steht, wo
+ * sie hingehört — nach dem Rückgrat-Bild, vor dem Handlungsblock.
  */
 import Basis from '../../../layouts/Basis.astro';
-import Platzhalter from '../../../components/Platzhalter.astro';
-import Kapitelliste from '../../../components/Kapitelliste.astro';
+import Kapitelseite from '../../../components/Kapitelseite.astro';
 import { SPRACHEN } from '../../../lib/seite';
 import type { Sprache } from '../../../lib/seite';
 import { uebersichtVon } from '../../../lib/navigation';
@@ -22,7 +22,6 @@ const eintrag = uebersichtVon('aufbau')!;
 
 <Basis titel={eintrag.titel} beschreibung={eintrag.kurzbeschreibung} sprache={sprache}>
   <div class="py-lesestrom">
-    <Platzhalter eintrag={eintrag} sprache={sprache} />
-    <Kapitelliste bereich="aufbau" sprache={sprache} />
+    <Kapitelseite eintrag={eintrag} sprache={sprache} />
   </div>
 </Basis>

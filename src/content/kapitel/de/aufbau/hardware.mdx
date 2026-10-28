@@ -1,0 +1,114 @@
+---
+stand: 2026-09-06
+einleitung: "Acht Geräte, jedes mit Aufgabe, Modell, Preis — und der Falle, die es gestellt hat. Zusammen rund CHF 3'700."
+---
+
+Die Modelle stehen ausgeschrieben da, weil du sie zum Nachbauen brauchst. Verlinkt ist
+keines: **Kein Herstellerlink, kein Provisionslink.** Die Preise sind Momentaufnahmen aus
+dem Sommer 2026 in Schweizer Franken; der Speicher- und Plattenmarkt bewegt sich stark,
+also vor jedem Kauf selbst nachschauen.
+
+<Bauteile>
+
+<Bauteil rolle="Speicher und Dienste" titel="Die NAS" modell="UGREEN DXP4800 Plus · Intel Pentium Gold 8505 · eigene 128-GB-System-SSD" preis="CHF 576 · Sommer 2026">
+Das Herz. Trägt Fotos, Dokumente, Automatisierung — und die eingebaute Grafikeinheit
+macht die Bilderkennung, ohne dass eine Grafikkarte nötig wäre.
+<Falle>Das Verwaltungskonto hat bewusst keinen Dateizugriff. Der Unterschied ist die Reichweite: Erhöhte Rechte brauchen eine bewusste Anmeldung, ein eingebundenes Laufwerk hängt dauerhaft am Rechner.</Falle>
+</Bauteil>
+
+<Bauteil rolle="Kapazität" titel="Zwei Festplatten" modell="2× WD Red Plus 8 TB, WD80EFPX · CMR · gleiches Modell" preis="CHF 328 pro Stück · Sommer 2026">
+Als Spiegel angelegt, **7,14 TiB nutzbar**, Ende August bei rund zehn Prozent Füllstand.
+Ein Ausbau ist ein zweites Plattenpaar, kein Umbau — das entscheidet man beim ersten
+Anlegen, nicht später.
+<Falle>Ein Spiegel ist kein Backup. Er schützt gegen eine kaputte Platte und gegen sonst nichts.</Falle>
+</Bauteil>
+
+<Bauteil rolle="Arbeitsspeicher" titel="32 GB im Paar" modell="2× Crucial CT16G48C40S5 · DDR5-4800 · gepaartes Set" preis="CHF 345.90 · Sommer 2026">
+Genug für alle laufenden Dienste samt Dateisystem-Cache. Ein Ausbau auf 64 GB steht in
+der Liste — **ohne Auslöser wird er nicht gekauft.**
+<Falle marke="Die Falle, die am meisten gerettet hat">Der Speichertest über Nacht meldete einen Fehler bei Durchlauf 14 — Ursache war die Mischbestückung, beide Riegel waren einzeln fehlerfrei. Der Test hat still eine Datenkorruption verhindert, bevor Daten drauf waren.</Falle>
+</Bauteil>
+
+<Bauteil rolle="Lokale KI" titel="Der kleine Rechner für die Modelle" modell="Mac Mini M4, 16 GB / 256 GB · externe SSD Lexar EQ790 1 TB nur für Modelle" preis="CHF 589 plus rund CHF 150 · Sommer 2026">
+Führt die Sprachmodelle aus und ist die Werkbank für die Projektarbeit. **Bewusst
+getrennt vom Speicher** — die Daten liegen auf der NAS, deshalb ist dieses Gerät
+austauschbar.
+<Falle>Der Arbeitsspeicher ist nicht nachrüstbar. Man kauft die Entscheidung einmal — und merkt erst beim ersten ernsthaften Ablauf, ob sie gereicht hat.</Falle>
+</Bauteil>
+
+<Bauteil rolle="Netz" titel="Gateway, Switch und zwei Access Points" modell="UniFi UCG-Fiber · UniFi Flex 2.5G PoE · 2× UniFi U7 Pro XG am Kabel · ein U6 Lite aus dem Bestand" preis="CHF 964 als Block, inklusive Kabel · Sommer 2026">
+Zwei Access Points am Kabel statt drei im Funk. Ein Funkknoten ohne Kabel gibt die
+Hälfte seiner Zeit für die Anbindung zum nächsten Knoten aus.
+<Falle>Ein einziger Klick in einer sortierten Liste traf die falsche Zeile und nahm dem halben Netz seine Verwaltungsverbindung. Sortierte Listen verschieben sich, während man sie liest.</Falle>
+</Bauteil>
+
+<Bauteil rolle="Strom" titel="Die USV" modell="CyberPower CP900EPFCLCD · line-interactive · angebunden über NUT" preis="CHF 229 · Sommer 2026">
+Puffert Anschlussgerät, Gateway, Einspeisung und Speicher — nicht das ganze Haus.
+Access Points dürfen ausfallen, sie halten keine Daten.
+<Falle>Was am Strom hängt, ändert die Laufzeit. Die Zahl gehört nach jedem Einbau neu abgelesen, nicht fortgeschrieben.</Falle>
+</Bauteil>
+
+<Bauteil rolle="Papier" titel="Der Scanner" modell="HP OfficeJet Pro 9015e" preis="Bestand">
+Kein Neukauf nötig. Er legt Scans in einen Ordner auf dem Speicher, den Rest macht die
+Software.
+<Falle>Der gefährlichere Fehler ist nicht die kaputte Datei, sondern die strukturell gültige, inhaltlich halbe — sie wird sauber archiviert und fällt erst auf, wenn jemand das Dokument braucht.</Falle>
+</Bauteil>
+
+<Bauteil rolle="Kaltkopie" titel="Eine Festplatte im Schrank" modell="ADATA SD600 · offline, jährlich gesichtet" preis="Bestand">
+Der vierte Rückweg. Sie hängt an nichts, wird von nichts abgeglichen und überlebt
+deshalb Fehler, die sich in alle drei anderen Ebenen kopiert haben.
+<Falle>Eine Kaltkopie, die man einmal anlegt und nie wieder ansieht, ist eine Vermutung. Einmal im Jahr aufstecken und hineinschauen gehört dazu.</Falle>
+</Bauteil>
+
+</Bauteile>
+
+## Was diese Geräte abgelöst haben
+
+Das alte Netz und der alte Speicher sind 2026 ausser Betrieb gegangen. Warum, steht im Beitrag
+[Mein Weg ins Homelab](/de/artikel/mein-weg-ins-homelab/).
+
+<div class="py-tabelle">
+
+| Rolle | Vorher | Heute |
+|---|---|---|
+| Speicher | Synology DS212j | UGREEN DXP4800 Plus |
+| Netzverwaltung | UniFi Cloud Key Gen 1 | im Gateway UCG-Fiber |
+| Switch | UniFi US-8-150W | UniFi Flex 2.5G PoE |
+| WLAN | drei Access Points im Funk-Mesh | zwei U7 Pro XG am Kabel, dazu ein U6 Lite |
+
+</div>
+
+<Konfig titel="Ein Gerät in eine andere Netzzone umhängen">
+
+```text
+# Die Reihenfolge — sie ist der ganze Inhalt dieses Blocks.
+# Wer Schritt 2 und 3 tauscht, sucht den Fehler danach in der Firewall.
+
+1. Port des Geräts zurück auf die Standardzone stellen
+   (am Switch bzw. in der Verwaltung: <Port> → <Standardzone>)
+
+2. Im Gerät selbst die Adresse auf „automatisch“ stellen
+   oder die Adresse aus <Zielzone> eintragen — dann neu starten
+
+3. Erst jetzt den Port auf <Zielzone> stellen
+
+4. Prüfen, nicht annehmen:
+   - Adresse des Geräts liegt in <Zielzone>?   (am Gerät ablesen,
+     nicht in der Clientliste — deren Adressspalte ist kein Messwert)
+   - erreicht es, was es erreichen soll?
+   - und erreicht es NICHTS sonst?
+
+5. Notieren, warum das Gerät in dieser Zone sitzt
+```
+
+</Konfig>
+
+<Handlung>
+
+Schreib für jede Zone in deinem Netz einen Satz, der ihren Zweck nennt, **ohne die
+Technik zu erwähnen.** Wo dir keiner einfällt, gibt es die Zone vermutlich nur, weil sie
+in einer Anleitung stand. Der Prompt dazu prüft den Rest:
+
+<PromptVerweis id="netzschnitt-hinterfragen" />
+
+</Handlung>

@@ -966,12 +966,14 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
 }
 .py-bauteil__warum { font-size: 0.9375rem; }
 .py-bauteil__warum > :last-child { margin-bottom: 0; }
+.py-bauteil__warum > p { margin-bottom: var(--py-r3); }
 .py-bauteil__preis {
   font-family: var(--py-schrift-mono);
   font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
   color: var(--py-text-leise);
 }
+.py-bauteil__warum { flex: 1; display: flex; flex-direction: column; }
 .py-bauteil__falle {
   margin-top: auto;
   padding-top: var(--py-r2);
@@ -1010,14 +1012,26 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   border: var(--py-rand) solid var(--py-text-leise);
   padding: var(--py-r4) var(--py-r4) var(--py-r5);
   margin-block: 0 var(--py-r4);
-  display: grid;
-  gap: var(--py-r3) var(--py-r5);
-  grid-template-columns: 1fr;
+  font-size: 0.9375rem;
   scroll-margin-top: var(--py-r5);
 }
+.py-stolperstein > p { margin-block: 0 var(--py-r2); }
+/* Ab 44rem steht das Gegenmittel rechts neben dem Beispiel. Typ, Titel und
+ * Beispiel fliessen links; das Gegenmittel spannt die volle Höhe. */
 @media (min-width: 44rem) {
-  .py-stolperstein { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
-  .py-stolperstein__gegen { border-left: var(--py-rand) dashed var(--py-text-leise); padding-left: var(--py-r5); }
+  .py-stolperstein {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    column-gap: var(--py-r5);
+    align-content: start;
+  }
+  .py-stolperstein > :not(.py-stolperstein__gegen) { grid-column: 1; }
+  .py-stolperstein__gegen {
+    grid-column: 2;
+    grid-row: 1 / span 20;
+    border-left: var(--py-rand) dashed var(--py-text-leise);
+    padding-left: var(--py-r5);
+  }
 }
 .py-stolperstein h3 { margin-block: var(--py-r1) var(--py-r2); font-size: 1.05rem; }
 .py-stolperstein__typ,
@@ -1030,12 +1044,9 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   margin: 0;
 }
 .py-stolperstein__marke { color: var(--py-accent-text); margin-bottom: var(--py-r1); }
-.py-stolperstein__bsp,
-.py-stolperstein__gegen { font-size: 0.9375rem; }
-.py-stolperstein__bsp > :last-child,
 .py-stolperstein__gegen > :last-child { margin-bottom: 0; }
 @media (max-width: 43.999rem) {
-  .py-stolperstein__gegen { border-top: var(--py-rand) dashed var(--py-text-leise); padding-top: var(--py-r3); }
+  .py-stolperstein__gegen { border-top: var(--py-rand) dashed var(--py-text-leise); padding-top: var(--py-r3); margin-top: var(--py-r3); }
 }
 
 /* --- Möglichkeiten ---------------------------------------------------- */
@@ -1224,4 +1235,11 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   content: '·';
   color: var(--py-line);
   margin-right: 0.5em;
+}
+
+/* --- Einleitung einer Kapitelseite ---------------------------------- */
+.py-einleitung {
+  font-size: 1.1875rem;
+  line-height: 1.55;
+  color: var(--py-text-leise);
 }

@@ -1,0 +1,86 @@
+---
+/* <Kapitelseite> — der Rumpf jeder Seite aus navigation.ts.
+ *
+ * Gibt es Text in src/content/kapitel/, steht er hier; gibt es keinen, steht
+ * der <Platzhalter> und sagt das ausdrücklich. Titel und Status kommen IMMER
+ * aus navigation.ts — die MDX-Datei liefert nur den Text.
+ *
+ * Die Bauteile werden dem MDX hier übergeben, nicht in jeder Datei importiert
+ * — dieselbe Regel wie bei den Artikeln: Ein Import, den man vergessen kann,
+ * wird vergessen.
+ */
+import { render } from 'astro:content';
+import Platzhalter from './Platzhalter.astro';
+import Statusmarke from './Statusmarke.astro';
+import Erklaerung from './Erklaerung.astro';
+import TLDR from './TLDR.astro';
+import Prompt from './Prompt.astro';
+import Kette from './bauteile/Kette.astro';
+import Station from './bauteile/Station.astro';
+import Szenario from './bauteile/Szenario.astro';
+import Behauptung from './bauteile/Behauptung.astro';
+import Notizen from './bauteile/Notizen.astro';
+import Notiz from './bauteile/Notiz.astro';
+import Bauteile from './bauteile/Bauteile.astro';
+import Bauteil from './bauteile/Bauteil.astro';
+import Regeln from './bauteile/Regeln.astro';
+import Regel from './bauteile/Regel.astro';
+import Stolperstein from './bauteile/Stolperstein.astro';
+import Gegenmittel from './bauteile/Gegenmittel.astro';
+import Falle from './bauteile/Falle.astro';
+import Moeglichkeiten from './bauteile/Moeglichkeiten.astro';
+import Moeglichkeit from './bauteile/Moeglichkeit.astro';
+import Handlung from './bauteile/Handlung.astro';
+import Konfig from './bauteile/Konfig.astro';
+import PromptVerweis from './bauteile/PromptVerweis.astro';
+import Rueckgrat from './bauteile/Rueckgrat.astro';
+import Kreis from './bauteile/Kreis.astro';
+import Gedaechtnisse from './bauteile/Gedaechtnisse.astro';
+import Stand from './bauteile/Stand.astro';
+import Kapitelliste from './Kapitelliste.astro';
+import { texte, type Sprache } from '../lib/seite';
+import type { Eintrag } from '../lib/navigation';
+import { kapitelZu } from '../lib/kapitel';
+
+interface Props {
+  eintrag: Eintrag;
+  sprache: Sprache;
+}
+const { eintrag, sprache } = Astro.props;
+const t = texte(sprache);
+const kapitel = await kapitelZu(eintrag, sprache);
+const Inhalt = kapitel ? (await render(kapitel)).Content : null;
+
+const bausteine = {
+  Erklaerung, TLDR, Prompt, Kette, Station, Szenario, Behauptung, Notizen, Notiz,
+  Bauteile, Bauteil, Falle, Regeln, Regel, Stolperstein, Gegenmittel, Moeglichkeiten, Moeglichkeit,
+  Handlung, Konfig, PromptVerweis, Rueckgrat, Kreis, Gedaechtnisse, Kapitelliste,
+};
+
+const markenText = {
+  belegt: t.markeBelegt,
+  teilweise: t.markeTeilweise,
+  geplant: t.markeGeplant,
+}[eintrag.status];
+---
+
+{kapitel && Inhalt ? (
+  <>
+    <p class="py-meta">
+      <span class="py-meta__eingabe" aria-hidden="true">$</span>
+      <Statusmarke status={eintrag.status} sprache={sprache} ohneText />
+      <span class="py-meta__teil">{markenText}</span>
+      <span class="py-meta__teil">Stand {kapitel.data.stand.toLocaleDateString('de-CH', { month: 'long', year: 'numeric', timeZone: 'UTC' })}</span>
+    </p>
+    <h1>{eintrag.titel}</h1>
+    <p class="py-einleitung">{kapitel.data.einleitung}</p>
+    <Inhalt components={bausteine} />
+    <slot />
+    <Stand stand={kapitel.data.stand} />
+  </>
+) : (
+  <>
+    <Platzhalter eintrag={eintrag} sprache={sprache} />
+    <slot />
+  </>
+)}

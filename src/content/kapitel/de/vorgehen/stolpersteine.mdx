@@ -1,0 +1,74 @@
+---
+stand: 2026-09-06
+einleitung: "Fehler, die sich nicht melden, weil sie Erfolg zurückmelden. Nicht chronologisch, sondern nach Typ — denn wer den Typ kennt, erkennt den nächsten Fall auch dann, wenn er ganz anders aussieht."
+---
+
+Alle acht sind in diesem Projekt tatsächlich passiert. Jeder steht mit dem Beispiel aus
+dem Bau links und dem, woran man ihn erkennt und was hilft, rechts.
+
+<Stolperstein nr={1} zusatz="der teuerste" titel="Der stille Fehlermodus">
+Etwas läuft durch, meldet Erfolg — und hat nichts getan. Ein Sicherungsjob, dessen Kette
+nur im letzten Glied gelingt. Ein Bauvorgang, der grün durchläuft und eine Seite **gar
+nicht erst erzeugt.** Ein Datenbereich, der drei Wochen ohne Sicherung war, weil die
+Aufgabe nie angelegt worden war.
+<Gegenmittel>Nichts meldet sich. Es gibt keine rote Zeile, weil es keine Zeile gibt. **Gegenmittel: zählen statt Status lesen.** Nicht „lief der Job?“, sondern „wie viele Dateien liegen dort, und wie viele sollten es sein?“ <span class="py-merksatz">Ein nicht existierender Job meldet sich nie.</span> Ein Beispiel ausgeschrieben: der Beitrag [Drei stille Fehler an einem Tag](/de/artikel/drei-stille-fehler-an-einem-tag/).</Gegenmittel>
+</Stolperstein>
+
+<Stolperstein nr={2} zusatz="der häufigste" titel="Der eigene Eingriff">
+Zwei lange, getrennte Fehlersuchen in diesem Projekt gingen auf **selbst gesetzte
+Sperren** zurück — einmal eine Geräteliste, die netzweit wirkte, einmal eine Blockade, die
+nach einem Ausfall aussah.
+<Gegenmittel>Das Symptom sieht nach einem Defekt aus und lädt dazu ein, nach Defekten zu suchen. **Gegenmittel: zuerst die eigene Änderungsliste der letzten zwei Wochen — auch das, was nichts damit zu tun haben kann.** Der Prompt dazu: [Den eigenen Eingriff als ersten Verdächtigen behandeln](/de/prompts/#eigener-eingriff).</Gegenmittel>
+</Stolperstein>
+
+<Stolperstein nr={3} titel="Die Annahme, die wie Sicherheit aussieht">
+Eine Firewall-Regel stand acht Tage lang da und konnte gar nicht greifen, weil ihre
+technische Voraussetzung auf dieser Plattform nicht existierte. Sie sah die ganze Zeit
+aus wie Schutz.
+<Gegenmittel>Man hat die Regel geschrieben, aber nie ausgelöst. **Gegenmittel: jede Schutzregel einmal absichtlich verletzen und nachsehen, ob sie greift.** Eine ungeprüfte Regel ist eine Notiz, keine Sperre.</Gegenmittel>
+</Stolperstein>
+
+<Stolperstein nr={4} titel="Die Doku-Lücke">
+Eine Einstellung wurde geändert und nicht nachgetragen. Wochen später stützte sich eine
+Fehlersuche auf den alten, falschen Wert — **und lief in die falsche Richtung, obwohl im
+Netz alles in Ordnung war.**
+<Gegenmittel>Der Schaden entsteht nicht sofort, sondern beim nächsten Nachschlagen. **Gegenmittel: Eine Änderung ist erst fertig, wenn sie notiert ist.** <span class="py-merksatz">Sie richtet keinen Schaden im System an, sondern in der nächsten Diagnose.</span></Gegenmittel>
+</Stolperstein>
+
+<Stolperstein nr={5} titel="Die Zweitkopie">
+Eine Datei, deren ganzer Schutz darin bestand, **genau einmal zu existieren**, lag neun
+Tage lang doppelt — in einem vergessenen Transportordner. Nicht dort, wo sorgfältig
+aufgepasst wurde, sondern daneben.
+<Gegenmittel>Man passt am geschützten Ort auf und übersieht den unbeobachteten. **Gegenmittel: den Schutz an den Ort binden, nicht an die Disziplin — und etwas zählen lassen, wie oft die Datei existiert.** Auch im Papierkorb.</Gegenmittel>
+</Stolperstein>
+
+<Stolperstein nr={6} zusatz="der unauffälligste" titel="Der falsche Kanal">
+Wochen mässiger Produktivität, weil das benutzte Werkzeug nie hatte, was gerade gebraucht
+wurde. Es fühlte sich an wie „die KI ist schlechter geworden“ — **und war das genaue
+Gegenteil.**
+<Gegenmittel>Man merkt es nicht beim Einsteigen, sondern wenn die Arbeit fertig ist und nicht abgelegt werden kann. **Gegenmittel: eine Zeile am Anfang jeder Sitzung — in welchem Kanal sitze ich, und erreicht der, was ich vorhabe?** Welcher Kanal was erreicht, steht unter [Mit einer KI](/de/vorgehen/mit-einer-ki/#kanaele). <span class="py-merksatz">Die Zeile kostet eine Zeile. Die Alternative kostet eine Sitzung.</span></Gegenmittel>
+</Stolperstein>
+
+<Stolperstein nr={7} titel="Der Test, der zu spät beginnt">
+Der erste Ernstfall-Test begann damit, das Passwort aus dem Passwortmanager zu holen — und
+prüfte damit die Kette **erst ab dem Passwortmanager.** Genau die Stufe davor war die
+ungeprüfte.
+<Gegenmittel>Der Test besteht, und man fühlt sich sicher. **Gegenmittel: den Test dort beginnen, wo der Ernstfall beginnt** — beim zweiten Anlauf wurden die Werte von Hand eingetippt, und erst der zählte.</Gegenmittel>
+</Stolperstein>
+
+<Stolperstein nr={8} titel="Die Regel, die nur vorwärts gilt">
+Eine Anonymisierungsregel wurde aufgeschrieben — während der bereits bestehende
+Datenbestand sie schon verletzte. **Die Regel war korrekt und die Ablage trotzdem nicht
+sauber.**
+<Gegenmittel>Man prüft ab jetzt und ist zufrieden. **Gegenmittel: Zu jeder neuen Regel gehört ein erster Lauf über den Bestand** — bevor man sie für erledigt hält.</Gegenmittel>
+</Stolperstein>
+
+<Handlung>
+
+Denk an die letzte Fehlersuche, die länger gedauert hat als nötig, und ordne sie einem
+dieser acht Typen zu. Wenn das nächste Mal etwas „plötzlich“ nicht mehr geht, fang mit
+diesem Prompt an — bevor du nach Defekten suchst:
+
+<PromptVerweis id="eigener-eingriff" />
+
+</Handlung>

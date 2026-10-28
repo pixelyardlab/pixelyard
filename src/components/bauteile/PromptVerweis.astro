@@ -1,0 +1,20 @@
+---
+/* <PromptVerweis> — zeigt auf einen Prompt in /de/prompts/, statt ihn zu
+ * wiederholen. Die Prompt-Sammlung ist der kanonische Ort (Seitenlandkarte):
+ * ein Dokument, ein Ort — das gilt auch für Seiten. */
+import { prompt } from '../../lib/prompts';
+import type { Sprache } from '../../lib/seite';
+
+interface Props {
+  id: string;
+  sprache?: Sprache;
+}
+const { id, sprache = 'de' } = Astro.props;
+const p = prompt(id);
+---
+
+<p class="py-promptverweis">
+  <span class="py-promptverweis__eingabe" aria-hidden="true">$</span>
+  <a href={`/${sprache}/prompts/#${p.id}`}>{p.titel}</a>
+  <span class="py-promptverweis__zweck">— {p.wofuer}</span>
+</p>

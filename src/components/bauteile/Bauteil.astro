@@ -6,8 +6,11 @@
  * neben einem Preis liest sich als Kaufempfehlung — und eine Empfehlung ohne
  * Messung ist genau das Füllmaterial, gegen das diese Seite steht.
  *
- * Die Falle steht als eigener Slot (`<div slot="falle">`), damit sie Markup
- * tragen kann. Ohne sie ist die Karte nicht fertig — deshalb kein Ersatztext.
+ * Die Falle kommt als eigenes Bauteil <Falle> am Ende des Inhalts.
+ * ⚠️ Nicht als benannter Slot (`<div slot="falle">`): Aus MDX heraus kommt das
+ * Attribut nicht als Slot an, sondern landet als gewöhnliches <div> im Text —
+ * Bau grün, Beschriftung und Trennlinie fehlen. Am 28.10.2026 so gebaut und
+ * erst im Bild bemerkt.
  */
 interface Props {
   rolle: string;
@@ -16,22 +19,14 @@ interface Props {
   modell?: string;
   /** Preis samt Zeitpunkt, z. B. „CHF 576 · Sommer 2026" oder „Bestand". */
   preis?: string;
-  /** Beschriftung vor der Falle, falls „Die Falle" nicht passt. */
-  fallenmarke?: string;
 }
-const { rolle, titel, modell, preis, fallenmarke = 'Die Falle' } = Astro.props;
+const { rolle, titel, modell, preis } = Astro.props;
 ---
 
 <article class="py-bauteil">
   <p class="py-bauteil__rolle">{rolle}</p>
   <h3 class="py-bauteil__titel">{titel}</h3>
   {modell && <p class="py-bauteil__modell">{modell}</p>}
-  <div class="py-bauteil__warum"><slot /></div>
   {preis && <p class="py-bauteil__preis">{preis}</p>}
-  {Astro.slots.has('falle') && (
-    <div class="py-bauteil__falle">
-      <span class="py-bauteil__fallenmarke">{fallenmarke}</span>
-      <slot name="falle" />
-    </div>
-  )}
+  <div class="py-bauteil__warum"><slot /></div>
 </article>

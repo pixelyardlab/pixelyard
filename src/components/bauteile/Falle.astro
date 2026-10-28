@@ -1,0 +1,14 @@
+---
+/* <Falle> — der letzte Teil einer <Bauteil>-Karte: die Falle, die dieses Teil
+ * gestellt hat. Ohne sie ist die Karte nicht fertig (Vorlage B). */
+interface Props {
+  /** Beschriftung, falls „Die Falle" nicht passt. */
+  marke?: string;
+}
+const { marke = 'Die Falle' } = Astro.props;
+---
+
+<div class="py-bauteil__falle">
+  <span class="py-bauteil__fallenmarke">{marke}</span>
+  <slot />
+</div>

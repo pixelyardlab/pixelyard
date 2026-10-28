@@ -1,0 +1,75 @@
+---
+stand: 2026-09-06
+einleitung: "Welches Sprachmodell passt auf welche Maschine — und was bringt die nächstgrössere wirklich? Die Frage, die vor jedem Hardwarekauf steht."
+---
+
+## Der Arbeitsspeicher entscheidet, nicht der Prozessor
+
+Bei lokalen Sprachmodellen ist die einzige Zahl, die wirklich zählt, der **verfügbare
+Arbeitsspeicher**. Er entscheidet, welches Modell überhaupt hineinpasst — und wie viel
+Text es am Stück lesen kann. Alles andere bestimmt nur, wie schnell es geht.
+
+<Bauteile>
+
+<Bauteil rolle="Heute · 16 GB" titel="Was tatsächlich läuft" modell="Zwei Modelle der 7–8-Milliarden-Klasse · 8,42 s bis zur Antwort · 20,8 Token/s">
+Reicht für: Schlagworte für eingescannte Dokumente vorschlagen, Texte zusammenfassen,
+umformulieren, übersetzen, kurze Fragen beantworten. **Alles, wo der Inhalt das Haus
+nicht verlassen soll und die Aufgabe klein ist.**
+<Falle marke="Die drei Grenzen, ehrlich">Vier interessante Modelle sind bei 16 GB nicht lauffähig. Die Anwendung war auf eine kurze Kontextlänge begrenzt — für ernsthafte Werkzeugnutzung werden mindestens 32k empfohlen. Und über die Programmierschnittstelle gibt es kein Zwischenspeichern des Kontexts: Bei jeder Anfrage geht der volle Text neu über die Leitung.</Falle>
+</Bauteil>
+
+<Bauteil rolle="Die Rechnung" titel="Wie viel Speicher ein Modell wirklich braucht">
+**Faustregel bei 4-Bit-Quantisierung: rund 0,6 GB pro Milliarde Parameter.** Ein
+8-Milliarden-Modell belegt also etwa 5 GB, ein 30-Milliarden-Modell etwa 18 GB, ein
+70-Milliarden-Modell etwa 42 GB.
+
+Dazu kommen **zwei Posten, die fast alle vergessen:** der Kontextspeicher — er wächst mit
+der Textlänge und kostet bei 32k je nach Modell ein bis zwei Gigabyte — und das System
+selbst, das auf einem Mac vier bis sechs Gigabyte für sich behält.
+<Falle marke="Und der Dämpfer">macOS gibt der Grafikeinheit standardmässig nur einen Teil des Speichers. Von 16 GB bleiben in der Praxis rund zehn. **Wer den Modellbedarf gegen die aufgedruckte Zahl rechnet, rechnet zu gross.**</Falle>
+</Bauteil>
+
+</Bauteile>
+
+## Was die nächste Stufe bringt
+
+<div class="py-tabelle">
+
+| Arbeitsspeicher | Was hineinpasst | Was dadurch neu möglich wird | Preis |
+|---|---|---|---|
+| **16 GB** · heute im Einsatz | 7–8 Milliarden bequem, 14 Milliarden knapp. Kurzer Kontext. | Vorschläge, Zusammenfassungen, Übersetzungen. **Ein Modell zur Zeit.** | CHF 589 |
+| **24 GB** | 14 Milliarden bequem, 24 knapp. **Kontext ab 32k realistisch.** | **Der eigentliche Sprung — und er kommt nicht von der Modellgrösse, sondern vom Kontext:** Erst ab hier kann ein lokales Modell Werkzeuge bedienen und Abläufe steuern, statt nur Text zu erzeugen. | CHF 1'299 |
+| **36 GB** | 30-Milliarden-Klasse bequem, langer Kontext. | Fragen an die eigenen Unterlagen mit brauchbarer Qualität. **Suchmodell und Sprachmodell gleichzeitig geladen** — Dokumentensuche ohne Nachladen zwischen den Schritten. | CHF 2'499 |
+| **96 GB** | 70-Milliarden-Klasse, oder **mehrere Modelle nebeneinander**. | Lange Dokumente am Stück. Sprache, Einbettung und Bild gleichzeitig im Speicher. Qualität, die für die meisten Alltagsaufgaben nicht mehr spürbar hinter einem grossen Cloud-Modell zurückbleibt. | CHF 5'499 |
+
+</div>
+
+<Notizen>
+  <Notiz>**Die Zahlen in den ersten drei Spalten sind gerechnet, nicht gemessen.** Gemessen ist nur die erste Zeile — sie steht hier im Haus. Die Preise sind ein Angebotsstand von Ende August 2026 und altern schnell.</Notiz>
+  <Notiz merksatz="Ein Argument fürs grosszügige Kaufen — aber keines fürs frühe.">**Unified Memory ist nicht aufrüstbar.** Man kauft die Entscheidung genau einmal, und zwar beim Gerätekauf.</Notiz>
+  <Notiz>**Die Zahl, die den Entscheid ehrlich macht:** Die 96-GB-Maschine kostet **CHF 5'499** — mehr als der gesamte bisherige Aufbau samt NAS, Platten, Netz und USV zusammen. Selbst die 36-GB-Maschine kostet zwei Drittel davon.</Notiz>
+</Notizen>
+
+## Rechnet sich das gegen ein Cloud-Modell? Fast nie.
+
+Wer nachrechnet, wie viele Anfragen an ein grosses Modell man für CHF 5'499 stellen
+kann, kommt auf Jahre. **Ein lokales Modell kauft man nicht, weil es billiger ist —
+sondern weil der Inhalt das Haus nicht verlassen soll.** Verträge, Vorsorge,
+Gesundheitsunterlagen, Familienfotos: Dort ist die Frage nicht der Preis pro Anfrage,
+sondern wer den Text zu sehen bekommt.
+
+Deshalb steht auch hier ein **Auslöser statt eines Termins:** Gekauft wird, wenn ein
+echter, laufender Arbeitsablauf nachweislich am Speicher scheitert — nicht, wenn ein
+neues Gerät erscheint. Solange kein einziger Ablauf existiert, ist unbekannt, ob 24, 36
+oder 96 GB nötig wären. <span class="py-merksatz">Hardware zu kaufen, bevor die
+Software-Entscheide stehen, ist die teuerste Art, ein Konzeptproblem zu verschieben.</span>
+
+<Handlung>
+
+Bevor du eine Maschine kaufst: Schreib die eine Aufgabe auf, die das lokale Modell
+erledigen soll, so konkret wie möglich. Dann rechne mit diesem Prompt nach, was davon in
+deinen Speicher passt — und vor allem, was **nicht.**
+
+<PromptVerweis id="modell-waehlen" />
+
+</Handlung>
