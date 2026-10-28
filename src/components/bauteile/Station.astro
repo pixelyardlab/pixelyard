@@ -1,0 +1,18 @@
+---
+/* <Station> — ein Kasten in der <Kette>.
+ *
+ *   art="aus"  die Station, die das Haus verlässt oder den Ausschlag gibt
+ *   art="leer" die Station entfällt — und steht trotzdem da
+ */
+interface Props {
+  /** Kopfzeile, z. B. „1 · Ankommen" oder „Rückweg 2". */
+  nr: string;
+  art?: 'aus' | 'leer';
+}
+const { nr, art } = Astro.props;
+---
+
+<li class:list={['py-kette__station', art && `py-kette__station--${art}`]}>
+  <span class="py-kette__nr">{nr}</span>
+  <span class="py-kette__text"><slot /></span>
+</li>

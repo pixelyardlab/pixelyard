@@ -1,0 +1,18 @@
+---
+/* <Stand> — die Zeile am Fuss jeder Kapitelseite.
+ *
+ * 🔑 „Übersicht, keine Betriebsdokumentation": Die Seite beschreibt einen
+ * Stand und wird nicht bei jeder Änderung nachgezogen. Ein Bauplan mit Datum
+ * ist ehrlicher als ein Stand, dem man nicht ansieht, wie alt er ist.
+ */
+interface Props {
+  stand: Date;
+}
+const { stand } = Astro.props;
+const monat = stand.toLocaleDateString('de-CH', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+
+<p class="py-stand">
+  Beschrieben im {monat}. Diese Seite wird nicht bei jeder Änderung nachgezogen —
+  was dazukommt, wird ein eigener Beitrag.
+</p>

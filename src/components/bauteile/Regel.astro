@@ -1,0 +1,17 @@
+---
+/* <Regel> — Regel als Aufforderung, woher sie kommt, ein Merksatz. */
+interface Props {
+  nr: number;
+  titel: string;
+  merksatz?: string;
+}
+const { nr, titel, merksatz } = Astro.props;
+const zwei = String(nr).padStart(2, '0');
+---
+
+<li class="py-regel" id={`regel-${zwei}`} value={nr}>
+  <span class="py-regel__nr" aria-hidden="true">{zwei}</span>
+  <h3 class="py-regel__titel">{titel}</h3>
+  <div class="py-regel__text"><slot /></div>
+  {merksatz && <p class="py-merksatz py-regel__merksatz">{merksatz}</p>}
+</li>

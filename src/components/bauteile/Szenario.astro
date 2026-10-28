@@ -1,0 +1,65 @@
+---
+/* <Szenario> — eine Situations-Seite im Kleinen (Vorlage A).
+ *
+ * Titel und Statusmarke kommen aus `szenarien.ts`, nicht aus dem MDX: dieselben
+ * Einträge zeigen die Beitragsübersicht und der Artikelkopf. Im MDX steht nur
+ * die `id` — ein Tippfehler hält den Bau an (s. `szenario()`).
+ *
+ * Am Ende stehen die zwei Verweise der Verzahnungsmatrix: der Beitrag dazu und
+ * die Regel dazu. Ein leerer Platz wird benannt, nicht versteckt.
+ */
+import Statusmarke from '../Statusmarke.astro';
+import { texte, type Sprache } from '../../lib/seite';
+import { szenario } from '../../lib/szenarien';
+import { alleArtikel, pfadVon as artikelPfad, slugVon } from '../../lib/artikel';
+
+interface Props {
+  id: string;
+  sprache?: Sprache;
+}
+const { id, sprache = 'de' } = Astro.props;
+const t = texte(sprache);
+const s = szenario(id);
+
+const markenText = {
+  belegt: t.markeBelegt,
+  teilweise: t.markeTeilweise,
+  geplant: t.markeGeplant,
+}[s.status];
+
+const artikel = await alleArtikel(sprache);
+const beitraege = artikel.filter((a) => s.beitraege.includes(slugVon(a)));
+---
+
+<section class="py-szenario" id={`s-${s.id}`} aria-labelledby={`s-${s.id}-titel`}>
+  <p class="py-szenario__marke">
+    <Statusmarke status={s.status} sprache={sprache} ohneText />
+    <span>{s.zusatz ?? markenText}</span>
+  </p>
+  <h3 id={`s-${s.id}-titel`}>{s.titel}</h3>
+  <slot />
+  <dl class="py-szenario__bezug">
+    <div>
+      <dt>{t.platzBeitrag}</dt>
+      <dd>
+        {beitraege.length === 0 ? (
+          <span class="py-weiterlesen__leer">{t.nochKeiner}</span>
+        ) : (
+          beitraege.map((a, i) => (
+            <>{i > 0 && ' · '}<a href={artikelPfad(a)}>{a.data.titel}</a></>
+          ))
+        )}
+      </dd>
+    </div>
+    <div>
+      <dt>{t.platzRegel}</dt>
+      <dd>
+        {s.regel === null ? (
+          <span class="py-weiterlesen__leer">{t.keineBewusst}</span>
+        ) : (
+          <a href={`/${sprache}/${s.regel.ziel}`}>{s.regel.titel}</a>
+        )}
+      </dd>
+    </div>
+  </dl>
+</section>

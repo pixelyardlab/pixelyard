@@ -168,6 +168,9 @@ export const TEXTE = {
      * dieser Blog anschreibt. */
     nochKeiner: 'noch keiner — geplant',
     bistHier: 'du bist hier',
+    /* Ein Platz, der leer bleibt, weil es dort nichts zu verweisen GIBT —
+     * nicht, weil noch etwas fehlt. Anderer Satz als „noch keiner — geplant". */
+    keineBewusst: 'keine — bewusst',
 
     /* --- Platzhalterseiten --------------------------------------------- */
     platzhalter: 'Platzhalter',

@@ -1,0 +1,28 @@
+---
+/* <Stolperstein> — ein Typ, nicht eine Anekdote.
+ *
+ * 🔑 Nach Typ sortiert, nicht chronologisch: Wer den Typ kennt, erkennt den
+ * nächsten Fall auch dann, wenn er ganz anders aussieht. Deshalb zwei Hälften —
+ * links das Beispiel aus dem Projekt, rechts woran man ihn erkennt und was hilft
+ * (`<div slot="gegen">`).
+ */
+interface Props {
+  nr: number;
+  titel: string;
+  /** Zusatz hinter „Typ n", z. B. „der teuerste". */
+  zusatz?: string;
+}
+const { nr, titel, zusatz } = Astro.props;
+---
+
+<article class="py-stolperstein" id={`typ-${nr}`}>
+  <div class="py-stolperstein__kopf">
+    <p class="py-stolperstein__typ">Typ {nr}{zusatz && ` · ${zusatz}`}</p>
+    <h3>{titel}</h3>
+    <div class="py-stolperstein__bsp"><slot /></div>
+  </div>
+  <div class="py-stolperstein__gegen">
+    <p class="py-stolperstein__marke">Woran man ihn erkennt · und was hilft</p>
+    <slot name="gegen" />
+  </div>
+</article>

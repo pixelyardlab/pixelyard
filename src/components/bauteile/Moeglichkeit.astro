@@ -1,0 +1,21 @@
+---
+/* <Moeglichkeit> — ein Vorhaben mit „ersetzt · braucht · Aufwand".
+ * Ob es hier gebaut ist, sagt der Text selbst; die Karte behauptet es nicht. */
+interface Props {
+  titel: string;
+  ersetzt: string;
+  braucht: string;
+  aufwand: string;
+}
+const { titel, ersetzt, braucht, aufwand } = Astro.props;
+---
+
+<article class="py-moeglichkeit">
+  <h3>{titel}</h3>
+  <div class="py-moeglichkeit__text"><slot /></div>
+  <dl>
+    <dt>ersetzt</dt><dd>{ersetzt}</dd>
+    <dt>braucht</dt><dd>{braucht}</dd>
+    <dt>Aufwand</dt><dd>{aufwand}</dd>
+  </dl>
+</article>

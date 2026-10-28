@@ -1,0 +1,37 @@
+---
+/* <Bauteil> — eine Karte nach Vorlage B:
+ *   Rolle im System · Modell und Preis MIT DATUM, OHNE LINK · warum so · die Falle
+ *
+ * 🔑 Kein Link, auch kein Herstellerlink (Entscheid 24.09.2026). Ein Link
+ * neben einem Preis liest sich als Kaufempfehlung — und eine Empfehlung ohne
+ * Messung ist genau das Füllmaterial, gegen das diese Seite steht.
+ *
+ * Die Falle steht als eigener Slot (`<div slot="falle">`), damit sie Markup
+ * tragen kann. Ohne sie ist die Karte nicht fertig — deshalb kein Ersatztext.
+ */
+interface Props {
+  rolle: string;
+  titel: string;
+  /** Modellbezeichnung, ausgeschrieben. */
+  modell?: string;
+  /** Preis samt Zeitpunkt, z. B. „CHF 576 · Sommer 2026" oder „Bestand". */
+  preis?: string;
+  /** Beschriftung vor der Falle, falls „Die Falle" nicht passt. */
+  fallenmarke?: string;
+}
+const { rolle, titel, modell, preis, fallenmarke = 'Die Falle' } = Astro.props;
+---
+
+<article class="py-bauteil">
+  <p class="py-bauteil__rolle">{rolle}</p>
+  <h3 class="py-bauteil__titel">{titel}</h3>
+  {modell && <p class="py-bauteil__modell">{modell}</p>}
+  <div class="py-bauteil__warum"><slot /></div>
+  {preis && <p class="py-bauteil__preis">{preis}</p>}
+  {Astro.slots.has('falle') && (
+    <div class="py-bauteil__falle">
+      <span class="py-bauteil__fallenmarke">{fallenmarke}</span>
+      <slot name="falle" />
+    </div>
+  )}
+</article>

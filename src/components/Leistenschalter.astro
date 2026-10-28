@@ -17,6 +17,7 @@
  */
 import { texte } from '../lib/seite';
 import type { Sprache } from '../lib/seite';
+import { bereichZuPfad, uebersichtVon } from '../lib/navigation';
 
 interface Props {
   sprache: Sprache;
@@ -25,6 +26,14 @@ interface Props {
 }
 const { sprache, seitentitel } = Astro.props;
 const t = texte(sprache);
+
+/* 🔑 Nacharbeit aus Schritt 1: Der Schalter nennt den BEREICH, nicht den
+ * Seitentitel. Der Titel steht direkt darunter als Überschrift — vorher stand
+ * er auf dem Handy dreimal vor dem ersten Satz (Brotkrumen · Schalter · H1).
+ * Seiten ohne Bereich (Startseite, Prompts, Über) behalten ihren Titel: Dort
+ * gibt es nichts Übergeordnetes, das man nennen könnte. */
+const bereich = bereichZuPfad(Astro.url.pathname);
+const anzeige = bereich && bereich !== 'einzeln' ? uebersichtVon(bereich)?.titel ?? seitentitel : seitentitel;
 ---
 
 <input
@@ -34,5 +43,5 @@ const t = texte(sprache);
 />
 <label class="py-leiste__schalter" for="py-leiste-auf">
   <span class="py-leiste__hier">{t.duBistHier}</span>
-  <span class="py-leiste__hiertitel">{seitentitel}</span>
+  <span class="py-leiste__hiertitel">{anzeige}</span>
 </label>

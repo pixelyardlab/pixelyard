@@ -1,0 +1,22 @@
+---
+/* <Konfig> — einer von höchstens DREI Konfigurationsblöcken (Entscheid
+ * 07.09.2026): am Ende der passenden Unterseite, immer mit Platzhaltern.
+ *
+ * 🔑 Der Unterschied zwischen nachvollziehbar und nachbaubar. Der Rahmen sagt
+ * ausdrücklich, dass es eine FORM ist und kein Original — ein kopierter Block
+ * mit echten Werten wäre genau der Fehler, vor dem „Ohne Daten" warnt.
+ */
+interface Props {
+  titel: string;
+}
+const { titel } = Astro.props;
+---
+
+<section class="py-konfig py-breit" aria-label={titel}>
+  <p class="py-konfig__marke">Zum Nachbauen · {titel}</p>
+  <slot />
+  <p class="py-konfig__hinweis">
+    Alles in spitzen Klammern ist ein Platzhalter. Die Zeilen zeigen die Form,
+    nicht das Original — eigene Werte gehören in deine Ablage, nicht in einen Chat.
+  </p>
+</section>

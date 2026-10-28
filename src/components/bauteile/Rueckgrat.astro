@@ -1,0 +1,68 @@
+---
+/* <Rueckgrat> — das Rückgrat-Bild des Aufbaus: sechs Stationen, fünf im Haus,
+ * eine draussen. Übernommen aus dem Entwurf „Homelab-Bauplan" (06.09.2026),
+ * Farben jetzt aus tokens.css statt fest im SVG — sonst nähme der Dunkelmodus
+ * das Bild nicht mit.
+ *
+ * Die Aussage steht zusätzlich als Text in der Bildunterschrift und in
+ * `aria-label`: Ein Bild, dessen Inhalt nur im Bild steht, liest kein
+ * Screenreader und keine Suchmaschine. */
+const stationen = [
+  ['Ankommen', 'Gerät ist im', 'eigenen Netz'],
+  ['Übertragen', 'an den Dienst', 'im Haus'],
+  ['Verarbeiten', 'Erkennung,', 'Volltext, Antwort'],
+  ['Zeigen', 'App, Browser,', 'Handy'],
+  ['Sichern', 'Snapshot und', 'geprüfter Abzug'],
+];
+---
+
+<figure class="py-diagramm py-breit">
+  <div class="py-diagramm__rolle">
+    <svg viewBox="0 0 900 300" role="img"
+      aria-label="Das Rückgrat: Ankommen, Übertragen, Verarbeiten, Zeigen und Sichern passieren im Haus. Nur die sechste Station, das verschlüsselte Auslagern, verlässt das Haus.">
+      <defs>
+        <marker id="rg-pfeil" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="py-svg__fuell" />
+        </marker>
+        <marker id="rg-pfeil-hl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="py-svg__hlfuell" />
+        </marker>
+      </defs>
+      <g class="py-svg__schrift">
+        <rect x="14" y="42" width="704" height="158" rx="2" class="py-svg__rahmen py-svg__leise" stroke-dasharray="5 4" />
+        <text x="28" y="66" font-size="12" font-weight="600" class="py-svg__leisetext">Im Haus</text>
+
+        {stationen.map(([name, z1, z2], i) => {
+          const x = 30 + i * 137;
+          const mitte = x + 60;
+          return (
+            <g>
+              <rect x={x} y="104" width="120" height="80" rx="2" class="py-svg__rahmen" />
+              <text x={mitte} y="124" font-size="10" text-anchor="middle" class="py-svg__leisetext">Station {i + 1}</text>
+              <text x={mitte} y="146" font-size="13" font-weight="600" text-anchor="middle" class="py-svg__text">{name}</text>
+              <text x={mitte} y="164" font-size="10.5" text-anchor="middle" class="py-svg__leisetext">{z1}</text>
+              <text x={mitte} y="177" font-size="10.5" text-anchor="middle" class="py-svg__leisetext">{z2}</text>
+              {i < 4 && <line x1={x + 120} y1="144" x2={x + 133} y2="144" class="py-svg__linie" marker-end="url(#rg-pfeil)" />}
+            </g>
+          );
+        })}
+
+        <line x1="698" y1="144" x2="756" y2="144" class="py-svg__hl" marker-end="url(#rg-pfeil-hl)" />
+        <rect x="760" y="104" width="126" height="80" rx="2" class="py-svg__hl" />
+        <text x="823" y="124" font-size="10" text-anchor="middle" class="py-svg__hltext">Station 6</text>
+        <text x="823" y="146" font-size="13" font-weight="600" text-anchor="middle" class="py-svg__hltext">Auslagern</text>
+        <text x="823" y="164" font-size="10.5" text-anchor="middle" class="py-svg__hltext">verschlüsselt,</text>
+        <text x="823" y="177" font-size="10.5" text-anchor="middle" class="py-svg__hltext">ausser Haus</text>
+        <text x="823" y="224" font-size="11" font-weight="600" text-anchor="middle" class="py-svg__hltext">die einzige Linie nach draussen</text>
+
+        <line x1="14" y1="258" x2="886" y2="258" class="py-svg__linie py-svg__leise" />
+        <text x="14" y="282" font-size="11.5" class="py-svg__leisetext">Was ein Aussenstehender sieht: ein verschlüsseltes Paket pro Nacht — nicht, was drin ist.</text>
+      </g>
+    </svg>
+  </div>
+  <figcaption>
+    <strong>Das Rückgrat.</strong> Fünf der sechs Stationen liegen im Haus. Nur die sechste
+    verlässt es, und sie transportiert ein Paket, das ohne den Schlüssel im Haus nicht
+    lesbar ist. Jede Situation ist diese Kette mit anderen Kästen.
+  </figcaption>
+</figure>

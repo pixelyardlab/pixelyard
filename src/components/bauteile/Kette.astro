@@ -1,0 +1,21 @@
+---
+/* <Kette> — die Sechser-Kette einer Situation (Vorlage A).
+ *
+ * 🔑 Immer dieselben sechs Plätze. Wer die Kette einmal verstanden hat, liest
+ * jede weitere Situation in zehn Sekunden — das ist der ganze Zweck. Eine
+ * Station, die entfällt, bleibt deshalb STEHEN und sagt „entfällt" (art="leer"),
+ * statt still zu fehlen.
+ *
+ * Die Stationen kommen als <Station> herein, damit der Text im MDX lesbar
+ * bleibt. Sechs Spalten ab 56rem, zwei darunter, eine auf dem Handy.
+ */
+interface Props {
+  /** Für Screenreader: wovon die Kette handelt. */
+  beschriftung?: string;
+}
+const { beschriftung = 'Die sechs Stationen' } = Astro.props;
+---
+
+<ol class="py-kette py-breit" aria-label={beschriftung}>
+  <slot />
+</ol>

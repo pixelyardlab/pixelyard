@@ -187,7 +187,11 @@ export const OHNE_LEISTE = ['impressum', 'datenschutz', 'design'] as const;
  *
  * ⚠️ `entwurfsPfade()` unten benutzt das NICHT. Die Sitemap muss jeden Entwurf
  * kennen, gerade weil sie im Bau läuft — sie soll ihn ja ausschliessen. */
-export const zeigeEntwuerfe = import.meta.env.DEV;
+/* ⚠️ `?.` mit Absicht (Nacharbeit aus Schritt 1): Ausserhalb von Vite — etwa
+ * mit blossem `node` oder `tsx` in einem Hilfsskript — gibt es `import.meta.env`
+ * nicht, und die Datei liess sich gar nicht erst laden. Ohne Vite gilt: kein
+ * Entwicklungsserver, also keine Entwürfe zeigen. */
+export const zeigeEntwuerfe: boolean = import.meta.env?.DEV ?? false;
 
 /** Darf dieser Eintrag verlinkt werden? */
 export function sichtbar(eintrag: Eintrag): boolean {

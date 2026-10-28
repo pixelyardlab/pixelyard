@@ -564,6 +564,18 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
 .py-status__fuell { fill: currentColor; }
 .py-status__rand  { fill: none; stroke: currentColor; stroke-width: 1.2; }
 
+/* Kontrast, gerechnet am 28.10.2026 (WCAG 2.1, relative Luminanz) — eine
+ * Nacharbeit aus Schritt 1. Für ein grafisches Objekt verlangt WCAG 3:1.
+ *
+ *   Marke       Farbe            hell: bg / surface   dunkel: bg / surface
+ *   belegt      --py-text        15.13 / 13.59        13.90 / 10.88
+ *   teilweise   --py-accent-text  6.34 /  5.69         8.11 /  6.35
+ *   geplant     --py-text-leise   6.43 /  5.77         7.59 /  5.94
+ *
+ * Alle drei halten auf beiden Flächen und in beiden Modi, der schlechteste
+ * Wert ist 5.69:1. ⚠️ Der Abstand zwischen „teilweise" und „geplant" ist
+ * dagegen KEIN Kontrast, sondern Farbton — deshalb trägt die Form die
+ * Aussage, nicht die Farbe (Kopf von Statusmarke.astro). */
 .py-status[data-status='belegt']    { color: var(--py-text); }
 .py-status[data-status='teilweise'] { color: var(--py-accent-text); }
 .py-status[data-status='geplant']   { color: var(--py-text-leise); }
@@ -797,4 +809,419 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   margin: 0;
   color: var(--py-text-leise);
   font-size: 0.9375rem;
+}
+
+/* ====================================================================
+ * Bauteile der Bereiche — Umbau Schritt 2, 28.10.2026
+ *
+ * Kette · Szenario · Notizen · Bauteilkarte · Regelliste · Stolperstein ·
+ * Möglichkeit · Handlung · Konfigurationsblock · Diagramme.
+ *
+ * Gestalterisch dieselbe Sprache wie der Rest: Monospace für Beschriftungen,
+ * Fläche --py-surface, Linien nach der Regel aus tokens.css (auf --py-surface
+ * rahmt --py-text-leise, nicht --py-line). Die Entwürfe vom 06.09. hatten eine
+ * eigene, türkisfarbene Palette — übernommen ist ihr Aufbau, nicht ihre Farbe.
+ *
+ * ⚠️ Nur `margin-block` im Lesestrom (Kopf dieser Datei).
+ * ==================================================================== */
+
+/* --- Gemeinsame Kleinteile ------------------------------------------ */
+.py-merksatz {
+  color: var(--py-link);
+  font-weight: 600;
+}
+.py-behauptung {
+  font-size: 1.0625rem;
+  color: var(--py-text-leise);
+}
+.py-behauptung strong { color: var(--py-text); }
+
+/* --- Kette ------------------------------------------------------------
+ * Sechs Kästen, durch 1px-Fugen getrennt. Die Fuge ist der Hintergrund des
+ * Rasters (--py-text-leise), nicht ein Rahmen je Kasten — sonst stehen
+ * innen doppelte Linien. */
+.py-kette {
+  list-style: none;
+  padding: 0;
+  margin-block: var(--py-r4) var(--py-r5);
+  display: grid;
+  gap: 1px;
+  grid-template-columns: 1fr;
+  background: var(--py-text-leise);
+  border: var(--py-rand) solid var(--py-text-leise);
+}
+@media (min-width: 30rem) { .py-kette { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 56rem) { .py-kette { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 80rem) { .py-kette { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.py-kette__station {
+  margin: 0;
+  background: var(--py-surface);
+  padding: var(--py-r3) var(--py-r3) var(--py-r4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--py-r1);
+  min-width: 0;
+}
+.py-kette__nr {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--py-text-leise);
+}
+.py-kette__text { font-size: 0.875rem; line-height: 1.45; }
+.py-kette__station--aus { background: var(--py-bg); box-shadow: inset 0 3px 0 var(--py-primary); }
+.py-kette__station--aus .py-kette__nr { color: var(--py-link); }
+.py-kette__station--leer .py-kette__text { color: var(--py-text-leise); font-style: italic; }
+
+/* --- Szenario --------------------------------------------------------- */
+.py-szenario {
+  margin-block: var(--py-r7) 0;
+  scroll-margin-top: var(--py-r5);
+}
+.py-szenario > * { max-width: var(--py-mass); margin-inline: auto; }
+.py-szenario > .py-kette { max-width: var(--py-mass-breit); }
+.py-szenario h3 { margin-block: var(--py-r2) var(--py-r3); font-size: 1.3rem; }
+.py-szenario__marke {
+  display: flex;
+  align-items: baseline;
+  gap: var(--py-r2);
+  margin-block: 0;
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--py-text-leise);
+}
+.py-szenario__bezug {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--py-r3) var(--py-r5);
+  margin-block: var(--py-r4) 0;
+  padding-top: var(--py-r3);
+  border-top: var(--py-rand) dashed var(--py-line);
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.py-szenario__bezug dt {
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--py-text-leise);
+}
+.py-szenario__bezug dd { margin: 0; }
+.py-szenario__bezug a { text-decoration: none; }
+.py-szenario__bezug a:hover { text-decoration: underline; }
+
+/* --- Notizen ---------------------------------------------------------- */
+.py-notizen { list-style: none; padding: 0; margin-block: var(--py-r4) 0; }
+.py-notizen > li {
+  position: relative;
+  padding-left: var(--py-r5);
+  margin-bottom: var(--py-r3);
+  font-size: 0.9375rem;
+}
+.py-notizen > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  width: 0.6rem;
+  height: 2px;
+  background: var(--py-text-leise);
+}
+
+/* --- Bauteilkarte (Vorlage B) ----------------------------------------- */
+.py-bauteile {
+  display: grid;
+  gap: 1px;
+  grid-template-columns: 1fr;
+  background: var(--py-text-leise);
+  border: var(--py-rand) solid var(--py-text-leise);
+  margin-block: var(--py-r4) var(--py-r6);
+}
+@media (min-width: 44rem) { .py-bauteile { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.py-bauteil {
+  background: var(--py-surface);
+  padding: var(--py-r4) var(--py-r4) var(--py-r5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--py-r2);
+  min-width: 0;
+}
+.py-bauteil > * { margin-block: 0; }
+.py-bauteil__rolle,
+.py-bauteil__fallenmarke {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--py-accent-text);
+}
+.py-bauteil__titel { font-size: 1.05rem; margin-block: 0; }
+.py-bauteil__modell {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+  color: var(--py-text-leise);
+}
+.py-bauteil__warum { font-size: 0.9375rem; }
+.py-bauteil__warum > :last-child { margin-bottom: 0; }
+.py-bauteil__preis {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--py-text-leise);
+}
+.py-bauteil__falle {
+  margin-top: auto;
+  padding-top: var(--py-r2);
+  border-top: var(--py-rand) dashed var(--py-text-leise);
+  font-size: 0.875rem;
+}
+.py-bauteil__falle > :last-child { margin-bottom: 0; }
+.py-bauteil__fallenmarke { display: block; margin-bottom: var(--py-r1); }
+
+/* --- Regelliste (Vorlage C) ------------------------------------------- */
+.py-regeln { list-style: none; padding: 0; margin-block: var(--py-r5) var(--py-r6); }
+.py-regel {
+  position: relative;
+  padding-left: 2.75rem;
+  margin-bottom: var(--py-r5);
+  scroll-margin-top: var(--py-r5);
+}
+.py-regel__nr {
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  font-family: var(--py-schrift-mono);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--py-link);
+}
+.py-regel__titel { font-size: 1.05rem; margin-block: 0 var(--py-r1); }
+.py-regel__text { font-size: 0.9375rem; color: var(--py-text-leise); }
+.py-regel__text > :last-child { margin-bottom: 0; }
+.py-regel__text strong { color: var(--py-text); }
+.py-regel__merksatz { margin-block: var(--py-r2) 0; font-size: 0.9375rem; }
+
+/* --- Stolperstein-Karte ----------------------------------------------- */
+.py-stolperstein {
+  background: var(--py-surface);
+  border: var(--py-rand) solid var(--py-text-leise);
+  padding: var(--py-r4) var(--py-r4) var(--py-r5);
+  margin-block: 0 var(--py-r4);
+  display: grid;
+  gap: var(--py-r3) var(--py-r5);
+  grid-template-columns: 1fr;
+  scroll-margin-top: var(--py-r5);
+}
+@media (min-width: 44rem) {
+  .py-stolperstein { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+  .py-stolperstein__gegen { border-left: var(--py-rand) dashed var(--py-text-leise); padding-left: var(--py-r5); }
+}
+.py-stolperstein h3 { margin-block: var(--py-r1) var(--py-r2); font-size: 1.05rem; }
+.py-stolperstein__typ,
+.py-stolperstein__marke {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--py-text-leise);
+  margin: 0;
+}
+.py-stolperstein__marke { color: var(--py-accent-text); margin-bottom: var(--py-r1); }
+.py-stolperstein__bsp,
+.py-stolperstein__gegen { font-size: 0.9375rem; }
+.py-stolperstein__bsp > :last-child,
+.py-stolperstein__gegen > :last-child { margin-bottom: 0; }
+@media (max-width: 43.999rem) {
+  .py-stolperstein__gegen { border-top: var(--py-rand) dashed var(--py-text-leise); padding-top: var(--py-r3); }
+}
+
+/* --- Möglichkeiten ---------------------------------------------------- */
+.py-moeglichkeiten {
+  display: grid;
+  gap: 1px;
+  grid-template-columns: 1fr;
+  background: var(--py-text-leise);
+  border: var(--py-rand) solid var(--py-text-leise);
+  margin-block: var(--py-r4) var(--py-r6);
+}
+@media (min-width: 40rem) { .py-moeglichkeiten { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.py-moeglichkeit {
+  background: var(--py-surface);
+  padding: var(--py-r4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--py-r2);
+}
+.py-moeglichkeit h3 { margin: 0; font-size: 1rem; }
+.py-moeglichkeit__text { font-size: 0.875rem; color: var(--py-text-leise); }
+.py-moeglichkeit__text > :last-child { margin-bottom: 0; }
+.py-moeglichkeit dl {
+  margin: auto 0 0;
+  padding-top: var(--py-r2);
+  border-top: var(--py-rand) dashed var(--py-text-leise);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--py-r1) var(--py-r3);
+  font-size: 0.8125rem;
+}
+.py-moeglichkeit dt { font-family: var(--py-schrift-mono); color: var(--py-text-leise); }
+.py-moeglichkeit dd { margin: 0; }
+
+/* --- Handlung: „Was du jetzt tun kannst" ------------------------------ */
+.py-handlung {
+  margin-block: var(--py-r7) 0;
+  padding: var(--py-r4) var(--py-r5) var(--py-r5);
+  border-left: 3px solid var(--py-primary);
+  background: var(--py-surface);
+}
+.py-handlung__marke {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--py-accent-text);
+  margin: 0 0 var(--py-r2);
+}
+.py-handlung > :last-child { margin-bottom: 0; }
+
+/* --- Verweis auf einen Prompt ---------------------------------------- */
+.py-promptverweis {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.875rem;
+}
+.py-promptverweis__eingabe { color: var(--py-primary); margin-right: var(--py-r2); }
+.py-promptverweis__zweck { color: var(--py-text-leise); }
+
+/* --- Konfigurationsblock --------------------------------------------- */
+.py-konfig { margin-block: var(--py-r6) var(--py-r5); }
+.py-konfig__marke {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--py-accent-text);
+  margin: 0 0 var(--py-r2);
+}
+.py-konfig pre { margin-bottom: var(--py-r2); }
+.py-konfig__hinweis {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  color: var(--py-text-leise);
+  margin: 0;
+}
+
+/* --- Stand-Zeile ----------------------------------------------------- */
+.py-stand {
+  margin-block: var(--py-r6) 0;
+  font-family: var(--py-schrift-mono);
+  font-size: 0.75rem;
+  color: var(--py-text-leise);
+}
+
+/* --- Diagramme ------------------------------------------------------
+ * Das SVG ist breit gezeichnet und rollt auf dem Handy seitlich, statt auf
+ * unlesbare Schriftgrössen zusammenzufallen. Die Aussage steht ohnehin in
+ * der Bildunterschrift. */
+.py-diagramm__rolle { overflow-x: auto; }
+.py-diagramm svg { min-width: 40rem; width: 100%; color: var(--py-text); padding: var(--py-r3); }
+.py-svg__schrift { font-family: var(--py-schrift-mono); }
+.py-svg__rahmen { fill: none; stroke: var(--py-text); stroke-width: 1.4; }
+.py-svg__linie { stroke: var(--py-text); stroke-width: 1.2; fill: none; }
+.py-svg__leise { opacity: 0.55; }
+.py-svg__fuell { fill: var(--py-text); }
+.py-svg__text { fill: var(--py-text); }
+.py-svg__leisetext { fill: var(--py-text-leise); }
+.py-svg__hl { fill: none; stroke: var(--py-link); stroke-width: 1.6; }
+.py-svg__hlfuell { fill: var(--py-link); }
+.py-svg__hltext { fill: var(--py-link); }
+
+/* --- Beitragsübersicht: Zeitachse und Gruppen ------------------------ */
+.py-zeitachse {
+  list-style: none;
+  padding: 0 0 0 var(--py-r5);
+  margin-block: var(--py-r5) var(--py-r6);
+  border-left: 2px solid var(--py-line);
+}
+.py-zeitachse > li {
+  position: relative;
+  margin-bottom: var(--py-r5);
+}
+.py-zeitachse > li::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--py-r5) - 6px);
+  top: 0.45em;
+  width: 10px;
+  height: 10px;
+  background: var(--py-bg);
+  border: 2px solid var(--py-text);
+}
+.py-zeitachse > li.py-zeitachse__geplant::before { border-color: var(--py-text-leise); border-style: dashed; }
+.py-zeitachse h3 { margin: var(--py-r1) 0 var(--py-r1); font-size: 1.1rem; }
+.py-zeitachse h3 a { color: var(--py-text); text-decoration: none; }
+.py-zeitachse h3 a:hover { color: var(--py-link); text-decoration: underline; }
+.py-zeitachse p { margin-block: 0; color: var(--py-text-leise); font-size: 0.9375rem; }
+.py-zeitachse .py-meta { margin-block: 0; }
+
+.py-gruppen { list-style: none; padding: 0; margin-block: var(--py-r4) var(--py-r6); }
+.py-gruppen > li {
+  padding-block: var(--py-r3);
+  border-bottom: var(--py-rand) solid var(--py-line);
+  margin: 0;
+}
+.py-gruppen__szenario { font-family: var(--py-schrift-mono); font-size: 0.8125rem; margin: 0 0 var(--py-r1); }
+.py-gruppen__szenario a { text-decoration: none; }
+.py-gruppen__beitraege { margin: 0; font-size: 0.9375rem; }
+
+/* --- Artikelkopf: Zusammenhang (Vorlage D) ---------------------------- */
+.py-zusammenhang {
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+  color: var(--py-text-leise);
+  margin-block: calc(-1 * var(--py-r4)) var(--py-r6);
+}
+.py-zusammenhang a { text-decoration: none; }
+.py-zusammenhang a:hover { text-decoration: underline; }
+
+/* ====================================================================
+ * Nacharbeiten aus Schritt 1 — 28.10.2026
+ * ==================================================================== */
+
+/* 1 · Der Titel stand auf dem Handy dreimal vor dem Text: Brotkrumen ·
+ *     „Du bist hier" · Überschrift. Unter 64rem trägt jetzt der Schalter die
+ *     Orientierung (Seitenleiste §3a, Entscheid 5: „das Einzige, was auf
+ *     kleinem Bildschirm dauernd sichtbar sein muss"), die Brotkrumen fallen
+ *     dort weg — und der Schalter nennt den BEREICH, nicht noch einmal den
+ *     Titel, der direkt darunter als Überschrift steht (Leistenschalter.astro).
+ *     Damit ist auch der Umbruch „Startseite / › langer Titel" weg, der nur
+ *     auf schmalen Bildschirmen auftrat. */
+@media (max-width: 63.999rem) {
+  .py-raster > .py-brotkrumen { display: none; }
+}
+/* Auf dem grossen Bildschirm bleibt die Zeile EINZEILIG: Der letzte Teil wird
+ * abgeschnitten statt umbrochen. Im HTML steht der ganze Titel. */
+.py-brotkrumen ol { flex-wrap: nowrap; }
+.py-brotkrumen li { flex: none; white-space: nowrap; }
+.py-brotkrumen li:last-child {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 2 · Der verwaiste Trennpunkt in der Meta-Zeile. Er war kein Datenfehler,
+ *     sondern ein Umbruch: Passte „Als Markdown ansehen" nicht mehr auf die
+ *     Zeile, blieb der Punkt davor allein am Zeilenende stehen. Der Punkt
+ *     hängt jetzt am FOLGENDEN Teil (Artikel.astro) und bricht mit ihm um. */
+.py-meta__teil { white-space: nowrap; }
+.py-meta__teil--lang { white-space: normal; }
+.py-meta__teil + .py-meta__teil::before {
+  content: '·';
+  color: var(--py-line);
+  margin-right: 0.5em;
 }

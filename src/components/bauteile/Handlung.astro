@@ -1,0 +1,17 @@
+---
+/* <Handlung> — „Was du jetzt tun kannst". Pflicht auf jeder Inhaltsseite.
+ *
+ * 🔑 Zielbild, Kriterium 2: Endet die Seite mit etwas, das der Leser tun kann?
+ * Ohne diesen Block ist eine Seite nicht fertig. Er steht deshalb als eigenes
+ * Bauteil da und nicht als Absatz, den man beim Kürzen mitnimmt.
+ */
+interface Props {
+  titel?: string;
+}
+const { titel = 'Was du jetzt tun kannst' } = Astro.props;
+---
+
+<aside class="py-handlung" aria-label={titel}>
+  <p class="py-handlung__marke">{titel}</p>
+  <slot />
+</aside>

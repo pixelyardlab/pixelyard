@@ -86,26 +86,20 @@ if (faq?.length) {
     <header class="py-artikelkopf">
       {entwurf && <p><span class="py-entwurf">{t.entwurf}</span></p>}
       <h1>{titel}</h1>
+      {/* Jeder Teil trägt seinen Trennpunkt VORNE (bausteine.css, „Nacharbeiten").
+          Bricht die Zeile um, wandert der Punkt mit — vorher blieb er allein am
+          Zeilenende stehen und sah aus wie ein fehlender Eintrag. */}
       <p class="py-meta">
         <span class="py-meta__eingabe" aria-hidden="true">$</span>
-        <span>{t.veroeffentlicht}</span>
-        <time datetime={isoTag(datum)}>{isoTag(datum)}</time>
-        <span class="py-meta__punkt" aria-hidden="true">·</span>
-        <span>{minuten} {t.minuten}</span>
+        <span class="py-meta__teil">{t.veroeffentlicht} <time datetime={isoTag(datum)}>{isoTag(datum)}</time></span>
+        <span class="py-meta__teil">{minuten} {t.minuten}</span>
         {aktualisiert && (
-          <>
-            <span class="py-meta__punkt" aria-hidden="true">·</span>
-            <span>{t.aktualisiert} <time datetime={isoTag(aktualisiert)}>{isoTag(aktualisiert)}</time></span>
-          </>
+          <span class="py-meta__teil">{t.aktualisiert} <time datetime={isoTag(aktualisiert)}>{isoTag(aktualisiert)}</time></span>
         )}
         {schlagworte.length > 0 && (
-          <>
-            <span class="py-meta__punkt" aria-hidden="true">·</span>
-            <span>{schlagworte.map((s) => `#${s}`).join(' ')}</span>
-          </>
+          <span class="py-meta__teil py-meta__teil--lang">{schlagworte.map((s) => `#${s}`).join(' ')}</span>
         )}
-        <span class="py-meta__punkt" aria-hidden="true">·</span>
-        <a href={markdownPfad}>{t.alsMarkdown}</a>
+        <span class="py-meta__teil"><a href={markdownPfad}>{t.alsMarkdown}</a></span>
       </p>
     </header>
 

@@ -1,0 +1,13 @@
+---
+/* <Notiz> — eine Beobachtung. Der Merksatz steht farbig abgesetzt dahinter,
+ * einer pro Notiz und nicht mehr — sonst ist keiner mehr hervorgehoben. */
+interface Props {
+  merksatz?: string;
+}
+const { merksatz } = Astro.props;
+---
+
+<li>
+  <slot />
+  {merksatz && <> <span class="py-merksatz">{merksatz}</span></>}
+</li>
