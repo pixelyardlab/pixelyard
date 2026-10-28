@@ -154,7 +154,7 @@ export const EINTRAEGE: Eintrag[] = [
   },
   {
     slug: 'ueber', titel: 'Über', bereich: 'einzeln',
-    status: 'geplant', entwurf: true,
+    status: 'belegt', entwurf: true,
     kurzbeschreibung: 'Wer hier schreibt, warum — und was hier bewusst nicht steht.',
   },
 ];

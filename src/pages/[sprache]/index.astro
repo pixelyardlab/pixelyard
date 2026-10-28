@@ -3,6 +3,13 @@ import Basis from '../../layouts/Basis.astro';
 import { SPRACHEN, SEITE, texte } from '../../lib/seite';
 import type { Sprache } from '../../lib/seite';
 import { alleArtikel, pfadVon, isoTag } from '../../lib/artikel';
+import Prompt from '../../components/Prompt.astro';
+import Kette from '../../components/bauteile/Kette.astro';
+import Station from '../../components/bauteile/Station.astro';
+import Bauteile from '../../components/bauteile/Bauteile.astro';
+import Bauteil from '../../components/bauteile/Bauteil.astro';
+import { prompt, PROMPTS } from '../../lib/prompts';
+import { uebersichtVon, pfadVon as seitenPfad, sichtbar } from '../../lib/navigation';
 
 export function getStaticPaths() {
   return SPRACHEN.map((sprache) => ({ params: { sprache } }));
@@ -11,6 +18,17 @@ export function getStaticPaths() {
 const sprache = Astro.params.sprache as Sprache;
 const t = texte(sprache);
 const artikel = await alleArtikel(sprache);
+const neueste = artikel.slice(0, 3);
+const erster = prompt('vorhaben-durchplanen');
+
+/* Die drei Türen zeigen auf die Bereichsübersichten — aber nur, wenn die im
+ * Bau verlinkt werden dürfen (`sichtbar`). Bis zum Entwurfsschalter in
+ * Schritt 6 stünde hier sonst ein Link auf eine noindex-Seite. */
+const tuer = (b: 'aufbau' | 'beitrag' | 'vorgehen') => {
+  const e = uebersichtVon(b)!;
+  return { titel: e.titel, pfad: sichtbar(e) ? seitenPfad(e, sprache) : null };
+};
+const tueren = { aufbau: tuer('aufbau'), beitrag: tuer('beitrag'), vorgehen: tuer('vorgehen') };
 
 /* Ausführlicher als nötig, und das mit Absicht: Diese Seite soll von
  * KI-Antwortmaschinen zitierbar sein, und die bauen ihre Antwort aus dem,
@@ -43,111 +61,172 @@ const schema = {
 ---
 
 <Basis titel="Homelab, mitgeschrieben" sprache={sprache} istStartseite schema={schema}>
-  <div class="py-lesestrom">
-    <h1>Ein Homelab, mitgeschrieben<span class="py-h1-cursor" aria-hidden="true">_</span></h1>
+  {/* Startseite nach dem Entwurf vom 06.09.2026 (Umbau Schritt 5).
+      Lesetiefe 1: In zwanzig Sekunden soll ein Erstbesucher wissen, ob er
+      bleibt — und wenn ja, wohin. Deshalb: ein Satz, vier Zahlen, vier
+      Unterschiede, drei Türen, ein erster Schritt.
 
-    <p>
-      Ich baue zuhause ein kleines Rechenzentrum: ein eigenes Netz, einen Speicher für
-      Unterlagen, die sonst in fremden Clouds lägen, eine KI, die lokal läuft, und ein
-      Archiv, das Papierpost durchsuchbar macht. <strong>Ich bin kein Administrator von
-      Beruf.</strong> Ich habe das gebaut, weil ich wissen wollte, ob es geht — und weil
-      mir nicht gefiel, wo meine Dokumente sonst liegen.
+      ⚠️ Gegenüber dem Entwurf geändert: Die Kopfzeile hiess dort „Ein Homelab,
+      vollständig dokumentiert". Vollständigkeit ist genau das Merkmal, das
+      bewusst FEHLT (Zielbild, Kriterium 4) — die Zeile hätte die Seite im
+      ersten Satz widerlegt. */}
+  <div class="py-lesestrom py-start">
+    <p class="py-start__dach">Ein Homelab, mitgeschrieben</p>
+    <h1>Unsere Fotos und Dokumente liegen im Haus. Nicht in einer Cloud.<span class="py-h1-cursor" aria-hidden="true">_</span></h1>
+
+    <p class="py-einleitung">
+      Gebaut in drei Monaten für rund CHF 3'700 — <strong>mit jeder Messung, jedem Preis
+      und jedem Fehler, den ich dabei gemacht habe.</strong> Damit du es nachbauen kannst,
+      ohne dieselben zu machen.
     </p>
 
+    <dl class="py-zahlen py-breit">
+      <div><dt>82'492</dt><dd>Fotos und Videos, im Haus durchsuchbar</dd></div>
+      <div><dt>2 Minuten</dt><dd>vom Blatt Papier ins durchsuchbare Archiv</dd></div>
+      <div><dt>4 Ebenen</dt><dd>Sicherung — zwei davon wirklich zurückgeholt</dd></div>
+      <div><dt>CHF 3</dt><dd>laufende Kosten im Monat, ohne den Anschluss</dd></div>
+    </dl>
+    <p class="py-zahlen__stand">Stand September 2026. Woher jede Zahl kommt, steht im <a href={tueren.aufbau.pfad ?? `/${sprache}/`}>Aufbau</a>.</p>
+
+    <h2>Vier Dinge, die du anderswo nicht bekommst</h2>
     <p>
-      Hier steht, wie das entstanden ist. Nicht als Anleitung zum Nachklicken, sondern
-      als Entscheidungsweg: was zur Wahl stand, was ich verworfen habe und warum, und was
-      es gekostet hat — in Franken, in Stunden, in Fehlversuchen. Preise und Anbieter sind
-      schweizerisch, weil ich hier einkaufe und weil genau das anderswo fehlt.
+      Es gibt tausend Anleitungen für so etwas. Die meisten erzählen die
+      Herstellerdokumentation nach und verdienen an den Links darunter.{' '}
+      <strong>Diese hier tut beides nicht.</strong>
     </p>
 
+    <Bauteile>
+      <Bauteil rolle="01" titel="Jede Zahl hat ein Datum">
+        <p>Keine Schätzung wird als Messung verkauft. Wo etwas aus Überlegung statt aus einem Test stammt, steht es dabei — auch wenn es die Aussage schwächer macht.</p>
+      </Bauteil>
+      <Bauteil rolle="02" titel="Die Fehler stehen drin">
+        <p>Acht Arten, wie es schiefgeht, alle selbst erlebt — inklusive der Stellen, die heute noch offen sind. Ein Bauplan mit sichtbaren Lücken ist mehr wert als eine Erfolgsmeldung.</p>
+      </Bauteil>
+      <Bauteil rolle="03" titel="Keine Provisionslinks">
+        <p>Modellbezeichnungen und Preise stehen da, damit du nachrechnen kannst. Verlinkt wird nichts. Was hier steht, soll allein davon tragen, wie es begründet ist.</p>
+      </Bauteil>
+      <Bauteil rolle="04" titel="Auch das Vorgehen, nicht nur das Ergebnis">
+        <p>Wie man so ein Vorhaben plant, mit einer KI zusammenarbeitet und so dokumentiert, dass es in einem halben Jahr noch trägt. <strong>Der Teil, den fast niemand veröffentlicht.</strong></p>
+      </Bauteil>
+    </Bauteile>
+
+    <h2>Wo willst du anfangen?</h2>
     <p>
-      Und was schiefging, steht ebenfalls da. Nicht aus Koketterie: <strong>Die Irrtümer
-      sind der Teil, den man anderswo nicht findet</strong>, weil sie sich schlecht als
-      Erfolg erzählen lassen.
+      Dasselbe Vorhaben aus drei Blickwinkeln. <strong>Sie greifen ineinander:</strong>{' '}
+      Jede Situation im Aufbau verweist auf den Beitrag, der sie erzählt, und auf die
+      Regel, die daraus geworden ist.
     </p>
 
-    <h2>{t.artikel}</h2>
-
-  {artikel.length === 0 ? (
-    <p class="py-schlagwort">Noch kein Artikel veröffentlicht.</p>
-  ) : (
-    <ul class="py-liste">
-      {artikel.map((a) => (
-        <li>
-          <p class="py-meta">
-            <span class="py-meta__eingabe" aria-hidden="true">$</span>
-            <time datetime={isoTag(a.data.datum)}>{isoTag(a.data.datum)}</time>
-            {a.data.entwurf && <span class="py-entwurf">{t.entwurf}</span>}
-          </p>
-          <h2><a href={pfadVon(a)}>{a.data.titel}</a></h2>
-          <p>{a.data.beschreibung}</p>
-          {a.data.schlagworte.length > 0 && (
-            <p class="py-schlagwort">
-              {a.data.schlagworte.map((s) => (
-                <a href={`/${sprache}/thema/${s}/`}>#{s}</a>
-              ))}
-            </p>
-          )}
-        </li>
-      ))}
+    <ul class="py-tueren py-breit">
+      <li>
+        <p class="py-tueren__nr">Bereich 1</p>
+        <h3>{tueren.aufbau.pfad ? <a href={tueren.aufbau.pfad}>{tueren.aufbau.titel}</a> : tueren.aufbau.titel}</h3>
+        <p><strong>Was das Ding kann</strong> — acht Situationen aus einem normalen Tag, dazu jedes Gerät mit Preis und jeder Dienst mit seiner Falle.</p>
+        <p class="py-tueren__fuer">Für dich, wenn du nachbauen oder nachrechnen willst</p>
+      </li>
+      <li>
+        <p class="py-tueren__nr">Bereich 2</p>
+        <h3>{tueren.beitrag.pfad ? <a href={tueren.beitrag.pfad}>{tueren.beitrag.titel}</a> : tueren.beitrag.titel}</h3>
+        <p><strong>Wie es gelaufen ist</strong> — ein Arbeitsschritt pro Text, mit der Messung dahinter und dem Problem, an dem es hing.</p>
+        <p class="py-tueren__fuer">Für dich, wenn du an derselben Stelle stehst</p>
+      </li>
+      <li>
+        <p class="py-tueren__nr">Bereich 3</p>
+        <h3>{tueren.vorgehen.pfad ? <a href={tueren.vorgehen.pfad}>{tueren.vorgehen.titel}</a> : tueren.vorgehen.titel}</h3>
+        <p><strong>Wie man es angeht</strong> — planen, mit einer KI zusammenarbeiten, sauber dokumentieren, acht Stolpersteine nach Typ. Hier steht bewusst keine Konfiguration.</p>
+        <p class="py-tueren__fuer">Für dich, wenn du irgendein Vorhaben planst — auch eines ohne einen einzigen Server</p>
+      </li>
     </ul>
-  )}
-  </div>
 
-  <div class="py-lesestrom">
-    <h2>Was hier anders ist</h2>
-
+    <h2>Der erste Schritt kostet nichts</h2>
     <p>
-      Drei Regeln tragen jeden Text, und sie sind der Grund, warum das Schreiben länger
-      dauert als das Bauen:
+      Du brauchst keine Hardware, um anzufangen — du brauchst einen Plan, der deine eigenen
+      Annahmen aufdeckt. <strong>Kopier diesen Text in die KI deiner Wahl</strong> und
+      beschreib ihr, was du vorhast. Die letzte Zeile ist die wichtigste.
+    </p>
+    <Prompt titel={`$ ${erster.titel}`} hinweis={erster.hinweis} sprache={sprache}><div class="py-prompt__vorformatiert">{erster.text}</div></Prompt>
+    <p>
+      Es gibt {PROMPTS.length - 1} weitere davon, alle ohne Upload:{' '}
+      <a href={`/${sprache}/prompts/`}>alle Prompts an einem Ort</a>.
     </p>
 
-    <ol>
+    <h2>Was hier eigentlich passiert</h2>
+    <p>
+      Jede Situation im Haus läuft über dieselben sechs Stationen — ob es um ein Foto
+      geht, einen Brief oder eine Frage an die eigenen Unterlagen. <strong>Fünf davon
+      liegen im Haus. Nur die sechste verlässt es</strong>, und sie transportiert ein
+      Paket, das ohne den Schlüssel zu Hause nicht lesbar ist.
+    </p>
+    <Kette>
+      <Station nr="Station 1 · Ankommen">Das Gerät ist wieder im eigenen Netz</Station>
+      <Station nr="Station 2 · Übertragen">Die Daten gehen an einen Dienst im Haus</Station>
+      <Station nr="Station 3 · Verarbeiten">Erkennung, Volltext, Antwort — auf eigener Hardware</Station>
+      <Station nr="Station 4 · Zeigen">App, Browser, Handy — auch von unterwegs</Station>
+      <Station nr="Station 5 · Sichern">Nächtliche Momentaufnahme und ein geprüfter Abzug</Station>
+      <Station nr="Station 6 · Auslagern" art="aus">Verschlüsselt ausser Haus — die einzige Linie nach draussen</Station>
+    </Kette>
+
+    <h2>Neu hier? Der Fünf-Minuten-Weg</h2>
+    <p>
+      Drei Seiten, in dieser Reihenfolge. Danach weisst du, ob das Thema etwas für dich
+      ist — <strong>und hast bereits eine Entscheidung getroffen, die dir später Geld
+      spart.</strong>
+    </p>
+    <ol class="py-weg">
       <li>
-        <strong>Jede Behauptung, die eine Messung sein könnte, ist eine Messung</strong> —
-        oder sie steht ausdrücklich als Annahme da.
+        <h3><a href={`/${sprache}/aufbau/was-es-kann/#s-verlust`}>Eine einzige Situation lesen: „Eine Datei ist weg“</a></h3>
+        <p>Vier Arten, etwas zu verlieren, und vier verschiedene Rückwege. Danach verstehst du, warum ein gespiegeltes Plattenpaar kein Backup ist — und warum drei von vier Rückwegen an zwei Passwörtern hängen.</p>
+        <p class="py-weg__dauer">rund 2 Minuten · im Aufbau</p>
       </li>
       <li>
-        <strong>Ein grüner Status ist kein Nachweis.</strong> Wo hier steht, dass etwas
-        funktioniert, steht auch die Zahl oder das Protokoll, an dem man es sieht.
+        <h3><a href={`/${sprache}/aufbau/reihenfolge/`}>Die Reihenfolge ansehen, in der man baut</a></h3>
+        <p>Sieben Schritte, und bei jedem steht, warum er dort steht. Der dritte ist der, den fast alle zu spät machen: die Sicherung einrichten, bevor es etwas zu sichern gibt.</p>
+        <p class="py-weg__dauer">rund 2 Minuten · im Aufbau</p>
       </li>
       <li>
-        <strong>Ein Irrtum, der korrigiert wurde, ist wertvoller als ein Ergebnis, das
-        immer schon stimmte.</strong> Korrekturen werden als solche geschrieben, nicht
-        wegretuschiert.
+        <h3><a href={`/${sprache}/prompts/#ausloeser-statt-termine`}>Einen Auslöser für deine eigene Liste formulieren</a></h3>
+        <p>Ein Auslöser ist ein Zustand, den du ablesen kannst — „der Speicher ist zu 70 Prozent voll“. <strong>Wo dir keiner einfällt, ist der Posten ein Wunsch und kein Plan.</strong></p>
+        <p class="py-weg__dauer">rund 1 Minute · bei den Prompts</p>
       </li>
     </ol>
-
-    <h2>Zwei Lesetiefen</h2>
-
-    <p>
-      Die Artikel richten sich an Leute, die Technik mögen, aber nicht beruflich damit zu
-      tun haben. Deshalb gibt es zu Begriffen, die nicht jeder kennt, kurze
-      Erklärungsblöcke — <strong>und einen Schalter im Kopf der Seite, der sie
-      ausblendet.</strong> Wer die Begriffe kennt, liest den knappen Text; wer sie nicht
-      kennt, bekommt sie erklärt, ohne dass jemand ihn dafür für dumm hält.
+    <p class="py-schlagwort">
+      Begriffe, die nicht jeder kennt, erklären kurze Kästen im Text. Wer sie nicht
+      braucht, blendet sie oben mit dem Schalter <em>erklärungen</em> aus — der knappe
+      Text bleibt vollständig.
     </p>
 
+    <h2>Zuletzt erschienen</h2>
+    {neueste.length === 0 ? (
+      <p class="py-schlagwort">Noch kein Artikel veröffentlicht.</p>
+    ) : (
+      <ul class="py-liste">
+        {neueste.map((a) => (
+          <li>
+            <p class="py-meta">
+              <span class="py-meta__eingabe" aria-hidden="true">$</span>
+              <time datetime={isoTag(a.data.datum)}>{isoTag(a.data.datum)}</time>
+            </p>
+            <h3 class="py-liste__titel"><a href={pfadVon(a)}>{a.data.titel}</a></h3>
+            <p>{a.data.beschreibung}</p>
+          </li>
+        ))}
+      </ul>
+    )}
+    {tueren.beitrag.pfad && <p><a href={tueren.beitrag.pfad}>Alle Beiträge, mit Zeitachse und nach Situation geordnet</a></p>}
+
+    <h2>Wer das schreibt</h2>
     <p>
-      Der kompakte Text bleibt dabei <em>vollständig</em>, nicht nur kürzer. Das wird bei
-      jedem Artikel einmal gegengelesen — es ist der Schritt, den man sonst überspringt.
+      Ich bin Cedric, <strong>kein Systemadministrator</strong>, und verdiene mein Geld
+      nicht damit. Ich habe das im Sommer 2026 neben dem Beruf aufgebaut — mit einer KI als
+      Planungspartner und mit der Disziplin, jede Zahl aufzuschreiben, bevor sie in
+      Vergessenheit gerät. Was hier steht, ist deshalb kein Fachbuch, sondern das Protokoll
+      von jemandem, der es zum ersten Mal gemacht hat. <strong>Genau darin liegt der
+      Nutzen:</strong> Ich weiss noch, welche Stellen unklar waren.
     </p>
-
-    <h2>Prompts zum Mitnehmen</h2>
-
     <p>
-      In jedem Artikel stehen fertige Fragen, die sich mit einem Knopf kopieren und in
-      eine KI deiner Wahl einfügen lassen. Sie sind so geschrieben, dass sie für sich
-      allein stehen — du musst den Artikel nicht mitschicken, und es ist gleichgültig,
-      welchen Assistenten du benutzt.
-    </p>
-
-    <p>
-      <strong>Diese Prompts fassen niemals deine Daten an.</strong> Keiner davon fordert
-      dich auf, eine Police, eine Rechnung oder einen Netzwerkplan irgendwo hochzuladen.
-      Ein Blog, der dafür wirbt, Unterlagen zuhause zu behalten, und den Leser im
-      Nebensatz zu einer Cloud schickt, hebt sich selbst auf.
+      Was noch offen ist und woran jeder offene Punkt hängt, steht unter{' '}
+      <a href={`/${sprache}/aufbau/offen/`}>Offen</a>. Mehr über diese Seite und wie du
+      mich erreichst: <a href={`/${sprache}/ueber/`}>Über</a>.
     </p>
   </div>
 </Basis>

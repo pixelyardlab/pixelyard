@@ -1,8 +1,11 @@
 ---
-/* /<sprache>/ueber/ — Platzhalter, Schritt 1 des Umbaus (24.09.2026).
- * Titel und Kurzbeschreibung stehen in navigation.ts, nicht hier. */
+/* /<sprache>/ueber/ — der Absender (Umbau Schritt 5, 28.10.2026).
+ * Titel und Kurzbeschreibung stehen in navigation.ts, der Text in
+ * src/content/kapitel/de/ueber.mdx. Anrede Du und die Mailadresse auf der
+ * Domain — beides Entscheide vom 07.09.2026. Bewusst KEIN beruflicher
+ * Hintergrund: Die einzige berufliche Angabe bleibt „kein Systemadministrator“. */
 import Basis from '../../layouts/Basis.astro';
-import Platzhalter from '../../components/Platzhalter.astro';
+import Kapitelseite from '../../components/Kapitelseite.astro';
 import { SPRACHEN } from '../../lib/seite';
 import type { Sprache } from '../../lib/seite';
 import { EINTRAEGE } from '../../lib/navigation';
@@ -17,6 +20,6 @@ const eintrag = EINTRAEGE.find((e) => e.slug === 'ueber')!;
 
 <Basis titel={eintrag.titel} beschreibung={eintrag.kurzbeschreibung} sprache={sprache}>
   <div class="py-lesestrom">
-    <Platzhalter eintrag={eintrag} sprache={sprache} />
+    <Kapitelseite eintrag={eintrag} sprache={sprache} />
   </div>
 </Basis>
