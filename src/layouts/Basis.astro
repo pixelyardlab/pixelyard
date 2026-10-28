@@ -107,8 +107,14 @@ const alternativen = [
     <meta property="og:locale" content={meta.ogLocale} />
     <meta name="twitter:card" content="summary_large_image" />
 
+    {/* Favicon aus pixelyard-marke/favicon (05.09.2026), eingebaut 28.10.2026.
+        Vier Dateien und diese Zeilen in EINEM Commit — sonst zeigt die Seite
+        ein halb getauschtes Favicon, und man sucht den Fehler im Cache.
+        favicon.svg folgt dem Systemthema; .ico trägt 16/32/48. */}
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href="/icon-512.png" type="image/png" sizes="512x512" />
     <link rel="alternate" type="application/rss+xml" title={SEITE.name} href="/rss.xml" />
 
     {/* Die zwei Schriftschnitte, die auf jeder Seite sofort sichtbar sind.
