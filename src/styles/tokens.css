@@ -73,10 +73,8 @@
    * ohne dass eine Zeile CSS danach ausgesehen hätte. */
   --py-mass-raster:   58rem;
   --py-leiste-links:  13rem;
-  /* Bleibt definiert, obwohl das Raster sie nicht mehr benutzt:
-   * src/components/Geraeteleiste.astro liegt weiterhin im Baum (ihr Inhalt
-   * wandert nach /de/aufbau/hardware/) und würde sie brauchen. */
-  --py-leiste-rechts: 14rem;
+  /* --py-leiste-rechts entfernt am 28.10.2026 — mit der Geräteleiste, die sie
+   * als einzige brauchte. */
 
   /* ---- Mass und Rhythmus ---- */
   --py-r1: 0.25rem; --py-r2: 0.5rem;  --py-r3: 0.75rem; --py-r4: 1rem;

@@ -390,7 +390,6 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
     padding-top: var(--py-r5);
     border-top: var(--py-rand) solid var(--py-line);
   }
-  .py-leiste--rechts { margin-top: var(--py-r5); }
 }
 
 /* Ab 64rem stehen sie daneben und laufen mit. `align-self: start` steht im
@@ -467,50 +466,10 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   color: var(--py-text-leise);
 }
 
-/* --- rechts: Geräte ---------------------------------------------------- */
-
-.py-leiste__geraete li { margin-bottom: var(--py-r4); }
-
-.py-leiste__rolle {
-  display: block;
-  font-size: 0.6875rem;
-  letter-spacing: 0.04em;
-  text-transform: lowercase;
-  color: var(--py-text-leise);
-  opacity: 0.85;
-}
-.py-leiste__geraete a { display: block; }
-.py-leiste__name { display: block; color: var(--py-text); }
-
-/* Abgelöste Geräte tragen keinen Link (src/lib/geraete.ts) und stehen
- * deshalb auch optisch zurück. */
-.py-leiste__geraete--alt .py-leiste__name { color: var(--py-text-leise); }
-.py-leiste__geraete--alt li { margin-bottom: var(--py-r3); }
-
-.py-leiste__beleg {
-  display: inline-block;
-  font-size: 0.6875rem;
-  margin-top: 0.15em;
-}
-
-.py-leiste__notiz {
-  margin: 0 0 var(--py-r3);
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  color: var(--py-text-leise);
-}
-
-/* Der Satz „Keine Provisionslinks" ist eine Kennzeichnung, keine Fussnote.
- * Camel als Schrift, im Hellmodus im dunkleren Ton (tokens.css) — dieselbe
- * Regel wie bei .py-werbung, nur mit umgekehrter Aussage. */
-.py-leiste__hinweis {
-  margin: 0 0 var(--py-r2);
-  padding-top: var(--py-r3);
-  border-top: var(--py-rand) solid var(--py-line);
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  color: var(--py-accent-text);
-}
+/* --- rechts: Geräte — entfernt am 28.10.2026 -------------------------
+ * Die Geräteleiste aus Commit 65caccc ist Inhalt, nicht Navigation. Ihr
+ * Inhalt steht seit Umbau Schritt 3 unter /de/aufbau/hardware/ (ohne Links,
+ * Vorlage B); Komponente, Datenliste und diese Regeln sind mitgegangen. */
 
 /* ====================================================================
  * Werbekennzeichnung am Provisionslink
@@ -1230,12 +1189,15 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
  *     Zeile, blieb der Punkt davor allein am Zeilenende stehen. Der Punkt
  *     hängt jetzt am FOLGENDEN Teil (Artikel.astro) und bricht mit ihm um. */
 .py-meta__teil { white-space: nowrap; }
-.py-meta__teil--lang { white-space: normal; }
+.py-meta__teil--lang { white-space: normal; flex-basis: 100%; }
 .py-meta__teil + .py-meta__teil::before {
   content: '·';
   color: var(--py-line);
   margin-right: 0.5em;
 }
+/* Die Schlagworte stehen immer auf eigener Zeile — ein Punkt davor trennte
+ * nichts mehr. (Nach der allgemeinen Regel, sonst gewinnt die.) */
+.py-meta__teil + .py-meta__teil--lang::before { content: none; }
 
 /* --- Einleitung einer Kapitelseite ---------------------------------- */
 .py-einleitung {

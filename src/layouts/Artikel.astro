@@ -14,6 +14,7 @@ import Basis from './Basis.astro';
 import { SEITE, texte } from '../lib/seite';
 import type { Sprache } from '../lib/seite';
 import { isoTag, lesezeit } from '../lib/artikel';
+import { szenarienZuBeitrag, SZENARIO_SEITE } from '../lib/szenarien';
 
 interface Props {
   titel: string;
@@ -38,6 +39,14 @@ const {
 const t = texte(sprache);
 const minuten = lesezeit(rohtext);
 const kanonisch = new URL(Astro.url.pathname, Astro.site).href;
+
+/* Vorlage D, Umbau Schritt 6: der Rückweg vom Beitrag zur Situation und zur
+ * Regel. Er kommt aus szenarien.ts und NICHT aus dem MDX — die drei
+ * vorhandenen Artikel bleiben unverändert (Entscheid 24.09.2026), und ein
+ * vierter bekommt den Verweis, sobald er dort eingetragen ist. */
+const slug = Astro.url.pathname.split('/').filter(Boolean).slice(2).join('/');
+const situationen = szenarienZuBeitrag(slug);
+const regeln = [...new Map(situationen.filter((x) => x.regel).map((x) => [x.regel!.ziel, x.regel!])).values()];
 
 const person = {
   '@type': 'Person',
@@ -86,9 +95,10 @@ if (faq?.length) {
     <header class="py-artikelkopf">
       {entwurf && <p><span class="py-entwurf">{t.entwurf}</span></p>}
       <h1>{titel}</h1>
-      {/* Jeder Teil trägt seinen Trennpunkt VORNE (bausteine.css, „Nacharbeiten").
-          Bricht die Zeile um, wandert der Punkt mit — vorher blieb er allein am
-          Zeilenende stehen und sah aus wie ein fehlender Eintrag. */}
+      {/* Jeder Teil trägt seinen Trennpunkt VORNE (bausteine.css, „Nacharbeiten“).
+          Die Schlagworte stehen als letzte und immer auf eigener Zeile, ohne
+          Punkt: Vorher blieb beim Umbruch ein Punkt allein am Zeilenende
+          stehen und sah aus wie ein fehlender Eintrag. */}
       <p class="py-meta">
         <span class="py-meta__eingabe" aria-hidden="true">$</span>
         <span class="py-meta__teil">{t.veroeffentlicht} <time datetime={isoTag(datum)}>{isoTag(datum)}</time></span>
@@ -96,11 +106,25 @@ if (faq?.length) {
         {aktualisiert && (
           <span class="py-meta__teil">{t.aktualisiert} <time datetime={isoTag(aktualisiert)}>{isoTag(aktualisiert)}</time></span>
         )}
+        <span class="py-meta__teil"><a href={markdownPfad}>{t.alsMarkdown}</a></span>
         {schlagworte.length > 0 && (
           <span class="py-meta__teil py-meta__teil--lang">{schlagworte.map((s) => `#${s}`).join(' ')}</span>
         )}
-        <span class="py-meta__teil"><a href={markdownPfad}>{t.alsMarkdown}</a></span>
       </p>
+      {situationen.length > 0 && (
+        <p class="py-zusammenhang">
+          Gehört zu {situationen.length === 1 ? 'der Situation' : 'den Situationen'}{' '}
+          {situationen.map((x, i) => (
+            <>{i > 0 && ' · '}<a href={`/${sprache}/${SZENARIO_SEITE}/#s-${x.id}`}>{x.titel}</a></>
+          ))}
+          {regeln.length > 0 && (
+            <>
+              {' '}— die Regel dazu:{' '}
+              {regeln.map((r, i) => <>{i > 0 && ' · '}<a href={`/${sprache}/${r.ziel}`}>{r.titel}</a></>)}
+            </>
+          )}
+        </p>
+      )}
     </header>
 
     <slot />

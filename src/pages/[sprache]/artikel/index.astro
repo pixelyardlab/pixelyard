@@ -1,21 +1,23 @@
 ---
 /* Übersicht über die Beiträge — /<sprache>/artikel/
  *
- * Die Liste ist echt: Sie kommt aus `alleArtikel()`, derselben Auswahl, die
- * auch Startseite, RSS und llms.txt benutzen. Der Bereichstext darüber fehlt
- * noch — deshalb steht der Eintrag in navigation.ts auf `teilweise` und
- * trägt weiterhin `entwurf: true`.
+ * Lesetiefe 2 für den Bereich „Die Beiträge" (Umbau Schritt 6, 28.10.2026):
+ *   1. die Zeitachse — das Rückgrat-Bild dieses Bereichs (Zielbild §2)
+ *   2. die Gruppierung nach Situation — welcher Beitrag welche Situation aus
+ *      dem Aufbau erzählt (Verzahnung, Zielbild §4)
  *
- * ⚠️ Das ist der einzige neue Eintrag, der nicht `geplant` ist. Er ist es
- * nicht, weil die Liste funktioniert — und er ist trotzdem kein `belegt`,
- * weil der Text fehlt, der sagt, wonach hier geordnet wird.
+ * Beide kommen aus Daten, nicht aus Handarbeit: die Artikel aus
+ * `alleArtikel()`, die Zuordnung aus `szenarien.ts`. Eine Situation ohne
+ * Beitrag steht trotzdem da und sagt „noch keiner — geplant“.
  */
 import Basis from '../../../layouts/Basis.astro';
 import Statusmarke from '../../../components/Statusmarke.astro';
+import Handlung from '../../../components/bauteile/Handlung.astro';
 import { SPRACHEN, texte } from '../../../lib/seite';
 import type { Sprache } from '../../../lib/seite';
-import { alleArtikel, pfadVon, isoTag } from '../../../lib/artikel';
-import { uebersichtVon } from '../../../lib/navigation';
+import { alleArtikel, pfadVon, isoTag, slugVon } from '../../../lib/artikel';
+import { uebersichtVon, GEPLANTE_BEITRAEGE, sichtbar } from '../../../lib/navigation';
+import { SZENARIEN, SZENARIO_SEITE } from '../../../lib/szenarien';
 
 export function getStaticPaths() {
   return SPRACHEN.map((sprache) => ({ params: { sprache } }));
@@ -25,6 +27,13 @@ const sprache = Astro.params.sprache as Sprache;
 const t = texte(sprache);
 const eintrag = uebersichtVon('beitrag')!;
 const artikel = await alleArtikel(sprache);
+const geplant = GEPLANTE_BEITRAEGE.filter(sichtbar);
+const markenText = { belegt: t.markeBelegt, teilweise: t.markeTeilweise, geplant: t.markeGeplant }[eintrag.status];
+
+/* Beiträge, die keiner Situation zugeordnet sind — sie stehen am Ende der
+ * Gruppierung als eigene Zeile, damit die Liste vollständig zählt. */
+const zugeordnet = new Set(SZENARIEN.flatMap((s) => s.beitraege));
+const ohneSituation = artikel.filter((a) => !zugeordnet.has(slugVon(a)));
 ---
 
 <Basis titel={eintrag.titel} beschreibung={eintrag.kurzbeschreibung} sprache={sprache}>
@@ -32,19 +41,26 @@ const artikel = await alleArtikel(sprache);
     <p class="py-meta">
       <span class="py-meta__eingabe" aria-hidden="true">$</span>
       <Statusmarke status={eintrag.status} sprache={sprache} ohneText />
-      <span>{t.markeTeilweise}</span>
-      <span class="py-meta__punkt" aria-hidden="true">·</span>
-      <span>{t.artikelZaehlung(artikel.length)}</span>
+      <span class="py-meta__teil">{markenText}</span>
+      <span class="py-meta__teil">{t.artikelZaehlung(artikel.length)}</span>
     </p>
 
     <h1>{eintrag.titel}</h1>
 
-    <p>{eintrag.kurzbeschreibung}</p>
+    <p class="py-einleitung">{eintrag.kurzbeschreibung}</p>
 
+    <p>
+      Jeder Beitrag erzählt einen Arbeitsschritt: die Messung dahinter, das Problem, an dem
+      es hing, und was ich verworfen habe. <strong>Was gebaut wurde, steht im{' '}
+      <a href={`/${sprache}/aufbau/`}>Aufbau</a>; wie man so etwas angeht, im{' '}
+      <a href={`/${sprache}/vorgehen/`}>Vorgehen</a>.</strong> Hier steht, wie es gelaufen ist.
+    </p>
+
+    <h2>Die Zeitachse</h2>
     {artikel.length === 0 ? (
       <p class="py-schlagwort">Noch kein Artikel veröffentlicht.</p>
     ) : (
-      <ul class="py-liste">
+      <ol class="py-zeitachse" reversed>
         {artikel.map((a) => (
           <li>
             <p class="py-meta">
@@ -52,7 +68,7 @@ const artikel = await alleArtikel(sprache);
               <time datetime={isoTag(a.data.datum)}>{isoTag(a.data.datum)}</time>
               {a.data.entwurf && <span class="py-entwurf">{t.entwurf}</span>}
             </p>
-            <h2><a href={pfadVon(a)}>{a.data.titel}</a></h2>
+            <h3><a href={pfadVon(a)}>{a.data.titel}</a></h3>
             <p>{a.data.beschreibung}</p>
             {a.data.schlagworte.length > 0 && (
               <p class="py-schlagwort">
@@ -63,7 +79,58 @@ const artikel = await alleArtikel(sprache);
             )}
           </li>
         ))}
-      </ul>
+        {geplant.map((e) => (
+          <li class="py-zeitachse__geplant">
+            <p class="py-meta"><span>{t.markeGeplant}</span></p>
+            <h3>{e.titel}</h3>
+          </li>
+        ))}
+      </ol>
     )}
+
+    <h2>Nach Situation</h2>
+    <p>
+      Die acht Situationen aus <a href={`/${sprache}/${SZENARIO_SEITE}/`}>Was es kann</a> — und
+      welcher Beitrag sie erzählt. <strong>Leere Plätze stehen hier mit Absicht:</strong> Sie
+      sind die Beiträge, die noch kommen, sobald es eine Messung dazu gibt.
+    </p>
+    <ul class="py-gruppen">
+      {SZENARIEN.map((s) => {
+        const beitraege = artikel.filter((a) => s.beitraege.includes(slugVon(a)));
+        return (
+          <li>
+            <p class="py-gruppen__szenario">
+              <Statusmarke status={s.status} sprache={sprache} />{' '}
+              <a href={`/${sprache}/${SZENARIO_SEITE}/#s-${s.id}`}>{s.titel}</a>
+            </p>
+            <p class="py-gruppen__beitraege">
+              {beitraege.length === 0 ? (
+                <span class="py-weiterlesen__leer">{t.nochKeiner}</span>
+              ) : (
+                beitraege.map((a, i) => <>{i > 0 && ' · '}<a href={pfadVon(a)}>{a.data.titel}</a></>)
+              )}
+            </p>
+          </li>
+        );
+      })}
+      {ohneSituation.length > 0 && (
+        <li>
+          <p class="py-gruppen__szenario">Keiner Situation zugeordnet — der Anfang</p>
+          <p class="py-gruppen__beitraege">
+            {ohneSituation.map((a, i) => <>{i > 0 && ' · '}<a href={pfadVon(a)}>{a.data.titel}</a></>)}
+          </p>
+        </li>
+      )}
+    </ul>
+
+    <Handlung>
+      <p>
+        Wenn du nur einen Beitrag liest, dann{' '}
+        <a href={`/${sprache}/artikel/drei-stille-fehler-an-einem-tag/`}>Drei stille Fehler an einem Tag</a>.
+        Er braucht keine Hardware zum Verstehen — und danach erkennst du den teuersten der
+        acht <a href={`/${sprache}/vorgehen/stolpersteine/#typ-1`}>Stolpersteine</a> auch in
+        deinem eigenen Vorhaben.
+      </p>
+    </Handlung>
   </div>
 </Basis>

@@ -52,6 +52,15 @@ export interface Eintrag {
  *   geplant    die Seite beschreibt, was noch nicht existiert („Offen")
  * ⚠️ Vorschlag von Claude, 28.10.2026 — von Cedric gegenzulesen. */
 
+/* --- Entwurfsschalter (Umbau Schritt 6, 28.10.2026) --------------------
+ * Alle Einträge stehen auf `entwurf: false`. Damit erscheinen sie in der
+ * Leiste, in Brotkrumen, Weiterlesen-Fuss, Sitemap und llms.txt, und sie
+ * tragen kein `noindex` mehr. Die 18 Platzhalter vom 24.09. sind Text
+ * geworden — keine Seite steht mehr ohne Inhalt da.
+ * ⚠️ Ein neuer Eintrag ohne Text gehört wieder auf `true`: Ohne Datei unter
+ * src/content/kapitel/ zeigt <Kapitelseite> den Platzhalter, und der soll
+ * nicht öffentlich verlinkt werden. */
+
 /* --- Die Struktur ------------------------------------------------------
  * ⚠️ Die Kurzbeschreibungen sind VORSCHLÄGE vom 24.09.2026. Sie sagen, was
  * dort hinkommt — sie behaupten nichts über das, was gebaut wurde. Wer sie
@@ -60,42 +69,42 @@ export const EINTRAEGE: Eintrag[] = [
   /* ---- Der Aufbau — was gebaut wurde ---- */
   {
     slug: 'aufbau', titel: 'Der Aufbau', bereich: 'aufbau', uebersicht: true,
-    status: 'teilweise', entwurf: true,
+    status: 'teilweise', entwurf: false,
     kurzbeschreibung: 'Was zuhause steht, in Teilen — und warum jedes Teil so und nicht anders ausfiel.',
   },
   {
     slug: 'aufbau/was-es-kann', titel: 'Was es kann', bereich: 'aufbau', bund: 'nachweis',
-    status: 'teilweise', entwurf: true,
+    status: 'teilweise', entwurf: false,
     kurzbeschreibung: 'Was der Aufbau im Alltag leistet, und woran du das ablesen kannst.',
   },
   {
     slug: 'aufbau/hardware', titel: 'Hardware', bereich: 'aufbau', bund: 'hardware',
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Die Geräte, die laufen — mit dem, was sie abgelöst haben.',
   },
   {
     slug: 'aufbau/software', titel: 'Software', bereich: 'aufbau', bund: 'software',
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Was auf den Geräten läuft, wofür — und was wieder herunterflog.',
   },
   {
     slug: 'aufbau/maschine-modelle', titel: 'Maschine und Modelle', bereich: 'aufbau', bund: 'modelle',
-    status: 'teilweise', entwurf: true,
+    status: 'teilweise', entwurf: false,
     kurzbeschreibung: 'Die Maschine für die lokale KI und die Modelle, die darauf laufen.',
   },
   {
     slug: 'aufbau/reihenfolge', titel: 'Die Reihenfolge', bereich: 'aufbau', bund: 'anfang',
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'In welcher Reihenfolge die Teile entstanden sind — und welche Reihenfolge du dir sparen kannst.',
   },
   {
     slug: 'aufbau/moeglichkeiten', titel: 'Möglichkeiten', bereich: 'aufbau', bund: 'moeglichkeiten',
-    status: 'teilweise', entwurf: true,
+    status: 'teilweise', entwurf: false,
     kurzbeschreibung: 'Was der Aufbau noch hergibt, ohne dass du etwas dazukaufst.',
   },
   {
     slug: 'aufbau/offen', titel: 'Offen', bereich: 'aufbau', bund: 'offen',
-    status: 'geplant', entwurf: true,
+    status: 'geplant', entwurf: false,
     kurzbeschreibung: 'Was nicht läuft, was ungeklärt ist und was ich schlicht noch nicht weiss.',
   },
 
@@ -105,56 +114,56 @@ export const EINTRAEGE: Eintrag[] = [
    * Doppelpflege, gegen die diese Datei gebaut ist. */
   {
     slug: 'artikel', titel: 'Die Beiträge', bereich: 'beitrag', uebersicht: true,
-    status: 'teilweise', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Alle Beiträge, neueste zuerst — wie es gelaufen ist, samt dem, was schiefging.',
   },
 
   /* ---- Das Vorgehen — wie man so etwas angeht ---- */
   {
     slug: 'vorgehen', titel: 'Das Vorgehen', bereich: 'vorgehen', uebersicht: true,
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Wie du so etwas angehst, ohne dieselben Umwege zu gehen.',
   },
   {
     slug: 'vorgehen/bevor-man-anfaengt', titel: 'Bevor du anfängst', bereich: 'vorgehen', bund: 'anfang',
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Was du klären solltest, bevor du das erste Gerät bestellst.',
   },
   {
     slug: 'vorgehen/mit-einer-ki', titel: 'Mit einer KI', bereich: 'vorgehen', bund: 'software',
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Wie eine KI beim Bauen hilft — und wo sie dir zuverlässig nicht hilft.',
   },
   {
     slug: 'vorgehen/dokumentieren', titel: 'Dokumentieren', bereich: 'vorgehen', bund: 'hardware',
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Warum das Mitschreiben zum Bauen gehört und nicht zur Nacharbeit.',
   },
   {
     slug: 'vorgehen/stolpersteine', titel: 'Stolpersteine', bereich: 'vorgehen', bund: 'nachweis',
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Fehler, die sich nicht melden, weil sie Erfolg zurückmelden.',
   },
   {
     slug: 'vorgehen/anders-machen', titel: 'Anders machen', bereich: 'vorgehen', bund: 'moeglichkeiten',
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Was ich heute anders bauen würde, und woran ich das gemerkt habe.',
   },
   {
     slug: 'vorgehen/ohne-daten', titel: 'Ohne Daten', bereich: 'vorgehen', bund: 'modelle',
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Wie du Werkzeuge nutzt, ohne deine Unterlagen aus dem Haus zu geben.',
   },
 
   /* ---- Ausserhalb der Gruppen ---- */
   {
     slug: 'prompts', titel: 'Alle Prompts', bereich: 'einzeln',
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Alle Prompts aus dem Aufbau und dem Vorgehen an einem Ort, zum Kopieren.',
   },
   {
     slug: 'ueber', titel: 'Über', bereich: 'einzeln',
-    status: 'belegt', entwurf: true,
+    status: 'belegt', entwurf: false,
     kurzbeschreibung: 'Wer hier schreibt, warum — und was hier bewusst nicht steht.',
   },
 ];

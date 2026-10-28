@@ -9,6 +9,7 @@
 import type { APIRoute } from 'astro';
 import { SEITE, SPRACHEN, texte } from '../lib/seite';
 import { alleArtikel, pfadVon, slugVon, isoTag } from '../lib/artikel';
+import { EINTRAEGE, sichtbar, pfadVon as seitenPfad } from '../lib/navigation';
 
 export const GET: APIRoute = async ({ site }) => {
   const basis = site?.href.replace(/\/$/, '') ?? '';
@@ -47,6 +48,21 @@ export const GET: APIRoute = async ({ site }) => {
         `  - Veröffentlicht: ${isoTag(a.data.datum)}${a.data.aktualisiert ? `, aktualisiert ${isoTag(a.data.aktualisiert)}` : ''}`,
       );
     }
+    zeilen.push('');
+  }
+
+  /* Die Bereiche (Umbau Schritt 6). Dieselbe Auswahl wie die Seitenleiste:
+   * Was im Bau nicht verlinkt wird, steht auch hier nicht. */
+  const bereiche: [string, string][] = [
+    ['aufbau', 'Der Aufbau — was gebaut wurde'],
+    ['vorgehen', 'Das Vorgehen — wie man so etwas angeht'],
+    ['einzeln', 'Weitere Seiten'],
+  ];
+  for (const [bereich, ueberschrift] of bereiche) {
+    const seiten = EINTRAEGE.filter((e) => e.bereich === bereich && sichtbar(e));
+    if (seiten.length === 0) continue;
+    zeilen.push(`## ${ueberschrift}`, '');
+    for (const e of seiten) zeilen.push(`- [${e.titel}](${basis}${seitenPfad(e)}): ${e.kurzbeschreibung}`);
     zeilen.push('');
   }
 

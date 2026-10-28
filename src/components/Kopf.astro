@@ -14,7 +14,9 @@ const pfad = Astro.url.pathname;
   <div class="py-huelle py-kopf__zeile">
     <Wortmarke href={istStartseite ? null : `/${sprache}/`} />
     <nav class="py-kopf__nav" aria-label="Hauptnavigation">
-      <a href={`/${sprache}/`} aria-current={pfad === `/${sprache}/` ? 'page' : undefined}>{t.artikel}</a>
+      {/* Seit Umbau Schritt 6 (28.10.2026) auf die Beitragsübersicht statt auf
+        die Startseite — vorher wäre man dort auf einem Platzhalter gelandet. */}
+      <a href={`/${sprache}/artikel/`} aria-current={pfad.startsWith(`/${sprache}/artikel/`) ? 'page' : undefined}>{t.artikel}</a>
     </nav>
     <Schalter sprache={sprache} />
   </div>
