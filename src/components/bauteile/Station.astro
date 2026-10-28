@@ -5,7 +5,10 @@
  *   art="leer" die Station entfällt — und steht trotzdem da
  */
 interface Props {
-  /** Kopfzeile, z. B. „1 · Ankommen" oder „Rückweg 2". */
+  /** Kopfzeile, z. B. „1 · Ankommen“ oder „2. Rückweg“.
+   *  ⚠️ Die Zahl VOR das Wort, nicht dahinter: Das Adressmuster der
+   *  Anonymisierungsprüfung liest ein Wort auf „-weg“ mit nachgestellter Zahl
+   *  als Strasse mit Hausnummer — zu Recht. */
   nr: string;
   art?: 'aus' | 'leer';
 }

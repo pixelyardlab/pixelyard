@@ -39,6 +39,7 @@ import Gedaechtnisse from './bauteile/Gedaechtnisse.astro';
 import Stand from './bauteile/Stand.astro';
 import Kapitelliste from './Kapitelliste.astro';
 import PromptSammlung from './bauteile/PromptSammlung.astro';
+import Kontaktadresse from './bauteile/Kontaktadresse.astro';
 import { texte, type Sprache } from '../lib/seite';
 import type { Eintrag } from '../lib/navigation';
 import { kapitelZu } from '../lib/kapitel';
@@ -55,7 +56,7 @@ const Inhalt = kapitel ? (await render(kapitel)).Content : null;
 const bausteine = {
   Erklaerung, TLDR, Prompt, Kette, Station, Szenario, Behauptung, Notizen, Notiz,
   Bauteile, Bauteil, Falle, Regeln, Regel, Stolperstein, Gegenmittel, Moeglichkeiten, Moeglichkeit,
-  Handlung, Konfig, PromptVerweis, Rueckgrat, Kreis, Gedaechtnisse, Kapitelliste, PromptSammlung,
+  Handlung, Konfig, PromptVerweis, Rueckgrat, Kreis, Gedaechtnisse, Kapitelliste, PromptSammlung, Kontaktadresse,
 };
 
 const markenText = {

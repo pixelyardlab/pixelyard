@@ -1,0 +1,13 @@
+---
+/* <Kontaktadresse> — die Mailadresse aus seite.ts, als Link.
+ *
+ * 🔑 Die Adresse steht genau EINMAL im Repo: in `SEITE.autor.kontakt`.
+ * Abschnitt 2 der Anonymisierungsprüfung sucht Werte aus seite.ts ausserhalb
+ * davon — eine zweite, hingeschriebene Fassung auf der Über-Seite hätte jeden
+ * Commit angehalten (am 28.10.2026 so gefunden). Und sie wäre eine Zahl an
+ * zwei Orten gewesen. */
+import { SEITE } from '../../lib/seite';
+const adresse = SEITE.autor.kontakt;
+---
+
+<a href={`mailto:${adresse}`}>{adresse}</a>
