@@ -1,0 +1,28 @@
+---
+/* <PromptSammlung> — alle Prompts aus prompts.ts, ausgeschrieben und
+ * kopierbar. Steht genau einmal auf der Website: unter /de/prompts/.
+ * Jeder Eintrag trägt seinen Anker (`#<id>`) und sagt, woher er kommt. */
+import Prompt from '../Prompt.astro';
+import { PROMPTS } from '../../lib/prompts';
+import { EINTRAEGE, pfadVon } from '../../lib/navigation';
+import type { Sprache } from '../../lib/seite';
+
+interface Props {
+  sprache?: Sprache;
+}
+const { sprache = 'de' } = Astro.props;
+---
+
+{PROMPTS.map((p, i) => {
+  const herkunft = EINTRAEGE.find((e) => e.slug === p.herkunft);
+  return (
+    <section class="py-promptkarte" id={p.id} aria-labelledby={`${p.id}-titel`}>
+      <h2 id={`${p.id}-titel`}><span class="py-promptkarte__nr" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span> {p.titel}</h2>
+      <p class="py-promptkarte__zweck">
+        Wofür: {p.wofuer}.
+        {herkunft && <> Steht im Zusammenhang unter <a href={pfadVon(herkunft, sprache)}>{herkunft.titel}</a>.</>}
+      </p>
+      <Prompt hinweis={p.hinweis} sprache={sprache}><div class="py-prompt__vorformatiert">{p.text}</div></Prompt>
+    </section>
+  );
+})}

@@ -149,8 +149,8 @@ export const EINTRAEGE: Eintrag[] = [
   /* ---- Ausserhalb der Gruppen ---- */
   {
     slug: 'prompts', titel: 'Alle Prompts', bereich: 'einzeln',
-    status: 'geplant', entwurf: true,
-    kurzbeschreibung: 'Alle Prompts aus den Beiträgen an einem Ort, zum Kopieren.',
+    status: 'belegt', entwurf: true,
+    kurzbeschreibung: 'Alle Prompts aus dem Aufbau und dem Vorgehen an einem Ort, zum Kopieren.',
   },
   {
     slug: 'ueber', titel: 'Über', bereich: 'einzeln',

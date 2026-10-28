@@ -1,8 +1,9 @@
 ---
-/* /<sprache>/prompts/ — Platzhalter, Schritt 1 des Umbaus (24.09.2026).
- * Titel und Kurzbeschreibung stehen in navigation.ts, nicht hier. */
+/* /<sprache>/prompts/ — die Prompt-Sammlung (Umbau Schritt 4, 28.10.2026).
+ * Titel und Kurzbeschreibung stehen in navigation.ts, der Text in
+ * src/content/kapitel/de/prompts.mdx, die Prompts selbst in prompts.ts. */
 import Basis from '../../layouts/Basis.astro';
-import Platzhalter from '../../components/Platzhalter.astro';
+import Kapitelseite from '../../components/Kapitelseite.astro';
 import { SPRACHEN } from '../../lib/seite';
 import type { Sprache } from '../../lib/seite';
 import { EINTRAEGE } from '../../lib/navigation';
@@ -17,6 +18,6 @@ const eintrag = EINTRAEGE.find((e) => e.slug === 'prompts')!;
 
 <Basis titel={eintrag.titel} beschreibung={eintrag.kurzbeschreibung} sprache={sprache}>
   <div class="py-lesestrom">
-    <Platzhalter eintrag={eintrag} sprache={sprache} />
+    <Kapitelseite eintrag={eintrag} sprache={sprache} />
   </div>
 </Basis>

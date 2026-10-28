@@ -19,10 +19,14 @@ interface Props {
   /** Setzt „Lade keine Dokumente hoch" darunter. Pflicht bei jedem Prompt
    *  zu Finanz-, Versicherungs- oder Rechtsthemen (designbrief §7d-1). */
   keinUpload?: boolean;
+  /** Eigener Hinweissatz statt des Standardsatzes — für die Prompts aus
+   *  prompts.ts, die jeweils sagen, WAS man nicht hochladen muss. */
+  hinweis?: string;
   sprache?: Sprache;
 }
-const { titel, keinUpload = false, sprache = 'de' } = Astro.props;
+const { titel, keinUpload = false, hinweis, sprache = 'de' } = Astro.props;
 const t = texte(sprache);
+const hinweisText = hinweis ?? (keinUpload ? t.keinUpload : null);
 ---
 
 <div class="py-prompt">
@@ -38,5 +42,5 @@ const t = texte(sprache);
     >{t.kopieren}</button>
   </div>
   <div class="py-prompt__text" data-py-quelle><slot /></div>
-  {keinUpload && <p class="py-prompt__hinweis">{t.keinUpload}</p>}
+  {hinweisText && <p class="py-prompt__hinweis">{hinweisText}</p>}
 </div>

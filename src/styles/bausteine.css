@@ -1243,3 +1243,18 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   line-height: 1.55;
   color: var(--py-text-leise);
 }
+
+/* --- Prompt-Sammlung (/de/prompts/) --------------------------------- */
+/* Die Prompts aus prompts.ts sind Klartext mit Zeilenumbrüchen und
+ * Einrückungen. Sie bleiben, wie sie geschrieben sind — kopiert wird über
+ * innerText, und der übernimmt die Umbrüche nur, wenn sie sichtbar sind. */
+.py-prompt__vorformatiert {
+  white-space: pre-wrap;
+  font-family: var(--py-schrift-mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+.py-promptkarte { scroll-margin-top: var(--py-r5); margin-block: var(--py-r7) 0; }
+.py-promptkarte h2 { font-size: 1.25rem; margin-block: 0 var(--py-r2); }
+.py-promptkarte__nr { color: var(--py-link); font-variant-numeric: tabular-nums; }
+.py-promptkarte__zweck { color: var(--py-text-leise); font-size: 0.9375rem; }
