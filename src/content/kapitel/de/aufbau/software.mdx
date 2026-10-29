@@ -3,119 +3,124 @@ stand: 2026-09-06
 einleitung: "Auf den Geräten laufen sechs Programme, alle frei verfügbar. Keines davon habe ich auf Anhieb richtig eingerichtet. Hier steht, wie sie jetzt laufen — und was ich dabei gelernt habe."
 ---
 
-Dasselbe Raster wie bei der Hardware: was der Dienst tut, warum er so eingerichtet ist,
-und was dabei schiefging oder beinahe schiefgegangen wäre. Am Ende stehen die zwei
-Konfigurationszeilen, auf die es bei der Sicherung und beim Ausstieg ankommt.
+Bei jedem Programm steht dasselbe wie bei der Hardware: was es für mich tut, warum ich es
+so eingerichtet habe — und wo es mich erwischt hat. Ganz unten findest du die zwei
+Einstellungen, auf die es mir am meisten ankommt: eine für die Sicherung, eine für den Tag,
+an dem ich die Software vielleicht nicht mehr will.
 
 <Bauteile>
 
 <Bauteil rolle="Grundlage" titel="TrueNAS Scale" modell="Version 25.10 · Dateisystem ZFS">
-Trägt Speicher, Snapshots und die Container für alle Dienste. Ein Datensatz pro Person
-mit eigener Grössenbeschränkung, dazu getrennte Bereiche für Anwendungsdaten und Scans.
-<Falle>Der Zuschnitt entscheidet, was ein Snapshot überhaupt erfassen kann. Ein Unterbereich, der kein eigener Datensatz ist, fällt still aus jeder Sicherungsregel heraus.</Falle>
+Darauf baut alles andere auf: der Speicher, die Snapshots und die Container, in denen die
+übrigen Dienste laufen. Jede Person hat einen eigenen Bereich mit eigener Obergrenze,
+dazu kommen getrennte Bereiche für Anwendungsdaten und Scans.
+<Falle>Wie ich die Bereiche zuschneide, entscheidet, was ein Snapshot überhaupt erfassen kann. Ein Unterordner, der kein eigener Bereich ist, fällt still aus jeder Sicherungsregel heraus — und nichts meldet sich deswegen.</Falle>
 </Bauteil>
 
 <Bauteil rolle="Fotos" titel="Immich" modell="Version 3.1 · Erkennung über OpenVINO auf der eingebauten Grafikeinheit">
-Ersetzt die Foto-Cloud vollständig: automatischer Upload vom Handy, Gesichter, Orte,
-Suche nach Bildinhalt.
-<Falle>Die Erkennung liess den Datenbankabzug von rund 12 MiB auf rund 360 MB wachsen — Faktor 30. Wer die Aufbewahrungsregel nicht mitzieht, füllt still den Speicher mit Sicherungen.</Falle>
+Damit brauche ich keine Foto-Cloud mehr: Das Handy lädt von selbst hoch, Gesichter und
+Orte werden erkannt, und ich kann nach dem suchen, was auf einem Bild zu sehen ist.
+<Falle>Nach der Erkennung war der nächtliche Datenbankabzug plötzlich rund 360 MB gross statt rund 12 MiB — dreissigmal so viel. Hätte ich die Aufbewahrungsregel nicht angepasst, hätten die Sicherungen still den Speicher gefüllt.</Falle>
 </Bauteil>
 
 <Bauteil rolle="Dokumente" titel="Paperless-ngx" modell="Version 3.0.5 · 15 Schlagworte · 10 Dokumenttypen · vier Einwurfwege">
-Texterkennung, Volltextsuche, automatische Vorschläge für Absender und Typ. Die
-Gliederung lebt in Schlagworten statt in Ordnern — ein Dokument kann zu drei Themen
-gehören.
-<Falle>Ein Schlagwort, das den Zugriff steuert, darf nie automatisch vergeben werden — sonst entscheidet ein Vorschlagsalgorithmus, wer was sieht.</Falle>
+Hier landet alles Papier: Die Texterkennung macht es durchsuchbar, und für Absender und
+Typ bekomme ich Vorschläge. Ordner gibt es keine, nur Schlagworte — so kann ein Dokument
+zu drei Themen gleichzeitig gehören.
+<Falle>Ein Schlagwort, das bestimmt, wer ein Dokument sehen darf, vergebe ich nie automatisch. Sonst entscheidet am Ende ein Vorschlag des Programms, wer was zu lesen bekommt.</Falle>
 </Bauteil>
 
 <Bauteil rolle="Sprachmodelle" titel="Ollama" modell="Modelle qwen3:8b und qwen2.5:7b · 8,42 s Ladezeit · 20,8 Token/s">
 Läuft direkt auf dem kleinen Rechner, nicht in einem Container. Cloud-Modelle und
-Websuche sind ausgeschaltet — der Dienst ist eine Vertraulichkeitsschleuse, keine
-Sparversion.
-<Falle>Der Dienst nimmt einen Zugriffsschlüssel entgegen und prüft ihn nicht. Wer ihn im Netz freigibt und sich auf den Schlüssel verlässt, hat keine Zugangskontrolle, sondern eine Höflichkeitsform.</Falle>
+Websuche habe ich ausgeschaltet: Für mich ist dieser Dienst eine Schleuse für alles, was
+das Haus nicht verlassen soll — keine Sparversion eines grossen Modells.
+<Falle>Der Dienst nimmt einen Zugriffsschlüssel entgegen, prüft ihn aber nicht. Wer ihn im Netz freigibt und sich auf diesen Schlüssel verlässt, hat keine Zugangskontrolle, sondern eine Höflichkeitsform.</Falle>
 </Bauteil>
 
 <Bauteil rolle="Abläufe" titel="n8n" modell="Version 2.36 · Ausführung in getrennten Prozessen · Schutz gegen Anfragefälschung eingeschaltet">
-Die Werkbank für alles, was regelmässig oder auf ein Ereignis hin passieren soll:
-Fristen, Erinnerungen, Übergaben zwischen Diensten.
-<Falle>Ein Ablauf, den man einem Sprachmodell als Werkzeug freigibt, wird vom Modell ausgelöst, nicht von einem Menschen. Was etwas verändert, braucht eine enge Positivliste oder eine Rückfrage.</Falle>
+Meine Werkbank für alles, was regelmässig oder auf ein Ereignis hin passieren soll:
+Fristen, Erinnerungen, Übergaben von einem Dienst zum nächsten.
+<Falle>Sobald ich einen Ablauf einem Sprachmodell als Werkzeug freigebe, löst ihn das Modell aus, nicht mehr ich. Alles, was dabei etwas verändert, braucht deshalb eine enge Liste dessen, was erlaubt ist — oder eine Rückfrage an mich.</Falle>
 </Bauteil>
 
 <Bauteil rolle="Ausser Haus" titel="Verschlüsselte Kopie" modell="Backblaze B2 · client-seitig verschlüsselt · sieben Aufgaben, nachts">
-Rund zwei bis drei Franken im Monat. Die Verschlüsselung passiert zu Hause — der
-Anbieter bekommt Datenblöcke, keine Dateien.
-<Falle>Der Übertragungsmodus ist Abgleich, nicht Kopie. Wer eine Datei zu Hause löscht, löscht sie damit auch dort. Das ist gewollt — aber man muss es wissen.</Falle>
+Kostet mich zwei bis drei Franken im Monat. Verschlüsselt wird zu Hause, bevor etwas
+hinausgeht — der Anbieter bekommt Datenblöcke, keine Dateien.
+<Falle>Die Übertragung gleicht ab, statt nur zu kopieren. Lösche ich zu Hause eine Datei, verschwindet sie auch dort. Das will ich so — aber man muss es wissen, bevor man sich auf diese Kopie verlässt.</Falle>
 </Bauteil>
 
 </Bauteile>
 
 <Konfig titel="Ein Datenbankabzug, der nicht still scheitern kann">
 
-Die Form des nächtlichen Abzugs. Jeder der fünf Schritte steht für einen Fehler, der
-sonst grün durchläuft — dieselben fünf, die der Prompt [„Das eigene Backup gegen sechs
-Fragen prüfen“](/de/prompts/#backup-pruefen) abfragt.
+So sieht mein nächtlicher Abzug in der Form aus. Jeder der fünf Schritte fängt einen
+Fehler ab, der sonst grün durchlaufen würde — dieselben, die der Prompt [„Das eigene
+Backup gegen sechs Fragen prüfen“](/de/prompts/#backup-pruefen) mit dir durchgeht.
 
 ```bash
 #!/usr/bin/env bash
 # Nächtlicher Datenbankabzug — die Form, nicht das Original.
-set -euo pipefail          # bricht ab, wenn IRGENDEIN Glied scheitert,
-                           # nicht nur das letzte in der Kette
+set -euo pipefail          # bricht ab, sobald IRGENDEIN Glied scheitert,
+                           # nicht erst, wenn das letzte in der Kette scheitert
 
 ZIEL="<abzugsordner>"
 NAME="<dienst>-$(date +%F).sql.gz"
 MINDEST_BYTES=<untergrenze>   # aus den bisherigen Abzügen ableiten
 GENERATIONEN=7
 
-# 1. In eine .part-Datei schreiben — der endgültige Name kommt zuletzt
+# 1. Zuerst in eine .part-Datei schreiben — den richtigen Namen gibt es zuletzt
 docker exec <datenbank-container> pg_dump -U <benutzer> <datenbank> \
   | gzip > "$ZIEL/$NAME.part"
 
-# 2. Einmal vollständig lesen: ein halbes Archiv fällt hier auf,
-#    nicht erst beim Wiederherstellen
+# 2. Einmal ganz durchlesen: Ein halbes Archiv fällt hier auf,
+#    nicht erst am Tag, an dem man es braucht
 gzip -t "$ZIEL/$NAME.part"
 
-# 3. Mindestgrösse: ein leerer Abzug ist auch ein gültiges Archiv
+# 3. Mindestgrösse: Auch ein leerer Abzug ist ein gültiges Archiv
 groesse=$(stat -c %s "$ZIEL/$NAME.part")
 if [ "$groesse" -lt "$MINDEST_BYTES" ]; then
   echo "Abzug zu klein: $groesse Bytes" >&2
   exit 1
 fi
 
-# 4. Erst jetzt der endgültige Name — mv im selben Dateisystem ist atomar
+# 4. Erst jetzt der richtige Name — mv im selben Dateisystem passiert auf einen Schlag
 mv "$ZIEL/$NAME.part" "$ZIEL/$NAME"
 
 # 5. Sieben Generationen behalten
 ls -1t "$ZIEL"/<dienst>-*.sql.gz | tail -n +$((GENERATIONEN + 1)) | xargs -r rm --
 ```
 
-⚠️ Ein Probelauf dieses Skripts verbraucht eine Generation. Und was es nicht kann:
-melden, dass es **gar nicht gelaufen** ist. Dafür braucht es einen zweiten Blick von
-aussen — die Zählung, ob der Abzug von heute überhaupt da ist.
+Zwei Dinge solltest du dazu wissen. Ein Probelauf verbraucht eine der sieben
+Generationen. Und das Skript kann eines nicht: melden, dass es **gar nicht gelaufen** ist.
+Dafür braucht es einen zweiten Blick von aussen, der einfach nachzählt, ob der Abzug von
+heute da ist.
 
 </Konfig>
 
 <Konfig titel="Die Zeile, die das Archiv ohne die Software lesbar hält" id="dateibaum">
 
-Paperless-ngx legt Dokumente sonst unter internen Nummern ab. Diese eine Einstellung
-macht daraus einen Baum aus Absender, Jahr und Titel — den ein Mensch auch dann noch
-versteht, wenn die Software längst weg ist.
+Ohne diese Einstellung legt Paperless-ngx die Dokumente unter internen Nummern ab. Mit ihr
+entsteht ein Baum aus Absender, Jahr und Titel — in dem sich auch dann noch jemand
+zurechtfindet, wenn es das Programm längst nicht mehr gibt.
 
 ```text
 PAPERLESS_FILENAME_FORMAT={{ correspondent }}/{{ created_year }}/{{ title }}
 ```
 
 Gesetzt wird sie als Umgebungsvariable des Containers. Laut Dokumentation gilt sie für
-neue Ablagen; bereits abgelegte Dokumente zieht der mitgelieferte Befehl
-`document_renamer` nach. **Danach einmal in den Ordner schauen**, ob der Baum wirklich so
-aussieht — die Einstellung zu setzen ist nicht dasselbe wie ihre Wirkung gesehen zu haben.
+neue Ablagen; für die schon abgelegten Dokumente gibt es den mitgelieferten Befehl
+`document_renamer`. Schau danach einmal selbst in den Ordner, ob der Baum wirklich so
+aussieht — eine Einstellung zu setzen ist noch nicht dasselbe, wie ihre Wirkung gesehen zu
+haben.
 
 </Konfig>
 
 <Handlung>
 
-Zähl für jeden Datenbereich auf deinem Speicher nach, ob es eine Sicherungsaufgabe gibt —
-**auch für die, die erst nach dem Einrichten dazugekommen sind.** Das ist der Fehler, der
-hier drei Wochen lang unbemerkt blieb. Danach den ganzen Ablauf gegen sechs Fragen:
+Nimm dir zehn Minuten und zähl auf deinem Speicher nach, ob es für jeden Datenbereich eine
+Sicherungsaufgabe gibt — auch für die, die erst nach dem Einrichten dazugekommen sind.
+Genau das ist mir drei Wochen lang durchgerutscht. Danach gehst du den ganzen Ablauf mit
+diesem Prompt durch:
 
 <PromptVerweis id="backup-pruefen" />
 

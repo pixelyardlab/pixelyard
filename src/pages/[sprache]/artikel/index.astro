@@ -50,13 +50,13 @@ const ohneSituation = artikel.filter((a) => !zugeordnet.has(slugVon(a)));
     <p class="py-einleitung">{eintrag.kurzbeschreibung}</p>
 
     <p>
-      Jeder Beitrag erzählt einen Arbeitsschritt: die Messung dahinter, das Problem, an dem
-      es hing, und was ich verworfen habe. <strong>Was gebaut wurde, steht im{' '}
-      <a href={`/${sprache}/aufbau/`}>Aufbau</a>; wie man so etwas angeht, im{' '}
-      <a href={`/${sprache}/vorgehen/`}>Vorgehen</a>.</strong> Hier steht, wie es gelaufen ist.
+      Hier erzähle ich, wie es gelaufen ist — jeweils ein Arbeitsschritt, mit der Messung
+      dahinter, dem Problem, an dem ich hing, und dem, was ich verworfen habe. Was am Ende
+      dasteht, findest du im <a href={`/${sprache}/aufbau/`}>Aufbau</a>; wie du so etwas
+      selbst angehst, im <a href={`/${sprache}/vorgehen/`}>Vorgehen</a>.
     </p>
 
-    <h2>Die Zeitachse</h2>
+    <h2>Der Reihe nach</h2>
     {artikel.length === 0 ? (
       <p class="py-schlagwort">Noch kein Artikel veröffentlicht.</p>
     ) : (
@@ -88,11 +88,11 @@ const ohneSituation = artikel.filter((a) => !zugeordnet.has(slugVon(a)));
       </ol>
     )}
 
-    <h2>Nach Situation</h2>
+    <h2>Welcher Beitrag zu welcher Situation gehört</h2>
     <p>
-      Die acht Situationen aus <a href={`/${sprache}/${SZENARIO_SEITE}/`}>Was es kann</a> — und
-      welcher Beitrag sie erzählt. <strong>Leere Plätze stehen hier mit Absicht:</strong> Sie
-      sind die Beiträge, die noch kommen, sobald es eine Messung dazu gibt.
+      Zu jeder der acht Situationen aus <a href={`/${sprache}/${SZENARIO_SEITE}/`}>Was es kann</a>{' '}
+      gehört irgendwann ein Beitrag. Wo noch keiner steht, fehlt mir noch die Messung dazu —
+      die leeren Plätze lasse ich bewusst stehen, damit du siehst, was noch kommt.
     </p>
     <ul class="py-gruppen">
       {SZENARIEN.map((s) => {
@@ -125,7 +125,7 @@ const ohneSituation = artikel.filter((a) => !zugeordnet.has(slugVon(a)));
 
     <Handlung>
       <p>
-        Wenn du nur einen Beitrag liest, dann{' '}
+        Wenn du nur einen einzigen liest, dann{' '}
         <a href={`/${sprache}/artikel/drei-stille-fehler-an-einem-tag/`}>Drei stille Fehler an einem Tag</a>.
         Er braucht keine Hardware zum Verstehen — und danach erkennst du den teuersten der
         acht <a href={`/${sprache}/vorgehen/stolpersteine/#typ-1`}>Stolpersteine</a> auch in

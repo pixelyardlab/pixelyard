@@ -88,61 +88,62 @@ const schema = {
     </dl>
     <p class="py-zahlen__stand">Stand September 2026. Woher jede Zahl kommt, steht im <a href={tueren.aufbau.pfad ?? `/${sprache}/`}>Aufbau</a>.</p>
 
-    <h2>Vier Dinge, die du anderswo nicht bekommst</h2>
+    <h2>Was hier anders ist</h2>
     <p>
-      Es gibt tausend Anleitungen für so etwas. Die meisten erzählen die
-      Herstellerdokumentation nach und verdienen an den Links darunter.{' '}
-      <strong>Diese hier tut beides nicht.</strong>
+      Anleitungen für so etwas gibt es viele. Die meisten erzählen nach, was ohnehin
+      beim Hersteller steht, und verdienen an den Links darunter. Ich wollte etwas
+      anderes aufschreiben: was ich tatsächlich gemessen, falsch gemacht und wieder
+      geradegebogen habe.
     </p>
 
     <Bauteile>
       <Bauteil rolle="01" titel="Jede Zahl hat ein Datum">
-        <p>Keine Schätzung wird als Messung verkauft. Wo etwas aus Überlegung statt aus einem Test stammt, steht es dabei — auch wenn es die Aussage schwächer macht.</p>
+        <p>Wenn ich etwas nur geschätzt habe, steht das dabei — auch wenn die Aussage dadurch schwächer klingt. Du sollst wissen, worauf du dich verlassen kannst.</p>
       </Bauteil>
       <Bauteil rolle="02" titel="Die Fehler stehen drin">
-        <p>Acht Arten, wie es schiefgeht, alle selbst erlebt — inklusive der Stellen, die heute noch offen sind. Ein Bauplan mit sichtbaren Lücken ist mehr wert als eine Erfolgsmeldung.</p>
+        <p>Acht Arten, wie es bei mir schiefging, und die Stellen, die heute noch offen sind. Aus den Fehlern lernst du mehr als aus meinen Erfolgen.</p>
       </Bauteil>
       <Bauteil rolle="03" titel="Keine Provisionslinks">
-        <p>Modellbezeichnungen und Preise stehen da, damit du nachrechnen kannst. Verlinkt wird nichts. Was hier steht, soll allein davon tragen, wie es begründet ist.</p>
+        <p>Modelle und Preise stehen da, damit du nachrechnen kannst. Verlinkt ist nichts, und ich verdiene an nichts davon. Was hier steht, muss allein durch seine Begründung überzeugen.</p>
       </Bauteil>
       <Bauteil rolle="04" titel="Auch das Vorgehen, nicht nur das Ergebnis">
-        <p>Wie man so ein Vorhaben plant, mit einer KI zusammenarbeitet und so dokumentiert, dass es in einem halben Jahr noch trägt. <strong>Der Teil, den fast niemand veröffentlicht.</strong></p>
+        <p>Wie ich so ein Vorhaben geplant, mit einer KI gearbeitet und alles so aufgeschrieben habe, dass ich es in einem halben Jahr noch verstehe. Das lässt sich auf fast jedes Vorhaben übertragen.</p>
       </Bauteil>
     </Bauteile>
 
     <h2>Wo willst du anfangen?</h2>
     <p>
-      Dasselbe Vorhaben aus drei Blickwinkeln. <strong>Sie greifen ineinander:</strong>{' '}
-      Jede Situation im Aufbau verweist auf den Beitrag, der sie erzählt, und auf die
-      Regel, die daraus geworden ist.
+      Drei Wege durch dasselbe Projekt — nimm den, der zu deiner Frage passt. Sie sind
+      miteinander verknüpft: Wo du auch einsteigst, findest du am Ende jeder Seite den
+      Weg zu den anderen beiden.
     </p>
 
     <ul class="py-tueren py-breit">
       <li>
         <p class="py-tueren__nr">Bereich 1</p>
         <h3>{tueren.aufbau.pfad ? <a href={tueren.aufbau.pfad}>{tueren.aufbau.titel}</a> : tueren.aufbau.titel}</h3>
-        <p><strong>Was das Ding kann</strong> — acht Situationen aus einem normalen Tag, dazu jedes Gerät mit Preis und jeder Dienst mit seiner Falle.</p>
+        <p>Was bei mir zuhause steht und was es im Alltag tut — acht ganz gewöhnliche Momente, jedes Gerät mit Preis, jedes Programm mit der Stelle, an der es mich erwischt hat.</p>
         <p class="py-tueren__fuer">Für dich, wenn du nachbauen oder nachrechnen willst</p>
       </li>
       <li>
         <p class="py-tueren__nr">Bereich 2</p>
         <h3>{tueren.beitrag.pfad ? <a href={tueren.beitrag.pfad}>{tueren.beitrag.titel}</a> : tueren.beitrag.titel}</h3>
-        <p><strong>Wie es gelaufen ist</strong> — ein Arbeitsschritt pro Text, mit der Messung dahinter und dem Problem, an dem es hing.</p>
+        <p>Wie es gelaufen ist, Schritt für Schritt erzählt — mit der Messung dahinter und dem Problem, an dem ich gerade hing.</p>
         <p class="py-tueren__fuer">Für dich, wenn du an derselben Stelle stehst</p>
       </li>
       <li>
         <p class="py-tueren__nr">Bereich 3</p>
         <h3>{tueren.vorgehen.pfad ? <a href={tueren.vorgehen.pfad}>{tueren.vorgehen.titel}</a> : tueren.vorgehen.titel}</h3>
-        <p><strong>Wie man es angeht</strong> — planen, mit einer KI zusammenarbeiten, sauber dokumentieren, acht Stolpersteine nach Typ. Hier steht bewusst keine Konfiguration.</p>
+        <p>Wie man so etwas angeht: planen, mit einer KI arbeiten, aufschreiben — und die acht Stolpersteine, über die ich gefallen bin. Ganz ohne Technik.</p>
         <p class="py-tueren__fuer">Für dich, wenn du irgendein Vorhaben planst — auch eines ohne einen einzigen Server</p>
       </li>
     </ul>
 
     <h2>Der erste Schritt kostet nichts</h2>
     <p>
-      Du brauchst keine Hardware, um anzufangen — du brauchst einen Plan, der deine eigenen
-      Annahmen aufdeckt. <strong>Kopier diesen Text in die KI deiner Wahl</strong> und
-      beschreib ihr, was du vorhast. Die letzte Zeile ist die wichtigste.
+      Für den Anfang brauchst du kein Gerät, sondern einen Plan, der deine eigenen
+      Annahmen auf den Tisch legt. Kopier diesen Text in die KI deiner Wahl und erzähl
+      ihr, was du vorhast. Achte auf die letzte Zeile — sie ist die wichtigste.
     </p>
     <Prompt titel={`$ ${erster.titel}`} hinweis={erster.hinweis} sprache={sprache}><div class="py-prompt__vorformatiert">{erster.text}</div></Prompt>
     <p>
@@ -150,7 +151,7 @@ const schema = {
       <a href={`/${sprache}/prompts/`}>alle Prompts an einem Ort</a>.
     </p>
 
-    <h2>Was hier eigentlich passiert</h2>
+    <h2>Was im Hintergrund passiert</h2>
     <p>
       Jede Situation im Haus läuft über dieselben sechs Stationen — ob es um ein Foto
       geht, einen Brief oder eine Frage an die eigenen Unterlagen. <strong>Fünf davon
@@ -168,9 +169,9 @@ const schema = {
 
     <h2>Neu hier? Der Fünf-Minuten-Weg</h2>
     <p>
-      Drei Seiten, in dieser Reihenfolge. Danach weisst du, ob das Thema etwas für dich
-      ist — <strong>und hast bereits eine Entscheidung getroffen, die dir später Geld
-      spart.</strong>
+      Wenn du nur fünf Minuten hast: diese drei Seiten, in dieser Reihenfolge. Danach
+      weisst du, ob das Thema etwas für dich ist — und hast bereits eine Entscheidung
+      getroffen, die dir später Geld spart.
     </p>
     <ol class="py-weg">
       <li>

@@ -5,70 +5,76 @@ einleitung: "Eine KI, die zuhause läuft und nichts nach draussen schickt — da
 
 ## Der Arbeitsspeicher entscheidet, nicht der Prozessor
 
-Bei lokalen Sprachmodellen ist die einzige Zahl, die wirklich zählt, der **verfügbare
-Arbeitsspeicher**. Er entscheidet, welches Modell überhaupt hineinpasst — und wie viel
-Text es am Stück lesen kann. Alles andere bestimmt nur, wie schnell es geht.
+Das war für mich die wichtigste Erkenntnis, bevor ich überhaupt etwas ausprobiert habe:
+Bei lokalen Sprachmodellen zählt eine einzige Zahl wirklich, nämlich der **verfügbare
+Arbeitsspeicher**. Er bestimmt, welches Modell überhaupt hineinpasst und wie viel Text es
+am Stück lesen kann. Alles andere entscheidet nur, wie schnell es geht.
 
 <Bauteile>
 
-<Bauteil rolle="Heute · 16 GB" titel="Was tatsächlich läuft" modell="Zwei Modelle der 7–8-Milliarden-Klasse · 8,42 s bis zur Antwort · 20,8 Token/s">
-Reicht für: Schlagworte für eingescannte Dokumente vorschlagen, Texte zusammenfassen,
-umformulieren, übersetzen, kurze Fragen beantworten. **Alles, wo der Inhalt das Haus
-nicht verlassen soll und die Aufgabe klein ist.**
-<Falle marke="Die drei Grenzen, ehrlich">Vier interessante Modelle sind bei 16 GB nicht lauffähig. Die Anwendung war auf eine kurze Kontextlänge begrenzt — für ernsthafte Werkzeugnutzung werden mindestens 32k empfohlen. Und über die Programmierschnittstelle gibt es kein Zwischenspeichern des Kontexts: Bei jeder Anfrage geht der volle Text neu über die Leitung.</Falle>
+<Bauteil rolle="Heute · 16 GB" titel="Was bei mir tatsächlich läuft" modell="Zwei Modelle der 7–8-Milliarden-Klasse · 8,42 s bis zur Antwort · 20,8 Token/s">
+Das reicht mir für kleine Aufgaben, bei denen der Inhalt das Haus nicht verlassen soll:
+Schlagworte für eingescannte Briefe vorschlagen, Texte zusammenfassen, umformulieren,
+übersetzen, kurze Fragen beantworten.
+<Falle marke="Wo ich an die Grenze gestossen bin">Vier Modelle, die ich gern ausprobiert hätte, laufen mit 16 GB gar nicht. Die Anwendung liess nur kurze Texte am Stück zu — für ernsthafte Arbeit mit Werkzeugen werden mindestens 32k empfohlen. Und über die Programmierschnittstelle wird der Text nicht zwischengespeichert: Bei jeder Anfrage geht er vollständig neu über die Leitung.</Falle>
 </Bauteil>
 
 <Bauteil rolle="Die Rechnung" titel="Wie viel Speicher ein Modell wirklich braucht">
-**Faustregel bei 4-Bit-Quantisierung: rund 0,6 GB pro Milliarde Parameter.** Ein
-8-Milliarden-Modell belegt also etwa 5 GB, ein 30-Milliarden-Modell etwa 18 GB, ein
-70-Milliarden-Modell etwa 42 GB.
+Als Faustregel bei 4-Bit-Quantisierung habe ich mir gemerkt: **rund 0,6 GB pro Milliarde
+Parameter.** Ein 8-Milliarden-Modell belegt also etwa 5 GB, ein 30-Milliarden-Modell etwa
+18 GB, ein 70-Milliarden-Modell etwa 42 GB.
 
-Dazu kommen **zwei Posten, die fast alle vergessen:** der Kontextspeicher — er wächst mit
-der Textlänge und kostet bei 32k je nach Modell ein bis zwei Gigabyte — und das System
-selbst, das auf einem Mac vier bis sechs Gigabyte für sich behält.
-<Falle marke="Und der Dämpfer">macOS gibt der Grafikeinheit standardmässig nur einen Teil des Speichers. Von 16 GB bleiben in der Praxis rund zehn. **Wer den Modellbedarf gegen die aufgedruckte Zahl rechnet, rechnet zu gross.**</Falle>
+Dazu kommen zwei Posten, die ich selbst zuerst vergessen habe: der Speicher für den Text,
+den das Modell gerade liest — bei 32k je nach Modell ein bis zwei Gigabyte —, und das
+System selbst, das auf einem Mac vier bis sechs Gigabyte für sich behält.
+<Falle marke="Und dann noch das">macOS gibt der Grafikeinheit standardmässig nur einen Teil des Speichers. Von 16 GB bleiben in der Praxis rund zehn. Wer den Bedarf eines Modells gegen die Zahl auf der Verpackung rechnet, rechnet zu grosszügig.</Falle>
 </Bauteil>
 
 </Bauteile>
 
-## Was die nächste Stufe bringt
+## Was die nächste Stufe bringen würde
+
+Die erste Zeile habe ich gemessen, sie steht bei mir im Haus. Die drei anderen sind
+**gerechnet, nicht gemessen** — und die Preise sind ein Angebotsstand von Ende August 2026,
+der schnell altert.
 
 <div class="py-tabelle">
 
 | Arbeitsspeicher | Was hineinpasst | Was dadurch neu möglich wird | Preis |
 |---|---|---|---|
-| **16 GB** · heute im Einsatz | 7–8 Milliarden bequem, 14 Milliarden knapp. Kurzer Kontext. | Vorschläge, Zusammenfassungen, Übersetzungen. **Ein Modell zur Zeit.** | CHF 589 |
-| **24 GB** | 14 Milliarden bequem, 24 knapp. **Kontext ab 32k realistisch.** | **Der eigentliche Sprung — und er kommt nicht von der Modellgrösse, sondern vom Kontext:** Erst ab hier kann ein lokales Modell Werkzeuge bedienen und Abläufe steuern, statt nur Text zu erzeugen. | CHF 1'299 |
-| **36 GB** | 30-Milliarden-Klasse bequem, langer Kontext. | Fragen an die eigenen Unterlagen mit brauchbarer Qualität. **Suchmodell und Sprachmodell gleichzeitig geladen** — Dokumentensuche ohne Nachladen zwischen den Schritten. | CHF 2'499 |
-| **96 GB** | 70-Milliarden-Klasse, oder **mehrere Modelle nebeneinander**. | Lange Dokumente am Stück. Sprache, Einbettung und Bild gleichzeitig im Speicher. Qualität, die für die meisten Alltagsaufgaben nicht mehr spürbar hinter einem grossen Cloud-Modell zurückbleibt. | CHF 5'499 |
+| **16 GB** · bei mir im Einsatz | 7–8 Milliarden bequem, 14 Milliarden knapp. Kurzer Kontext. | Vorschläge, Zusammenfassungen, Übersetzungen. **Ein Modell zur Zeit.** | CHF 589 |
+| **24 GB** | 14 Milliarden bequem, 24 knapp. **Kontext ab 32k realistisch.** | **Hier liegt der eigentliche Sprung — und er kommt nicht von der Modellgrösse, sondern vom Kontext:** Erst ab hier kann ein lokales Modell Werkzeuge bedienen und Abläufe steuern, statt nur Text zu schreiben. | CHF 1'299 |
+| **36 GB** | 30-Milliarden-Klasse bequem, langer Kontext. | Fragen an die eigenen Unterlagen in brauchbarer Qualität. **Suchmodell und Sprachmodell gleichzeitig geladen** — ohne Nachladen zwischen den Schritten. | CHF 2'499 |
+| **96 GB** | 70-Milliarden-Klasse, oder **mehrere Modelle nebeneinander**. | Lange Dokumente am Stück. Sprache, Einbettung und Bild gleichzeitig im Speicher. Für die meisten Alltagsaufgaben kaum noch spürbar hinter einem grossen Cloud-Modell. | CHF 5'499 |
 
 </div>
 
 <Notizen>
-  <Notiz>**Die Zahlen in den ersten drei Spalten sind gerechnet, nicht gemessen.** Gemessen ist nur die erste Zeile — sie steht hier im Haus. Die Preise sind ein Angebotsstand von Ende August 2026 und altern schnell.</Notiz>
-  <Notiz merksatz="Ein Argument fürs grosszügige Kaufen — aber keines fürs frühe.">**Unified Memory ist nicht aufrüstbar.** Man kauft die Entscheidung genau einmal, und zwar beim Gerätekauf.</Notiz>
-  <Notiz>**Die Zahl, die den Entscheid ehrlich macht:** Die 96-GB-Maschine kostet **CHF 5'499** — mehr als der gesamte bisherige Aufbau samt NAS, Platten, Netz und USV zusammen. Selbst die 36-GB-Maschine kostet zwei Drittel davon.</Notiz>
+  <Notiz merksatz="Ein Argument fürs grosszügige Kaufen — aber keines fürs frühe.">Diesen Speicher kann man nicht nachrüsten. Die Entscheidung fällt genau einmal, beim Kauf.</Notiz>
+  <Notiz>Die Zahl, die mich am meisten ernüchtert hat: Die 96-GB-Maschine kostet **CHF 5'499** — mehr als mein ganzer bisheriger Aufbau mit NAS, Platten, Netz und USV zusammen. Selbst die 36-GB-Maschine kostet zwei Drittel davon.</Notiz>
 </Notizen>
 
 ## Rechnet sich das gegen ein Cloud-Modell? Fast nie.
 
-Wer nachrechnet, wie viele Anfragen an ein grosses Modell man für CHF 5'499 stellen
-kann, kommt auf Jahre. **Ein lokales Modell kauft man nicht, weil es billiger ist —
-sondern weil der Inhalt das Haus nicht verlassen soll.** Verträge, Vorsorge,
-Gesundheitsunterlagen, Familienfotos: Dort ist die Frage nicht der Preis pro Anfrage,
-sondern wer den Text zu sehen bekommt.
+Rechne nach, wie viele Anfragen an ein grosses Modell du für CHF 5'499 stellen kannst — du
+kommst auf Jahre. Ein lokales Modell kaufe ich also nicht, weil es billiger wäre, sondern
+weil der Inhalt das Haus nicht verlassen soll. Bei Verträgen, Vorsorge,
+Gesundheitsunterlagen oder Familienfotos ist die Frage nicht der Preis pro Anfrage, sondern
+wer den Text zu sehen bekommt.
 
-Deshalb steht auch hier ein **Auslöser statt eines Termins:** Gekauft wird, wenn ein
-echter, laufender Arbeitsablauf nachweislich am Speicher scheitert — nicht, wenn ein
-neues Gerät erscheint. Solange kein einziger Ablauf existiert, ist unbekannt, ob 24, 36
-oder 96 GB nötig wären. <span class="py-merksatz">Hardware zu kaufen, bevor die
-Software-Entscheide stehen, ist die teuerste Art, ein Konzeptproblem zu verschieben.</span>
+Deshalb habe ich mir auch hier einen Auslöser gesetzt statt eines Termins: Ich kaufe erst,
+wenn ein echter, laufender Ablauf nachweislich am Speicher scheitert — nicht, wenn ein neues
+Gerät herauskommt. Solange es noch keinen einzigen solchen Ablauf gibt, weiss ich schlicht
+nicht, ob 24, 36 oder 96 GB nötig wären. <span class="py-merksatz">Hardware zu kaufen,
+bevor die Software-Entscheide stehen, ist die teuerste Art, ein Konzeptproblem zu
+verschieben.</span>
 
 <Handlung>
 
-Bevor du eine Maschine kaufst: Schreib die eine Aufgabe auf, die das lokale Modell
-erledigen soll, so konkret wie möglich. Dann rechne mit diesem Prompt nach, was davon in
-deinen Speicher passt — und vor allem, was **nicht.**
+Bevor du eine Maschine kaufst: Schreib die eine Aufgabe auf, die dein lokales Modell
+erledigen soll, so konkret wie möglich — „Briefe nach Absender sortieren“, nicht „KI zu
+Hause“. Dann rechne mit diesem Prompt nach, was davon in deinen Speicher passt und vor
+allem, was **nicht**:
 
 <PromptVerweis id="modell-waehlen" />
 
