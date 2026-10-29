@@ -83,6 +83,40 @@
   --py-rand: 1px;
 }
 
+/* ---- Grosser Bildschirm (Entscheid 29.10.2026) -------------------------
+ * Die Seite wird vor allem am Rechner gelesen, an 20- bis 27-Zoll-Schirmen.
+ * Bis zum 29.10. stand sie dort in einer Hülle von 58rem — auf einem
+ * 27-Zoll-Schirm ein schmaler Streifen in der Mitte, und die Sechser-Kette
+ * quetschte sich in die Lesespalte von 34rem („Texterkennu…“).
+ *
+ * Zwei Stufen, beide über die Breite des Fensters, nicht über das Gerät:
+ *   ab 80rem  (1280 px): breitere Hülle, breitere Lesespalte, breite Elemente
+ *                         nutzen die ganze Mitte
+ *   ab 100rem (1600 px): dazu eine Stufe grössere Schrift (18px). Alle Masse
+ *                         stehen in rem und wachsen deshalb mit.
+ *   ab 140rem (2240 px): 20px — der 27-Zoll-Schirm mit 2560 px.
+ *
+ * Die Lesespalte bleibt bei rund 70 Zeichen — breiter wird nicht der Text,
+ * sondern alles, was kein Fliesstext ist: Ketten, Karten, Tabellen, Bilder.
+ * Das Handy bleibt bei den Werten oben; es soll funktionieren, nicht glänzen. */
+@media (min-width: 80rem) {
+  :root {
+    --py-mass:          38rem;
+    --py-mass-raster:   76rem;
+    --py-leiste-links:  14rem;
+    /* Mitte = 76 − 14 − 2 (Spalt) = 60rem. Breite Elemente füllen sie ganz. */
+    --py-mass-breit:    60rem;
+  }
+}
+@media (min-width: 100rem) {
+  html { font-size: 112.5%; }   /* 18px statt 16px — der Rest folgt in rem */
+}
+/* 27 Zoll mit 2560 px Breite: noch eine Stufe. Ohne sie stand die Seite dort
+ * als Streifen von gut der Hälfte der Breite da, mit 18px-Schrift. */
+@media (min-width: 140rem) {
+  html { font-size: 125%; }     /* 20px */
+}
+
 /* Dark Mode. Beide Wege sind noetig:
  * - ohne data-theme entscheidet die Systemeinstellung
  * - mit data-theme gewinnt die Wahl des Lesers, in beide Richtungen */

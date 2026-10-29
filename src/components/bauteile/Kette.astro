@@ -16,6 +16,10 @@ interface Props {
 const { beschriftung = 'Die sechs Stationen' } = Astro.props;
 ---
 
-<ol class="py-kette py-breit" aria-label={beschriftung}>
-  <slot />
-</ol>
+{/* Die Hülle trägt die Container-Abfrage: Die Spaltenzahl richtet sich nach
+    der Breite, die die Kette wirklich hat (bausteine.css). */}
+<div class="py-kette-huelle py-breit">
+  <ol class="py-kette" aria-label={beschriftung}>
+    <slot />
+  </ol>
+</div>

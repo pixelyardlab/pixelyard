@@ -100,6 +100,56 @@ async function kopiere(knopf: HTMLButtonElement): Promise<void> {
   }, 2000);
 }
 
+/* ---- Diagramm vergroessern (29.10.2026) -----------------------------
+ * Ein <dialog>, einmal angelegt und wiederverwendet. Darin eine KOPIE des
+ * SVG — das Original bleibt an seinem Platz, und Schliessen heisst nur,
+ * den Dialog zu schliessen. Escape erledigt der Browser selbst.
+ *
+ * ⚠️ Die Kopie traegt dieselben Marker-IDs wie das Original. Das ist hier
+ * harmlos: `url(#…)` findet das erste Element dieses Namens, und das ist
+ * derselbe Pfeil. Wuerde ein Diagramm je Kopie eigene Marker brauchen,
+ * muessten die IDs beim Klonen umbenannt werden. */
+
+let zoomDialog: HTMLDialogElement | null = null;
+
+function zoomFenster(): HTMLDialogElement {
+  if (zoomDialog) return zoomDialog;
+  const d = document.createElement('dialog');
+  d.className = 'py-zoom';
+  d.setAttribute('aria-label', 'Diagramm vergrössert');
+  d.innerHTML =
+    '<div class="py-zoom__kopf"><span>Escape oder Klick schliesst</span>' +
+    '<button type="button" class="py-zoom__zu" data-py-zoom-zu>schliessen</button></div>' +
+    '<div class="py-zoom__bild" data-py-zoom-zu></div>';
+  /* Klick auf den abgedunkelten Rand: Ziel ist der Dialog selbst. */
+  d.addEventListener('click', (e) => {
+    if (e.target === d || (e.target instanceof Element && e.target.closest('[data-py-zoom-zu]'))) d.close();
+  });
+  document.body.append(d);
+  zoomDialog = d;
+  return d;
+}
+
+function vergroessere(rolle: HTMLElement): void {
+  const svg = rolle.querySelector('svg');
+  if (!svg) return;
+  const d = zoomFenster();
+  const flaeche = d.querySelector<HTMLElement>('.py-zoom__bild')!;
+  flaeche.replaceChildren(svg.cloneNode(true));
+  d.showModal();
+}
+
+/* Tastatur: Die Bildflaeche wird zum Knopf — sonst erreicht nur die Maus
+ * die Vergroesserung. */
+for (const rolle of document.querySelectorAll<HTMLElement>('[data-py-zoom]')) {
+  rolle.tabIndex = 0;
+  rolle.setAttribute('role', 'button');
+  rolle.setAttribute('aria-label', 'Diagramm vergrössern');
+  rolle.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); vergroessere(rolle); }
+  });
+}
+
 /* ---- Verdrahtung ----------------------------------------------------
  * Ein einziger Zuhoerer am Dokument statt einer pro Knopf. Dadurch
  * funktionieren auch Bloecke, die erst spaeter im DOM landen. */
@@ -119,6 +169,9 @@ document.addEventListener('click', (ereignis) => {
     schalteErklaerungen();
     return;
   }
+
+  const zoom = ziel.closest<HTMLElement>('[data-py-zoom]');
+  if (zoom) { vergroessere(zoom); return; }
 
   const kopierKnopf = ziel.closest<HTMLButtonElement>('[data-py-kopieren]');
   if (kopierKnopf) void kopiere(kopierKnopf);

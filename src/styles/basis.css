@@ -231,6 +231,8 @@ body[data-raster] .py-huelle { max-width: var(--py-mass-raster); }
   margin-inline: auto;
 }
 .py-lesestrom > .py-breit,
+.py-lesestrom > .py-szenario,
+.py-lesestrom > .py-stolperstein,
 .py-lesestrom > .py-tabelle,
 .py-lesestrom > figure,
 .py-lesestrom > pre,
