@@ -21,7 +21,7 @@ const kapitel = kapitelVon(bereich);
     <li>
       <p class="py-kapitel__kopf">
         <Statusmarke status={e.status} sprache={sprache} />
-        <a href={pfadVon(e, sprache)}>{e.titel}</a>
+        <a href={pfadVon(e, sprache)}>{e.ueberschrift ?? e.titel}</a>
       </p>
       <p class="py-kapitel__text">{e.kurzbeschreibung}</p>
     </li>

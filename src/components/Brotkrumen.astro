@@ -31,7 +31,9 @@ const zeigeBereich = Boolean(uebersicht) && !eigener?.uebersicht && sichtbar(ueb
 const stufen: { titel: string; pfad: string | null }[] = [
   { titel: t.startseite, pfad: `/${sprache}/` },
   ...(zeigeBereich ? [{ titel: uebersicht!.titel, pfad: pfadVon(uebersicht!, sprache) }] : []),
-  { titel, pfad: null },
+  /* Der kurze Titel aus navigation.ts, wo es einen gibt — die Überschrift
+   * der Seite ist ein Satz und gehört nicht in eine Pfadzeile. */
+  { titel: eigener?.titel ?? titel, pfad: null },
 ];
 ---
 

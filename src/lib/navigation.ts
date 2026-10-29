@@ -28,7 +28,13 @@ export type Status = 'belegt' | 'teilweise' | 'geplant';
 export interface Eintrag {
   /** Pfad ohne Sprachpräfix und ohne Schrägstriche aussen: `aufbau/hardware`. */
   slug: string;
+  /** Kurz — für Leiste, Brotkrumen und Weiterlesen-Fuss. */
   titel: string;
+  /** Die Überschrift der Seite selbst, als Satz statt als Schlagwort
+   *  (Vorlage A: „Titel als Alltagssatz“). Fehlt sie, gilt `titel`.
+   *  Eingeführt 29.10.2026: „Hardware“ und „Offen“ waren richtig, aber
+   *  niemand wurde davon eingeladen weiterzulesen. */
+  ueberschrift?: string;
   bereich: Bereich;
   status: Status;
   /** true → noindex, nicht in der Sitemap. Wird in Basis.astro abgeleitet. */
@@ -70,42 +76,42 @@ export const EINTRAEGE: Eintrag[] = [
   {
     slug: 'aufbau', titel: 'Der Aufbau', bereich: 'aufbau', uebersicht: true,
     status: 'teilweise', entwurf: false,
-    kurzbeschreibung: 'Was zuhause steht, in Teilen — und warum jedes Teil so und nicht anders ausfiel.',
+    kurzbeschreibung: 'Was bei mir zuhause steht, was es kann und was es gekostet hat — zum Nachvollziehen und Nachbauen.',
   },
   {
-    slug: 'aufbau/was-es-kann', titel: 'Was es kann', bereich: 'aufbau', bund: 'nachweis',
+    slug: 'aufbau/was-es-kann', titel: 'Was es kann', ueberschrift: 'Acht Situationen aus einem gewöhnlichen Tag', bereich: 'aufbau', bund: 'nachweis',
     status: 'teilweise', entwurf: false,
-    kurzbeschreibung: 'Was der Aufbau im Alltag leistet, und woran du das ablesen kannst.',
+    kurzbeschreibung: 'Vom Handy, das beim Heimkommen die Fotos ablädt, bis zur Datei, die plötzlich weg ist — und was dabei im Haus passiert.',
   },
   {
-    slug: 'aufbau/hardware', titel: 'Hardware', bereich: 'aufbau', bund: 'hardware',
+    slug: 'aufbau/hardware', titel: 'Hardware', ueberschrift: 'Was im Haus steht — und was es gekostet hat', bereich: 'aufbau', bund: 'hardware',
     status: 'belegt', entwurf: false,
-    kurzbeschreibung: 'Die Geräte, die laufen — mit dem, was sie abgelöst haben.',
+    kurzbeschreibung: 'Acht Geräte mit Preis. Und bei jedem die Stelle, an der es mich überrascht hat.',
   },
   {
-    slug: 'aufbau/software', titel: 'Software', bereich: 'aufbau', bund: 'software',
+    slug: 'aufbau/software', titel: 'Software', ueberschrift: 'Was auf den Geräten läuft', bereich: 'aufbau', bund: 'software',
     status: 'belegt', entwurf: false,
-    kurzbeschreibung: 'Was auf den Geräten läuft, wofür — und was wieder herunterflog.',
+    kurzbeschreibung: 'Sechs Programme, alle frei verfügbar — und warum ich jedes so eingerichtet habe, wie es jetzt ist.',
   },
   {
-    slug: 'aufbau/maschine-modelle', titel: 'Maschine und Modelle', bereich: 'aufbau', bund: 'modelle',
+    slug: 'aufbau/maschine-modelle', titel: 'Maschine und Modelle', ueberschrift: 'Welche KI auf welchen Rechner passt', bereich: 'aufbau', bund: 'modelle',
     status: 'teilweise', entwurf: false,
-    kurzbeschreibung: 'Die Maschine für die lokale KI und die Modelle, die darauf laufen.',
+    kurzbeschreibung: 'Bevor du einen Rechner für lokale KI kaufst: was in 16 GB passt, was nicht — und warum mehr Speicher selten die Antwort ist.',
   },
   {
-    slug: 'aufbau/reihenfolge', titel: 'Die Reihenfolge', bereich: 'aufbau', bund: 'anfang',
+    slug: 'aufbau/reihenfolge', titel: 'Die Reihenfolge', ueberschrift: 'In welcher Reihenfolge ich es wieder bauen würde', bereich: 'aufbau', bund: 'anfang',
     status: 'belegt', entwurf: false,
-    kurzbeschreibung: 'In welcher Reihenfolge die Teile entstanden sind — und welche Reihenfolge du dir sparen kannst.',
+    kurzbeschreibung: 'Sieben Schritte. Den dritten machen fast alle zu spät.',
   },
   {
-    slug: 'aufbau/moeglichkeiten', titel: 'Möglichkeiten', bereich: 'aufbau', bund: 'moeglichkeiten',
+    slug: 'aufbau/moeglichkeiten', titel: 'Möglichkeiten', ueberschrift: 'Was du darauf noch bauen kannst', bereich: 'aufbau', bund: 'moeglichkeiten',
     status: 'teilweise', entwurf: false,
-    kurzbeschreibung: 'Was der Aufbau noch hergibt, ohne dass du etwas dazukaufst.',
+    kurzbeschreibung: 'Zwölf Ideen für später — mit dem, was sie ersetzen, und dem, was sie wirklich voraussetzen.',
   },
   {
-    slug: 'aufbau/offen', titel: 'Offen', bereich: 'aufbau', bund: 'offen',
+    slug: 'aufbau/offen', titel: 'Offen', ueberschrift: 'Was noch fehlt — und woran es hängt', bereich: 'aufbau', bund: 'offen',
     status: 'geplant', entwurf: false,
-    kurzbeschreibung: 'Was nicht läuft, was ungeklärt ist und was ich schlicht noch nicht weiss.',
+    kurzbeschreibung: 'Neun offene Punkte. Keiner hat ein Datum, jeder hat einen Auslöser.',
   },
 
   /* ---- Die Beiträge — wie es gelaufen ist ----
@@ -122,37 +128,37 @@ export const EINTRAEGE: Eintrag[] = [
   {
     slug: 'vorgehen', titel: 'Das Vorgehen', bereich: 'vorgehen', uebersicht: true,
     status: 'belegt', entwurf: false,
-    kurzbeschreibung: 'Wie du so etwas angehst, ohne dieselben Umwege zu gehen.',
+    kurzbeschreibung: 'Wie du so ein Vorhaben angehst: planen, mit einer KI arbeiten, aufschreiben — und die Fehler, die alle machen.',
   },
   {
-    slug: 'vorgehen/bevor-man-anfaengt', titel: 'Bevor du anfängst', bereich: 'vorgehen', bund: 'anfang',
+    slug: 'vorgehen/bevor-man-anfaengt', titel: 'Bevor du anfängst', ueberschrift: 'Vier Fragen, bevor du etwas kaufst', bereich: 'vorgehen', bund: 'anfang',
     status: 'belegt', entwurf: false,
-    kurzbeschreibung: 'Was du klären solltest, bevor du das erste Gerät bestellst.',
+    kurzbeschreibung: 'Die teuersten Fehler passieren, bevor das erste Gerät da ist. Vier Fragen, die sie verhindern.',
   },
   {
-    slug: 'vorgehen/mit-einer-ki', titel: 'Mit einer KI', bereich: 'vorgehen', bund: 'software',
+    slug: 'vorgehen/mit-einer-ki', titel: 'Mit einer KI', ueberschrift: 'Mit einer KI planen — und wo sie danebenliegt', bereich: 'vorgehen', bund: 'software',
     status: 'belegt', entwurf: false,
-    kurzbeschreibung: 'Wie eine KI beim Bauen hilft — und wo sie dir zuverlässig nicht hilft.',
+    kurzbeschreibung: 'Welche Tür zur KI was erreicht, und neun Regeln aus zwei Monaten gemeinsamer Arbeit.',
   },
   {
-    slug: 'vorgehen/dokumentieren', titel: 'Dokumentieren', bereich: 'vorgehen', bund: 'hardware',
+    slug: 'vorgehen/dokumentieren', titel: 'Dokumentieren', ueberschrift: 'Damit du in einem halben Jahr noch weisst, warum', bereich: 'vorgehen', bund: 'hardware',
     status: 'belegt', entwurf: false,
-    kurzbeschreibung: 'Warum das Mitschreiben zum Bauen gehört und nicht zur Nacharbeit.',
+    kurzbeschreibung: 'Neun Regeln fürs Aufschreiben — jede ist aus einem Nachmittag entstanden, den ich gern zurückhätte.',
   },
   {
-    slug: 'vorgehen/stolpersteine', titel: 'Stolpersteine', bereich: 'vorgehen', bund: 'nachweis',
+    slug: 'vorgehen/stolpersteine', titel: 'Stolpersteine', ueberschrift: 'Acht Arten, wie es schiefgeht', bereich: 'vorgehen', bund: 'nachweis',
     status: 'belegt', entwurf: false,
-    kurzbeschreibung: 'Fehler, die sich nicht melden, weil sie Erfolg zurückmelden.',
+    kurzbeschreibung: 'Die Fehler, die sich nicht melden, weil sie Erfolg melden — sortiert nach Typ, damit du sie wiedererkennst.',
   },
   {
-    slug: 'vorgehen/anders-machen', titel: 'Anders machen', bereich: 'vorgehen', bund: 'moeglichkeiten',
+    slug: 'vorgehen/anders-machen', titel: 'Anders machen', ueberschrift: 'Was ich heute anders machen würde', bereich: 'vorgehen', bund: 'moeglichkeiten',
     status: 'belegt', entwurf: false,
-    kurzbeschreibung: 'Was ich heute anders bauen würde, und woran ich das gemerkt habe.',
+    kurzbeschreibung: 'Sechs Dinge im Rückblick. Keine Katastrophe, aber jedes hätte Abende gespart.',
   },
   {
-    slug: 'vorgehen/ohne-daten', titel: 'Ohne Daten', bereich: 'vorgehen', bund: 'modelle',
+    slug: 'vorgehen/ohne-daten', titel: 'Ohne Daten', ueberschrift: 'Planen, ohne deine Daten herzugeben', bereich: 'vorgehen', bund: 'modelle',
     status: 'belegt', entwurf: false,
-    kurzbeschreibung: 'Wie du Werkzeuge nutzt, ohne deine Unterlagen aus dem Haus zu geben.',
+    kurzbeschreibung: 'Was eine KI zum Planen nie braucht — und was auf eine öffentliche Seite darf.',
   },
 
   /* ---- Ausserhalb der Gruppen ---- */

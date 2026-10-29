@@ -74,7 +74,7 @@ const markenText = {
       <span class="py-meta__teil">{markenText}</span>
       <span class="py-meta__teil">Stand {kapitel.data.stand.toLocaleDateString('de-CH', { month: 'long', year: 'numeric', timeZone: 'UTC' })}</span>
     </p>
-    <h1>{eintrag.titel}</h1>
+    <h1>{eintrag.ueberschrift ?? eintrag.titel}</h1>
     <p class="py-einleitung">{kapitel.data.einleitung}</p>
     <Inhalt components={bausteine} />
     <slot />

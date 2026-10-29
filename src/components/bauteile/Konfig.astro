@@ -15,10 +15,10 @@ const { titel, id = 'zum-nachbauen' } = Astro.props;
 ---
 
 <section class="py-konfig py-breit" id={id} aria-label={titel}>
-  <p class="py-konfig__marke">Zum Nachbauen · {titel}</p>
+  <p class="py-konfig__marke">Zum Abschreiben · {titel}</p>
   <slot />
   <p class="py-konfig__hinweis">
-    Alles in spitzen Klammern ist ein Platzhalter. Die Zeilen zeigen die Form,
-    nicht das Original — eigene Werte gehören in deine Ablage, nicht in einen Chat.
+    Was in spitzen Klammern steht, setzt du selbst ein. Die Zeilen zeigen die Form,
+    nicht meine Werte — deine eigenen gehören in deine Ablage, nicht in einen Chat.
   </p>
 </section>
