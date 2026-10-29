@@ -18,6 +18,19 @@
 #
 set -u
 
+# --- Zeichensatz: immer UTF-8 (29.10.2026) --------------------------------
+# Ohne UTF-8-Einstellung liest grep Umlaute als zwei Bytes, und die Muster
+# unten treffen dann Dinge, die sie nicht treffen sollen: Am 28.10.2026 meldete
+# ein Lauf in einer Umgebung ohne LANG einen Fund in public/fonts/HERKUNFT.md,
+# der mit UTF-8 keiner war. Ein Wächter, der je nach Rechner anders urteilt,
+# ist zwei Wächter — deshalb wird die Einstellung hier gesetzt, nicht erwartet.
+# Probiert wird, was es gibt: C.UTF-8 (Linux, neuere macOS), sonst en_US.UTF-8.
+if ! locale 2>/dev/null | grep -qiE 'utf-?8'; then
+  for _l in C.UTF-8 en_US.UTF-8; do
+    if [ -z "$(LC_ALL=$_l locale 2>&1 >/dev/null)" ]; then export LC_ALL=$_l; break; fi
+  done
+fi
+
 # --- Welcher Ordner geprüft wird -----------------------------------------
 # Ohne Angabe: der Projektordner dieses Skripts (der Blog).
 # Mit --ordner <pfad>: irgendein anderer Ordner auf demselben Mac.
@@ -80,6 +93,11 @@ ADRESSE='[A-ZÄÖÜ][a-zäöü-]{2,}(strasse|str\.|weg|gasse|platz|wies)[ ]+[0-9
 #                    Steht so im Artikel drei-stille-fehler-an-einem-tag.
 #   1234 Mbit …      Messwert mit Einheit, keine Postleitzahl.
 #   2016 The …       englische Lizenzzeile in public/fonts, kein Ortsname.
+#   Rückweg 2 …      Kopfzeile einer Kette (Umbau, 28.10.2026), keine Strasse.
+#                    Stand in zwei Commits, die gepusht sind — ohne diese
+#                    Ausnahme meldete --historie sie bei jedem Lauf. Ausgenommen
+#                    ist genau das Wort „Rückweg“ mit einer Ziffer 1–9, sonst
+#                    nichts, was auf „-weg“ endet.
 #
 # ⚠️ Die letzten beiden sind WORTGENAU ausgenommen. „4106 The" wird NICHT
 # gestrichen, weil dort „Therwil" weitergeht — eine unsaubere Ausnahme haette
@@ -87,7 +105,8 @@ ADRESSE='[A-ZÄÖÜ][a-zäöü-]{2,}(strasse|str\.|weg|gasse|platz|wies)[ ]+[0-9
 entwerten() {
   sed -E -e 's/127\.0\.0\.1//g' \
          -e 's/[Mm]uster(strasse|weg|gasse|platz|wies) [0-9]{1,4}//g' \
-         -e 's/[0-9]{4} *(Mbit|Gbit|Kbit|Mio|Mrd|The)([^a-zA-ZäöüÄÖÜß]|$)/\2/g'
+         -e 's/[0-9]{4} *(Mbit|Gbit|Kbit|Mio|Mrd|The)([^a-zA-ZäöüÄÖÜß]|$)/\2/g' \
+         -e 's/Rückweg [1-9]([^0-9]|$)/\1/g'
 }
 
 # --- Werte, die im Repo stehen DUERFEN ------------------------------------

@@ -149,6 +149,12 @@ bekannten, echten Klarwert an bekannter Stelle:
   (3 Blob-Fassungen von src/lib/seite.ts = 1 + 23 + 8 = 32 Commits)
 ```
 
+*(29.10.2026: Ausgegeben werden **Objekte**, nicht Zeilen — gemeldet werden genau die
+drei Fassungen von `src/lib/seite.ts`. Zwei weitere Funde aus dem Umbau, „Rückweg 2“
+in einer Kettenbeschriftung, sind seither als Wert ausgenommen, wie „Musterstrasse“.
+Und das Skript setzt UTF-8 jetzt selbst: Ohne meldete es auf einem Rechner ohne
+Spracheinstellung einen Fehlalarm in `public/fonts/HERKUNFT.md`.)*
+
 **Meldet dieser Lauf eines Tages wieder grün, ist nicht der Bestand sauber geworden,
 sondern das Skript kaputt.** Das ist der einzige Test im Projekt, der einen echten
 Klarwert benutzt — und der einzige, der beweist, dass Abschnitt 1 und Abschnitt 3
@@ -260,10 +266,15 @@ Aufbau, damit klar ist, wo etwas hingehört:
 | `src/styles/schriften.css` | `@font-face`, **erzeugt** — nicht von Hand ändern, s. `public/fonts/HERKUNFT.md` |
 | `src/styles/basis.css` | Grundelemente, Fliesstext, Tabellen, Seitenraster |
 | `src/styles/bausteine.css` | die Bauteile aus `designbrief.md` §4 |
-| `src/components/` | `Erklaerung`, `Prompt`, `TLDR`, `Affiliatelink`, `Schalter`, `Wortmarke`, `Kopf`, `Fuss` |
+| `src/components/` | `Erklaerung`, `Prompt`, `TLDR`, `Affiliatelink`, `Schalter`, `Wortmarke`, `Kopf`, `Fuss` · seit 24.09. `Bereichsleiste`, `Leistenschalter`, `Brotkrumen`, `Weiterlesen`, `Statusmarke`, `Kapitelliste`, `Kapitelseite`, `Platzhalter` |
+| `src/components/bauteile/` | die Bauteile der drei Bereiche (seit 28.10.2026), s. Abschnitt „Die drei Bereiche“ |
 | `src/lib/seite.ts` | Sprachen, Oberflächentexte, Autorangaben. **Wird beim Push öffentlich** |
 | `src/lib/artikel.ts` | Auswahl über der Sammlung — Liste, RSS, `llms.txt` benutzen dieselbe |
-| `src/scripts/oberflaeche.ts` | die drei Schalter und der Kopieren-Knopf |
+| `src/lib/navigation.ts` | **die Seitenstruktur** — Leiste, Brotkrumen, Weiterlesen, Sitemap-Filter ziehen alle daraus |
+| `src/lib/szenarien.ts` | die acht Situationen aus „Was es kann“ und ihre Verzahnung |
+| `src/lib/prompts.ts` | die Prompts der Bereiche, kanonisch; `/de/prompts/` zeigt sie |
+| `src/lib/kapitel.ts` | Zuordnung Eintrag → Text in `src/content/kapitel/` |
+| `src/scripts/oberflaeche.ts` | die drei Schalter, der Kopieren-Knopf, das Vergrössern der Diagramme |
 
 ⚠️ **Kein `margin`-Kurzschreiben in Bauteilen, die im Lesestrom stehen — nur `margin-block`.**
 Das Kurzschreiben setzt auch die seitlichen Abstände auf `0` und schlägt damit das
@@ -298,11 +309,98 @@ Datenschutzerklärung mit, die dann etwas behaupten, was nicht stattfindet.
 Die Vergleichsseite und die drei anderen Familien sind im selben Zug entfernt worden.
 **Es liegen nur noch die Schriften im Repo, die auch ausgeliefert werden** — 212 KB, 12 Dateien.
 
+### Die drei Bereiche — steht seit 28.10.2026
+
+Der Blog hat drei Bereiche: **Der Aufbau** (`/de/aufbau/…`), **Die Beiträge**
+(`/de/artikel/…`), **Das Vorgehen** (`/de/vorgehen/…`), dazu `/de/prompts/` und
+`/de/ueber/`. Das Leitdokument dazu (Zielbild, Seitenvorlagen) liegt im
+**Projektwissen** (`pixelyard_zielbild_und_struktur.md`), **nicht im Repo** — was den
+Code betrifft, steht hier.
+
+**Wer eine Seite anlegt, ändert genau zwei Orte:**
+
+1. **`src/lib/navigation.ts`** — ein Eintrag mit `slug`, `titel` (kurz: Leiste,
+   Brotkrumen, Weiterlesen), optional `ueberschrift` (die H1 als Satz),
+   `kurzbeschreibung`, `status`, `entwurf`, optional `bund`. Die Route entsteht daraus
+   von selbst; eine Datei je Seite unter `src/pages/` gibt es nicht.
+2. **`src/content/kapitel/de/<slug>.mdx`** — nur der Text. Frontmatter: `stand`
+   (Datum) und `einleitung` (ein Absatz). **Titel und Status stehen NICHT im MDX**,
+   sonst gäbe es sie zweimal.
+
+⚠️ **Ein Eintrag ohne MDX-Datei zeigt den `<Platzhalter>`.** Er gehört dann auf
+`entwurf: true` — sonst ist ein leerer Platzhalter öffentlich verlinkt. Mit
+`entwurf: true` ist die Seite gebaut und erreichbar, aber nirgends verlinkt, `noindex`
+und nicht in Sitemap und `llms.txt`.
+
+**`status`** sagt, wie weit die Aussagen DER SEITE belegt sind, nicht ob sie
+geschrieben ist: `belegt` · `teilweise` (Teile ohne Nachweis oder nur gerechnet — und
+die Seite sagt das an der Stelle) · `geplant`.
+
+**Die Bauteile** werden dem MDX von `<Kapitelseite>` übergeben, nicht importiert —
+dieselbe Regel wie bei den Artikeln. Neue Bauteile dort in `bausteine` eintragen.
+
+| Bauteil | Wofür |
+|---|---|
+| `<Szenario id>` | eine Situation; Titel, Status und Verzahnung aus `szenarien.ts` |
+| `<Kette>` + `<Station nr art>` | die Sechser-Kette; `art="aus"` hervorgehoben, `art="leer"` entfällt — **bleibt trotzdem stehen** |
+| `<Behauptung>` · `<Notizen>` + `<Notiz merksatz>` | Satz mit der Zahl, die ihn trägt · Beobachtungen |
+| `<Bauteile>` + `<Bauteil rolle titel modell preis>` + `<Falle marke>` | Vorlage B. **Preis mit Datum, nie ein Link** |
+| `<Regeln>` + `<Regel nr titel merksatz>` | Vorlage C. `nr` ist der Anker `#regel-NN` — **Nummern nie verschieben**, andere Seiten verlinken sie |
+| `<Stolperstein nr titel zusatz>` + `<Gegenmittel>` | Anker `#typ-N` |
+| `<Moeglichkeiten>` + `<Moeglichkeit …>` | ersetzt · braucht · Aufwand |
+| `<Konfig titel id>` | höchstens drei auf der ganzen Seite (Entscheid 07.09.), **immer mit Platzhaltern** |
+| `<Handlung>` | „Dein nächster Schritt“ — **ohne ihn ist eine Seite nicht fertig** |
+| `<PromptVerweis id>` | zeigt auf `/de/prompts/#id`, statt den Prompt zu wiederholen |
+| `<Rueckgrat />` · `<Kreis />` · `<Gedaechtnisse />` | die drei Diagramme, Farben aus `tokens.css`, per Klick vergrösserbar |
+| `<Kapitelliste bereich>` · `<PromptSammlung />` · `<Kontaktadresse />` | Liste der Unterkapitel · alle Prompts · Mailadresse aus `seite.ts` |
+
+⚠️ **Keine benannten Slots (`<div slot="…">`) aus MDX.** Sie kommen nicht als Slot
+an, sondern als gewöhnliches `<div>` im Text — der Bau bleibt grün, Beschriftung und
+Linie fehlen. **Am 28.10.2026 so gebaut und erst im Bild bemerkt.** Deshalb `<Falle>`
+und `<Gegenmittel>` als eigene Bauteile.
+
+⚠️ **Die Mailadresse nie ausschreiben**, auch nicht als Link — `<Kontaktadresse />`.
+Abschnitt 2 des Prüfskripts sucht Werte aus `seite.ts` ausserhalb davon und hält
+sonst jeden Commit an.
+
+**Ein neuer Beitrag** bekommt seinen Rückverweis („Gehört zur Situation …“) über
+`szenarien.ts` (`beitraege`) und seinen Platz im Weiterlesen-Fuss über
+`BUND_JE_BEITRAG` in `navigation.ts`. Die Artikel-Datei selbst bleibt dafür unberührt.
+
+### Layout: grosse Bildschirme zuerst — Entscheid 29.10.2026
+
+Gelesen wird die Seite vor allem an **20- bis 27-Zoll-Schirmen**. Das Handy soll
+funktionieren, nicht glänzen. Die Werte stehen in `tokens.css`:
+
+- **Ab 80rem:** Hülle 76rem, **Text und breite Elemente gleich breit (54rem)** — eine
+  Kante statt zwei (Wunsch Cedric). Damit die Zeile nicht zu lang wird, wächst die
+  Schrift auf 1.1875rem: rund 90 Zeichen je Zeile. **Breiter nicht** — über ~95 verliert
+  das Auge den Zeilenanfang.
+- **Ab 100rem** 18px, **ab 140rem** (27 Zoll mit 2560 px) 20px Grundschrift; alles in
+  `rem`, der Rest wächst mit.
+- Die Sechser-Kette wählt ihre Spaltenzahl per **Container-Abfrage** nach ihrer
+  eigenen Breite, nicht nach der Fensterbreite.
+
+### Ton — Entscheid 29.10.2026
+
+Die Seiten der Bereiche klingen wie die Beiträge: **ich** erzähle, der Leser ist
+**du**, kleine Szenen statt Aufzählung, Fettdruck sparsam, Merksätze nur, wo sie
+tragen. Überschriften als Satz („Was im Haus steht — und was es gekostet hat“), nicht
+als Schlagwort. **Fakten, Zahlen und Preise ändert ein Umformulieren nie**, und keine
+Formulierung behauptet einen Stand, der nicht belegt ist.
+
+### Vorschau
+
+`werkzeuge/vorschau-starten.command` startet `astro dev`. **Das Browserfenster zu
+schliessen beendet den Server nicht** — neu laden genügt, er zieht Änderungen selbst
+nach. Beenden mit Ctrl+C im Terminalfenster oder `pkill -f "astro dev"`. Der Dev-Server
+zeigt Entwürfe; was live geht, zeigt nur `npm run build`.
+
 ### 🔑 `package-lock.json` gehört ins Repo
 
 Sie ist der einzige Beleg dafür, **welche Versionen tatsächlich installiert wurden** — `^7.2.9` in der `package.json` ist ein Bereich, die Lockfile ist die Zahl. Cloudflare Pages baut daraus; fehlt sie, löst der Bau die Bereiche neu auf und kann andere Versionen erwischen als der Mac. **Der Fehler zeigt sich dann im Deploy und nicht lokal.**
 
 `node_modules/` dagegen **nie** — 141 MB, plattformgebunden, und aus der Lockfile jederzeit reproduzierbar.
 
-⚠️ **`README.md` ist noch die Astro-Vorlage.** Sie wird beim ersten Push öffentlich sichtbar und gehört vorher ersetzt.
+✅ **`README.md` ist ersetzt** (Commit `4fecabf`) — die Astro-Vorlage ist weg. *(Hinweis nachgezogen 29.10.2026; er stand hier noch als offen.)*
 
