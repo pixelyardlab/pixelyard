@@ -101,11 +101,21 @@
  * Das Handy bleibt bei den Werten oben; es soll funktionieren, nicht glänzen. */
 @media (min-width: 80rem) {
   :root {
-    --py-mass:          38rem;
     --py-mass-raster:   76rem;
     --py-leiste-links:  14rem;
-    /* Mitte = 76 − 14 − 2 (Spalt) = 60rem. Breite Elemente füllen sie ganz. */
-    --py-mass-breit:    60rem;
+    /* 🔑 Ab 80rem sind Text und Rahmen GLEICH breit (Entscheid Cedric,
+     * 29.10.2026): Ein Text, der schmaler eingerückt neben breiten Kästen
+     * steht, wirkt unruhig — zwei Kanten statt einer.
+     *
+     * Damit die Zeile dabei nicht zu lang wird, wächst die Schrift mit
+     * (--py-grad-text unten). Gerechnet: 54rem bei 1.1875rem Schrift und
+     * ~0.5em je Zeichen ergibt rund 90 Zeichen je Zeile. Die alte Spalte
+     * hatte 68; über ~95 verliert das Auge am Zeilenende den Anschluss.
+     * Mitte = 76 − 14 − 2 = 60rem, der Block steht darin zentriert. */
+    --py-mass:          54rem;
+    --py-mass-breit:    54rem;
+    --py-grad-text:     1.1875rem;
+    --py-hoehe-text:    1.7;
   }
 }
 @media (min-width: 100rem) {

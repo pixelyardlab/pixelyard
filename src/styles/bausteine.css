@@ -684,6 +684,9 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
  * Eine Zeile, kein Bauteil. Sie steht über dem Titel und richtet sich am
  * Lesestrom aus, nicht an der Spalte — sonst hinge sie links daneben. */
 .py-brotkrumen {
+  /* width: 100% — als Rasterzelle mit margin-inline: auto schrumpfte sie
+   * sonst auf ihren Inhalt und stand mittig statt bündig mit dem Text. */
+  width: 100%;
   max-width: var(--py-mass);
   margin: 0 auto var(--py-r5);
   font-family: var(--py-schrift-mono);
@@ -1236,7 +1239,12 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
 .py-promptkarte__nr { color: var(--py-link); font-variant-numeric: tabular-nums; }
 .py-promptkarte__zweck { color: var(--py-text-leise); font-size: 0.9375rem; }
 
-/* --- Startseite (Umbau Schritt 5) ------------------------------------ */
+/* --- Startseite (zweite Fassung, 29.10.2026) ------------------------
+ * Weniger Rahmen, mehr Luft. Die erste Fassung stapelte sechs Kastenreihen
+ * mit dunklen Rändern übereinander — „erdrückend“. Hier tragen Abstände und
+ * eine einzige Linie die Gliederung, nicht Kästen. */
+.py-start h2 { margin-top: var(--py-r8); }
+.py-start__kopf { margin-block: var(--py-r5) var(--py-r6); }
 .py-start__dach {
   font-family: var(--py-schrift-mono);
   font-size: 0.75rem;
@@ -1245,79 +1253,87 @@ html:not(.py-js) .py-prompt__knopf { display: none; }
   color: var(--py-accent-text);
   margin-block: 0 var(--py-r3);
 }
-.py-zahlen {
+.py-start h1 { font-size: clamp(1.9rem, 1.2rem + 2vw, 2.75rem); line-height: 1.15; }
+.py-start__lead {
+  font-size: 1.15em;
+  line-height: 1.6;
+  color: var(--py-text-leise);
+  margin-top: var(--py-r4);
+}
+.py-start__klein { font-size: 0.9375rem; color: var(--py-text-leise); }
+
+.py-kennzahlen {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
-  background: var(--py-text-leise);
-  border: var(--py-rand) solid var(--py-text-leise);
-  margin-block: var(--py-r5) var(--py-r2);
+  gap: var(--py-r5) var(--py-r6);
+  margin-block: var(--py-r6) var(--py-r2);
+  padding-top: var(--py-r5);
+  border-top: var(--py-rand) solid var(--py-line);
 }
-@media (min-width: 48rem) { .py-zahlen { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.py-zahlen > div { background: var(--py-surface); padding: var(--py-r3) var(--py-r4) var(--py-r4); }
-.py-zahlen dt {
+@media (min-width: 48rem) { .py-kennzahlen { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.py-kennzahlen dt {
   font-family: var(--py-schrift-mono);
   font-weight: 600;
-  font-size: 1.375rem;
-  font-variant-numeric: tabular-nums;
+  font-size: 1.75rem;
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--py-link);
 }
-.py-zahlen dd { margin: var(--py-r1) 0 0; font-size: 0.8125rem; line-height: 1.4; color: var(--py-text-leise); }
-.py-zahlen__stand {
-  font-family: var(--py-schrift-mono);
-  font-size: 0.75rem;
-  color: var(--py-text-leise);
-}
+.py-kennzahlen dd { margin: var(--py-r1) 0 0; font-size: 0.875rem; line-height: 1.45; color: var(--py-text-leise); }
+.py-zahlen__stand { font-family: var(--py-schrift-mono); font-size: 0.75rem; color: var(--py-text-leise); }
 
+/* Die drei Türen: keine Kästen, nur eine farbige Linie oben. */
 .py-tueren {
   list-style: none;
   padding: 0;
-  margin-block: var(--py-r4) var(--py-r6);
+  margin-block: var(--py-r5) 0;
   display: grid;
-  gap: 1px;
+  gap: var(--py-r6);
   grid-template-columns: 1fr;
-  background: var(--py-text-leise);
-  border: var(--py-rand) solid var(--py-text-leise);
 }
 @media (min-width: 56rem) { .py-tueren { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.py-tueren > li { margin: 0; background: var(--py-surface); padding: var(--py-r4) var(--py-r4) var(--py-r5); display: flex; flex-direction: column; gap: var(--py-r2); }
-.py-tueren > li > * { margin: 0; }
-.py-tueren h3 { font-size: 1.2rem; }
+.py-tueren > li { margin: 0; padding-top: var(--py-r3); border-top: 3px solid var(--py-primary); }
+.py-tueren > li > * { margin: 0 0 var(--py-r2); }
+.py-tueren h3 { font-size: 1.25rem; }
 .py-tueren h3 a { text-decoration: none; }
 .py-tueren h3 a::after { content: ' →'; }
-.py-tueren p { font-size: 0.9375rem; }
-.py-tueren__nr,
-.py-tueren__fuer {
-  font-family: var(--py-schrift-mono);
-  font-size: 0.75rem;
-  color: var(--py-text-leise);
-}
-.py-tueren__fuer { margin-top: auto !important; padding-top: var(--py-r2); border-top: var(--py-rand) dashed var(--py-text-leise); }
-
-.py-weg { list-style: none; counter-reset: weg; padding: 0; margin-block: var(--py-r4) var(--py-r5); }
-.py-weg > li {
-  counter-increment: weg;
-  position: relative;
-  padding-left: 2.5rem;
-  margin-bottom: var(--py-r5);
-}
-.py-weg > li::before {
-  content: counter(weg);
-  position: absolute;
-  left: 0;
-  top: 0.1em;
-  font-family: var(--py-schrift-mono);
-  font-weight: 600;
-  color: var(--py-link);
-}
-.py-weg h3 { font-size: 1.05rem; margin: 0 0 var(--py-r1); }
-.py-weg p { margin: 0; font-size: 0.9375rem; }
-.py-weg__dauer {
+.py-tueren p { font-size: 0.9375em; color: var(--py-text-leise); }
+.py-tueren__nr {
   font-family: var(--py-schrift-mono);
   font-size: 0.75rem !important;
-  color: var(--py-text-leise);
-  margin-top: var(--py-r1) !important;
+  color: var(--py-accent-text) !important;
 }
+
+.py-weg { list-style: none; counter-reset: weg; padding: 0; margin-block: var(--py-r4) 0; }
+.py-weg > li { counter-increment: weg; position: relative; padding-left: 2.5rem; margin-bottom: var(--py-r5); }
+.py-weg > li::before {
+  content: counter(weg);
+  position: absolute; left: 0; top: 0.05em;
+  font-family: var(--py-schrift-mono);
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--py-link);
+}
+.py-weg h3 { font-size: 1.1rem; margin: 0 0 var(--py-r1); }
+.py-weg p { margin: 0; }
+.py-weg__dauer { font-family: var(--py-schrift-mono); font-size: 0.75rem; color: var(--py-text-leise); margin-top: var(--py-r1) !important; }
+
+/* Der erste Prompt ist aufklappbar: Ein dunkler Block von zwanzig Zeilen
+ * mitten auf der Startseite war der schwerste Brocken der ersten Fassung. */
+.py-aufklapp { margin-block: var(--py-r4); }
+.py-aufklapp > summary {
+  cursor: pointer;
+  font-family: var(--py-schrift-mono);
+  font-size: 0.875rem;
+  color: var(--py-link);
+  padding: var(--py-r2) 0;
+}
+.py-aufklapp[open] > summary { margin-bottom: var(--py-r2); }
+
+.py-merkmale { list-style: none; padding: 0; display: grid; gap: var(--py-r4) var(--py-r6); grid-template-columns: 1fr; }
+@media (min-width: 48rem) { .py-merkmale { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.py-merkmale > li { margin: 0; color: var(--py-text-leise); }
+.py-merkmale strong { display: block; color: var(--py-text); }
 .py-liste__titel { font-size: 1.15rem; margin-block: 0 var(--py-r2); }
 .py-liste__titel a { color: var(--py-text); text-decoration: none; }
 .py-liste__titel a:hover { color: var(--py-link); text-decoration: underline; }

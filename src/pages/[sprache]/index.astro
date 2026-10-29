@@ -4,10 +4,6 @@ import { SPRACHEN, SEITE, texte } from '../../lib/seite';
 import type { Sprache } from '../../lib/seite';
 import { alleArtikel, pfadVon, isoTag } from '../../lib/artikel';
 import Prompt from '../../components/Prompt.astro';
-import Kette from '../../components/bauteile/Kette.astro';
-import Station from '../../components/bauteile/Station.astro';
-import Bauteile from '../../components/bauteile/Bauteile.astro';
-import Bauteil from '../../components/bauteile/Bauteil.astro';
 import { prompt, PROMPTS } from '../../lib/prompts';
 import { uebersichtVon, pfadVon as seitenPfad, sichtbar } from '../../lib/navigation';
 
@@ -61,140 +57,97 @@ const schema = {
 ---
 
 <Basis titel="Homelab, mitgeschrieben" sprache={sprache} istStartseite schema={schema}>
-  {/* Startseite nach dem Entwurf vom 06.09.2026 (Umbau Schritt 5).
-      Lesetiefe 1: In zwanzig Sekunden soll ein Erstbesucher wissen, ob er
-      bleibt — und wenn ja, wohin. Deshalb: ein Satz, vier Zahlen, vier
-      Unterschiede, drei Türen, ein erster Schritt.
+  {/* Startseite, zweite Fassung (29.10.2026). Die erste war „erdrückend“
+      (Cedric): ein Titel über vier Zeilen, sechs schwere Kastenreihen, neun
+      Abschnitte am Stück. Jetzt: weniger Rahmen, mehr Luft, sieben Abschnitte,
+      und zuerst die Frage, wohin der Leser will — erst danach, was hier anders
+      ist. Die Sechser-Kette steht nur noch im Aufbau, nicht doppelt hier.
 
-      ⚠️ Gegenüber dem Entwurf geändert: Die Kopfzeile hiess dort „Ein Homelab,
-      vollständig dokumentiert". Vollständigkeit ist genau das Merkmal, das
-      bewusst FEHLT (Zielbild, Kriterium 4) — die Zeile hätte die Seite im
-      ersten Satz widerlegt. */}
+      ⚠️ Die Dachzeile heisst nicht „vollständig dokumentiert“ wie im Entwurf
+      vom 06.09.: Vollständigkeit ist das Merkmal, das bewusst fehlt. */}
   <div class="py-lesestrom py-start">
-    <p class="py-start__dach">Ein Homelab, mitgeschrieben</p>
-    <h1>Unsere Fotos und Dokumente liegen im Haus. Nicht in einer Cloud.<span class="py-h1-cursor" aria-hidden="true">_</span></h1>
+    <header class="py-start__kopf">
+      <p class="py-start__dach">Ein Homelab, mitgeschrieben</p>
+      <h1>Unsere Fotos und Dokumente liegen im Haus. Nicht in einer Cloud.<span class="py-h1-cursor" aria-hidden="true">_</span></h1>
+      <p class="py-start__lead">
+        Ich habe das im Sommer 2026 neben dem Beruf aufgebaut, für rund CHF 3'700 — und
+        dabei jede Messung, jeden Preis und jeden Fehler aufgeschrieben. Damit du es
+        nachbauen kannst, ohne dieselben Umwege zu gehen.
+      </p>
+    </header>
 
-    <p class="py-einleitung">
-      Gebaut in drei Monaten für rund CHF 3'700 — <strong>mit jeder Messung, jedem Preis
-      und jedem Fehler, den ich dabei gemacht habe.</strong> Damit du es nachbauen kannst,
-      ohne dieselben zu machen.
-    </p>
-
-    <dl class="py-zahlen py-breit">
+    <dl class="py-kennzahlen">
       <div><dt>82'492</dt><dd>Fotos und Videos, im Haus durchsuchbar</dd></div>
-      <div><dt>2 Minuten</dt><dd>vom Blatt Papier ins durchsuchbare Archiv</dd></div>
-      <div><dt>4 Ebenen</dt><dd>Sicherung — zwei davon wirklich zurückgeholt</dd></div>
-      <div><dt>CHF 3</dt><dd>laufende Kosten im Monat, ohne den Anschluss</dd></div>
+      <div><dt>2 Min.</dt><dd>vom Brief im Kasten bis ins durchsuchbare Archiv</dd></div>
+      <div><dt>4</dt><dd>Wege zurück, wenn etwas verloren geht</dd></div>
+      <div><dt>CHF 3</dt><dd>im Monat, ohne den Internetanschluss</dd></div>
     </dl>
-    <p class="py-zahlen__stand">Stand September 2026. Woher jede Zahl kommt, steht im <a href={tueren.aufbau.pfad ?? `/${sprache}/`}>Aufbau</a>.</p>
-
-    <h2>Was hier anders ist</h2>
-    <p>
-      Anleitungen für so etwas gibt es viele. Die meisten erzählen nach, was ohnehin
-      beim Hersteller steht, und verdienen an den Links darunter. Ich wollte etwas
-      anderes aufschreiben: was ich tatsächlich gemessen, falsch gemacht und wieder
-      geradegebogen habe.
-    </p>
-
-    <Bauteile>
-      <Bauteil rolle="01" titel="Jede Zahl hat ein Datum">
-        <p>Wenn ich etwas nur geschätzt habe, steht das dabei — auch wenn die Aussage dadurch schwächer klingt. Du sollst wissen, worauf du dich verlassen kannst.</p>
-      </Bauteil>
-      <Bauteil rolle="02" titel="Die Fehler stehen drin">
-        <p>Acht Arten, wie es bei mir schiefging, und die Stellen, die heute noch offen sind. Aus den Fehlern lernst du mehr als aus meinen Erfolgen.</p>
-      </Bauteil>
-      <Bauteil rolle="03" titel="Keine Provisionslinks">
-        <p>Modelle und Preise stehen da, damit du nachrechnen kannst. Verlinkt ist nichts, und ich verdiene an nichts davon. Was hier steht, muss allein durch seine Begründung überzeugen.</p>
-      </Bauteil>
-      <Bauteil rolle="04" titel="Auch das Vorgehen, nicht nur das Ergebnis">
-        <p>Wie ich so ein Vorhaben geplant, mit einer KI gearbeitet und alles so aufgeschrieben habe, dass ich es in einem halben Jahr noch verstehe. Das lässt sich auf fast jedes Vorhaben übertragen.</p>
-      </Bauteil>
-    </Bauteile>
+    <p class="py-zahlen__stand">Stand September 2026 — woher jede Zahl kommt, steht im <a href={tueren.aufbau.pfad ?? `/${sprache}/`}>Aufbau</a>.</p>
 
     <h2>Wo willst du anfangen?</h2>
     <p>
-      Drei Wege durch dasselbe Projekt — nimm den, der zu deiner Frage passt. Sie sind
-      miteinander verknüpft: Wo du auch einsteigst, findest du am Ende jeder Seite den
-      Weg zu den anderen beiden.
+      Drei Wege durch dasselbe Projekt. Nimm den, der zu deiner Frage passt — am Ende
+      jeder Seite findest du den Weg zu den anderen beiden.
     </p>
-
     <ul class="py-tueren py-breit">
       <li>
-        <p class="py-tueren__nr">Bereich 1</p>
+        <p class="py-tueren__nr">Wenn du nachbauen willst</p>
         <h3>{tueren.aufbau.pfad ? <a href={tueren.aufbau.pfad}>{tueren.aufbau.titel}</a> : tueren.aufbau.titel}</h3>
-        <p>Was bei mir zuhause steht und was es im Alltag tut — acht ganz gewöhnliche Momente, jedes Gerät mit Preis, jedes Programm mit der Stelle, an der es mich erwischt hat.</p>
-        <p class="py-tueren__fuer">Für dich, wenn du nachbauen oder nachrechnen willst</p>
+        <p>Was bei mir zuhause steht und was es im Alltag tut — jedes Gerät mit Preis, jedes Programm mit der Stelle, an der es mich erwischt hat.</p>
       </li>
       <li>
-        <p class="py-tueren__nr">Bereich 2</p>
+        <p class="py-tueren__nr">Wenn du an derselben Stelle stehst</p>
         <h3>{tueren.beitrag.pfad ? <a href={tueren.beitrag.pfad}>{tueren.beitrag.titel}</a> : tueren.beitrag.titel}</h3>
         <p>Wie es gelaufen ist, Schritt für Schritt erzählt — mit der Messung dahinter und dem Problem, an dem ich gerade hing.</p>
-        <p class="py-tueren__fuer">Für dich, wenn du an derselben Stelle stehst</p>
       </li>
       <li>
-        <p class="py-tueren__nr">Bereich 3</p>
+        <p class="py-tueren__nr">Wenn du etwas ganz anderes planst</p>
         <h3>{tueren.vorgehen.pfad ? <a href={tueren.vorgehen.pfad}>{tueren.vorgehen.titel}</a> : tueren.vorgehen.titel}</h3>
-        <p>Wie man so etwas angeht: planen, mit einer KI arbeiten, aufschreiben — und die acht Stolpersteine, über die ich gefallen bin. Ganz ohne Technik.</p>
-        <p class="py-tueren__fuer">Für dich, wenn du irgendein Vorhaben planst — auch eines ohne einen einzigen Server</p>
+        <p>Wie man so ein Vorhaben angeht, mit einer KI arbeitet und alles so aufschreibt, dass man es in einem halben Jahr noch versteht. Ganz ohne Technik.</p>
       </li>
     </ul>
 
-    <h2>Der erste Schritt kostet nichts</h2>
-    <p>
-      Für den Anfang brauchst du kein Gerät, sondern einen Plan, der deine eigenen
-      Annahmen auf den Tisch legt. Kopier diesen Text in die KI deiner Wahl und erzähl
-      ihr, was du vorhast. Achte auf die letzte Zeile — sie ist die wichtigste.
-    </p>
-    <Prompt titel={`$ ${erster.titel}`} hinweis={erster.hinweis} sprache={sprache}><div class="py-prompt__vorformatiert">{erster.text}</div></Prompt>
-    <p>
-      Es gibt {PROMPTS.length - 1} weitere davon, alle ohne Upload:{' '}
-      <a href={`/${sprache}/prompts/`}>alle Prompts an einem Ort</a>.
-    </p>
-
-    <h2>Was im Hintergrund passiert</h2>
-    <p>
-      Jede Situation im Haus läuft über dieselben sechs Stationen — ob es um ein Foto
-      geht, einen Brief oder eine Frage an die eigenen Unterlagen. <strong>Fünf davon
-      liegen im Haus. Nur die sechste verlässt es</strong>, und sie transportiert ein
-      Paket, das ohne den Schlüssel zu Hause nicht lesbar ist.
-    </p>
-    <Kette>
-      <Station nr="Station 1 · Ankommen">Das Gerät ist wieder im eigenen Netz</Station>
-      <Station nr="Station 2 · Übertragen">Die Daten gehen an einen Dienst im Haus</Station>
-      <Station nr="Station 3 · Verarbeiten">Erkennung, Volltext, Antwort — auf eigener Hardware</Station>
-      <Station nr="Station 4 · Zeigen">App, Browser, Handy — auch von unterwegs</Station>
-      <Station nr="Station 5 · Sichern">Nächtliche Momentaufnahme und ein geprüfter Abzug</Station>
-      <Station nr="Station 6 · Auslagern" art="aus">Verschlüsselt ausser Haus — die einzige Linie nach draussen</Station>
-    </Kette>
-
-    <h2>Neu hier? Der Fünf-Minuten-Weg</h2>
-    <p>
-      Wenn du nur fünf Minuten hast: diese drei Seiten, in dieser Reihenfolge. Danach
-      weisst du, ob das Thema etwas für dich ist — und hast bereits eine Entscheidung
-      getroffen, die dir später Geld spart.
-    </p>
+    <h2>Nur fünf Minuten Zeit?</h2>
+    <p>Dann diese drei Seiten, in dieser Reihenfolge. Danach weisst du, ob das Thema etwas für dich ist.</p>
     <ol class="py-weg">
       <li>
-        <h3><a href={`/${sprache}/aufbau/was-es-kann/#s-verlust`}>Eine einzige Situation lesen: „Eine Datei ist weg“</a></h3>
-        <p>Vier Arten, etwas zu verlieren, und vier verschiedene Rückwege. Danach verstehst du, warum ein gespiegeltes Plattenpaar kein Backup ist — und warum drei von vier Rückwegen an zwei Passwörtern hängen.</p>
-        <p class="py-weg__dauer">rund 2 Minuten · im Aufbau</p>
+        <h3><a href={`/${sprache}/aufbau/was-es-kann/#s-verlust`}>Was passiert, wenn eine Datei weg ist</a></h3>
+        <p>Vier Arten, etwas zu verlieren, und vier Wege zurück. Danach weisst du, warum zwei gespiegelte Platten noch kein Backup sind.</p>
+        <p class="py-weg__dauer">2 Minuten</p>
       </li>
       <li>
-        <h3><a href={`/${sprache}/aufbau/reihenfolge/`}>Die Reihenfolge ansehen, in der man baut</a></h3>
-        <p>Sieben Schritte, und bei jedem steht, warum er dort steht. Der dritte ist der, den fast alle zu spät machen: die Sicherung einrichten, bevor es etwas zu sichern gibt.</p>
-        <p class="py-weg__dauer">rund 2 Minuten · im Aufbau</p>
+        <h3><a href={`/${sprache}/aufbau/reihenfolge/`}>In welcher Reihenfolge ich es wieder bauen würde</a></h3>
+        <p>Sieben Schritte. Den dritten — die Sicherung, bevor es etwas zu sichern gibt — machen fast alle zu spät.</p>
+        <p class="py-weg__dauer">2 Minuten</p>
       </li>
       <li>
-        <h3><a href={`/${sprache}/prompts/#ausloeser-statt-termine`}>Einen Auslöser für deine eigene Liste formulieren</a></h3>
-        <p>Ein Auslöser ist ein Zustand, den du ablesen kannst — „der Speicher ist zu 70 Prozent voll“. <strong>Wo dir keiner einfällt, ist der Posten ein Wunsch und kein Plan.</strong></p>
-        <p class="py-weg__dauer">rund 1 Minute · bei den Prompts</p>
+        <h3><a href={`/${sprache}/prompts/#ausloeser-statt-termine`}>Deine eigene Wunschliste in einen Plan verwandeln</a></h3>
+        <p>Ein Prompt, der zu jedem Vorhaben fragt: Woran merkst du, dass es Zeit dafür ist?</p>
+        <p class="py-weg__dauer">1 Minute</p>
       </li>
     </ol>
-    <p class="py-schlagwort">
-      Begriffe, die nicht jeder kennt, erklären kurze Kästen im Text. Wer sie nicht
-      braucht, blendet sie oben mit dem Schalter <em>erklärungen</em> aus — der knappe
-      Text bleibt vollständig.
+
+    <h2>Der erste Schritt kostet nichts</h2>
+    <p>
+      Für den Anfang brauchst du kein Gerät, sondern einen Plan, der deine eigenen Annahmen
+      auf den Tisch legt. Diesen Text kannst du in die KI deiner Wahl kopieren und ihr
+      erzählen, was du vorhast — ohne deine Daten herzugeben.
     </p>
+    <details class="py-aufklapp">
+      <summary>Prompt anzeigen: {erster.titel}</summary>
+      <Prompt hinweis={erster.hinweis} sprache={sprache}><div class="py-prompt__vorformatiert">{erster.text}</div></Prompt>
+    </details>
+    <p class="py-start__klein">
+      {PROMPTS.length - 1} weitere davon stehen unter <a href={`/${sprache}/prompts/`}>Alle Prompts</a>.
+    </p>
+
+    <h2>Was hier anders ist</h2>
+    <ul class="py-merkmale">
+      <li><strong>Jede Zahl hat ein Datum.</strong> Wenn ich etwas nur geschätzt habe, steht das dabei.</li>
+      <li><strong>Die Fehler stehen drin.</strong> Auch die, die heute noch offen sind.</li>
+      <li><strong>Nichts ist verlinkt, um Geld zu verdienen.</strong> Modelle und Preise stehen da, damit du nachrechnen kannst.</li>
+      <li><strong>Auch das Vorgehen, nicht nur das Ergebnis.</strong> Der Teil, der sich auf fast jedes Vorhaben übertragen lässt.</li>
+    </ul>
 
     <h2>Zuletzt erschienen</h2>
     {neueste.length === 0 ? (
@@ -213,21 +166,15 @@ const schema = {
         ))}
       </ul>
     )}
-    {tueren.beitrag.pfad && <p><a href={tueren.beitrag.pfad}>Alle Beiträge, mit Zeitachse und nach Situation geordnet</a></p>}
 
     <h2>Wer das schreibt</h2>
     <p>
-      Ich bin Cedric, <strong>kein Systemadministrator</strong>, und verdiene mein Geld
-      nicht damit. Ich habe das im Sommer 2026 neben dem Beruf aufgebaut — mit einer KI als
-      Planungspartner und mit der Disziplin, jede Zahl aufzuschreiben, bevor sie in
-      Vergessenheit gerät. Was hier steht, ist deshalb kein Fachbuch, sondern das Protokoll
-      von jemandem, der es zum ersten Mal gemacht hat. <strong>Genau darin liegt der
-      Nutzen:</strong> Ich weiss noch, welche Stellen unklar waren.
-    </p>
-    <p>
-      Was noch offen ist und woran jeder offene Punkt hängt, steht unter{' '}
-      <a href={`/${sprache}/aufbau/offen/`}>Offen</a>. Mehr über diese Seite und wie du
-      mich erreichst: <a href={`/${sprache}/ueber/`}>Über</a>.
+      Ich bin Cedric, kein Systemadministrator, und verdiene mein Geld nicht damit. Gebaut
+      habe ich das mit einer KI als Planungspartner und mit der Gewohnheit, jede Zahl
+      aufzuschreiben, bevor ich sie vergesse. Was hier steht, ist kein Fachbuch, sondern
+      das Protokoll von jemandem, der es zum ersten Mal gemacht hat — ich weiss also noch
+      genau, welche Stellen unklar waren. Mehr <a href={`/${sprache}/ueber/`}>über mich und
+      diese Seite</a>.
     </p>
   </div>
 </Basis>
